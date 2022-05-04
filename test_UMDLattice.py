@@ -90,8 +90,8 @@ def test_UMDLattice_reduced_basis():
     """
     Test the reduced function to convert a vector in cartesian coordiates to
     reduced coordinates refered to the lattice vector system.
-    To test it we assert that the cartesian basis vectors in reduced
-    coordinates must be equal to the canonical basis vectors .
+    To test it, we assert that the each basis vector in cartesian coordinates
+    must be transformed into a canonical basis vector.
 
     """
     name = 'LatticeName'
@@ -108,16 +108,57 @@ def test_UMDLattice_reduced_basis():
     assert np.allclose(reduced_c, np.array([0, 0, 1]))
 
 
+def test_UMDLattice_reduced_allbasis():
+    """
+    Test the reduced function to convert a set of vectors in cartesian 
+    coordiates to reduced coordinates refered to the lattice vector system.
+    To test it, we assert that the matrix made of all the three basis vectors
+    in cartesian coordinates must be transformed into a matrix made of all
+    the canonical basis vectors.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    reduced = Lattice.reduced(basis)
+    assert np.allclose(reduced, np.identity(3))
+
+
+def test_UMDLattice_reduced_halfbasis():
+    """
+    Test the reduced function to convert a set of vectors in cartesian 
+    coordiates to reduced coordinates refered to the lattice vector system.
+    To test it, we assert that the matrix made of only the first two basis
+    vectors in cartesian coordinates must be transformed into a matrix made of
+    only the first two canonical basis vectors.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    reduced = Lattice.reduced(basis[:2])
+    assert np.allclose(reduced, np.identity(3)[:2])
+
+
 test_UMDLattice_reduced_basis()
+test_UMDLattice_reduced_allbasis()
+test_UMDLattice_reduced_halfbasis()
 
 
 # %% UMDLattice cartesian function tests
 def test_UMDLattice_cartesian_basis():
     """
-    Test the cartesian function to convert a vector in reduced coordiates 
+    Test the cartesian function to convert a vector in reduced coordiates
     refered to the lattice vector system to cartesian coordinates.
-    To test it, we assert that the canonical basis vectors in the reduced
-    coordinates systemmust be equal to the cartesian basis vectors.
+    To test it, we assert that each basis vector in the reduced coordinates,
+    equal to a canonical basis vector, must be transformed into the original
+    cartesian basis vector.
 
     """
     name = 'LatticeName'
