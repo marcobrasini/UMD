@@ -81,7 +81,7 @@ class UMDLattice:
             Array of N 3-dim vectors in reduced coordinates.
 
         """
-        reduced = (self.invBasis@cartesian.T).T
+        reduced = self.invBasis.T @ cartesian
         return reduced
 
     def cartesian(self, reduced):
@@ -99,5 +99,5 @@ class UMDLattice:
             Array of N 3-dim vectors in cartesian coordinates.
 
         """
-        cartesian = self.basis @ reduced.T
+        cartesian = self.dirBasis.T @ reduced
         return cartesian.T
