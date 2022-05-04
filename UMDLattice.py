@@ -42,16 +42,16 @@ class UMDLattice:
         """
         self.name = name
         self.atoms = atoms
-        self.dirBasis = basis
+        self.dirBasis = np.copy(basis)
 
         # If possible, we initialize the inverse basis matrix.
         # The inverse basis matrix is necessary to move from cartesian to
         # reduced coordinate system.
-        self.invBasis = NULL_Basis
+        self.invBasis = np.copy(NULL_Basis)
         try:
-            self.invBasis = np.linalg.inv(basis)
+            self.invBasis = np.copy(np.linalg.inv(basis))
         except np.linalg.LinAlgError:
-            self.invBasis[:] = np.nan
+            self.invBasis.fill(np.nan)
 
     def natoms(self):
         """
@@ -99,5 +99,5 @@ class UMDLattice:
             Array of N 3-dim vectors in cartesian coordinates.
 
         """
-        cartesian = self.dirBasis.T @ reduced
-        return cartesian.T
+        cartesian = (self.dirBasis.T @ reduced.T).T
+        return cartesian
