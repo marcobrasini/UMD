@@ -7,7 +7,6 @@ Created on Wed May  4 10:23:02 2022
 
 from UMDLattice import UMDLattice
 
-import pytest
 import numpy as np
 
 
@@ -65,3 +64,17 @@ def test_UMDLattice_init_basis_inversion_error():
 test_UMDLattice_init_assignement()
 test_UMDLattice_init_basis_inversion()
 test_UMDLattice_init_basis_inversion_error()
+
+
+#%% UMDLattice natoms function tests
+def test_UMDLattice_natoms():
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {'X': 10, 'Y': 2}
+    Lattice = UMDLattice(name, basis, atoms)
+    assert Lattice.natoms() == 12
+
+
+test_UMDLattice_natoms()
