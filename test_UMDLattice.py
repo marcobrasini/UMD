@@ -7,9 +7,11 @@ Created on Wed May  4 10:23:02 2022
 
 from UMDLattice import UMDLattice
 
+import pytest
 import numpy as np
 
 
+#%% UMDLattice __init__ function tests
 def test_UMDLattice_init_assignement():
     """
     Test the __init__ function assignement operations with a non singular
@@ -44,5 +46,22 @@ def test_UMDLattice_init_basis_inversion():
     assert np.allclose(Lattice.dirBasis@Lattice.invBasis, np.identity(3))
 
 
+def test_UMDLattice_init_basis_inversion_error():
+    """
+    Test the __init__ function matrix inversion operation for a singular 
+    matrix of lattice vectors. The invBasis attribute returned must be a
+    matrix of np.nan.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 0, 0]])
+    atoms = {'X': 10, 'Y': 2}
+    Lattice = UMDLattice(name, basis, atoms)
+    assert np.isnan(Lattice.invBasis).all()
+
+
 test_UMDLattice_init_assignement()
 test_UMDLattice_init_basis_inversion()
+test_UMDLattice_init_basis_inversion_error()
