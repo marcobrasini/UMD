@@ -53,6 +53,8 @@ class UMDLattice:
         except np.linalg.LinAlgError:
             self.invBasis.fill(np.nan)
 
+        return self
+
     def natoms(self):
         """
         Get the number of atoms of any type in the lattice.

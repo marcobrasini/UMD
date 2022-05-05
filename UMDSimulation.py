@@ -44,6 +44,8 @@ class UMDSimulation:
         self.snapTime = snaptime
         self.Lattice = lattice
 
+        return self
+
     def time(self):
         """
         Calculate the total time of the simulation.
