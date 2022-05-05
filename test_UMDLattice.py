@@ -6,9 +6,14 @@ Created on Wed May  4 10:23:02 2022
 """
 
 from UMDLattice import UMDLattice
+from UMDAtom import UMDAtom
 
 import numpy as np
 
+
+X = UMDAtom('X')
+Y = UMDAtom('Y')
+Z = UMDAtom('Y')
 
 # %% UMDLattice __init__ function tests
 def test_UMDLattice_init_default():
@@ -33,7 +38,7 @@ def test_UMDLattice_init_assignement():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     assert Lattice.name == name
     assert Lattice.atoms == atoms
@@ -52,7 +57,7 @@ def test_UMDLattice_init_basis_inversion():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     assert np.allclose(Lattice.dirBasis@Lattice.invBasis, np.identity(3))
 
@@ -68,7 +73,7 @@ def test_UMDLattice_init_basis_inversion_error():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 0, 0]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     assert np.isnan(Lattice.invBasis).all()
 
@@ -90,7 +95,7 @@ def test_UMDLattice_natoms():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     assert Lattice.natoms() == 44
 
@@ -111,7 +116,7 @@ def test_UMDLattice_reduced_basis():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     reduced_a = Lattice.reduced(basis[0])
     reduced_b = Lattice.reduced(basis[1])
@@ -134,7 +139,7 @@ def test_UMDLattice_reduced_allbasis():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     reduced = Lattice.reduced(basis)
     assert np.allclose(reduced, np.identity(3))
@@ -153,7 +158,7 @@ def test_UMDLattice_reduced_halfbasis():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     reduced = Lattice.reduced(basis[:2])
     assert np.allclose(reduced, np.identity(3)[:2])
@@ -178,7 +183,7 @@ def test_UMDLattice_cartesian_basis():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     cartesian_a = Lattice.cartesian(np.array([1, 0, 0]))
     cartesian_b = Lattice.cartesian(np.array([0, 1, 0]))
@@ -201,7 +206,7 @@ def test_UMDLattice_cartesian_allbasis():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     cartesian = Lattice.cartesian(np.identity(3))
     assert np.allclose(cartesian, basis)
@@ -221,7 +226,7 @@ def test_UMDLattice_cartesian_halfbasis():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
     cartesian = Lattice.cartesian(np.identity(3)[:2])
     assert np.allclose(cartesian, basis[:2])
@@ -245,7 +250,7 @@ def test_UMDLattice_eq_true():
     basis = np.array([[2, 1, -3],
                       [-1, 0, 0],
                       [-4, 2, 1]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice1 = UMDLattice(name1, basis, atoms)
     Lattice2 = UMDLattice(name2, basis, atoms)
     assert Lattice1 == Lattice2
@@ -266,17 +271,17 @@ def test_UMDLattice_eq_false_basis():
     basis2 = np.array([[5, -1, 0],
                        [2, 0, -1],
                        [0, 4, -2]])
-    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms = {X: 15, Y: 28, Z: 1}
     Lattice1 = UMDLattice(name1, basis1, atoms)
     Lattice2 = UMDLattice(name2, basis2, atoms)
     assert not Lattice1 == Lattice2
 
 
-def test_UMDLattice_eq_false_atoms():
+def test_UMDLattice_eq_false_atoms_types():
     """
     Test the __eq__ function to compare two UMDLattice objects representing
     two different lattices, with same lattice basis but different atoms.
-    The value returned must be False.
+    Since the types of atoms are different, the value returned must be False.
 
     """
     name1 = 'Lattice1Name'
@@ -284,8 +289,28 @@ def test_UMDLattice_eq_false_atoms():
     basis = np.array([[2, 1, -3],
                        [-1, 0, 0],
                        [-4, 2, 1]])
-    atoms1 = {'X': 15, 'Y': 28, 'Z': 1}
-    atoms2 = {'X': 15, 'Y': 28, 'A': 1}
+    atoms1 = {X: 15, Y: 28}
+    atoms2 = {X: 15, Z: 28}
+    Lattice1 = UMDLattice(name1, basis, atoms1)
+    Lattice2 = UMDLattice(name2, basis, atoms2)
+    assert not Lattice1 == Lattice2
+
+
+def test_UMDLattice_eq_false_atoms_number():
+    """
+    Test the __eq__ function to compare two UMDLattice objects representing
+    two different lattices, with same lattice basis but different atoms.
+    Since the number of atoms per type is different, the value returned must
+    be False.
+
+    """
+    name1 = 'Lattice1Name'
+    name2 = 'Lattice2Name'
+    basis = np.array([[2, 1, -3],
+                       [-1, 0, 0],
+                       [-4, 2, 1]])
+    atoms1 = {X: 13, Y: 20, Z: 3}
+    atoms2 = {X: 15, Y: 28, Z: 1}
     Lattice1 = UMDLattice(name1, basis, atoms1)
     Lattice2 = UMDLattice(name2, basis, atoms2)
     assert not Lattice1 == Lattice2
@@ -293,4 +318,5 @@ def test_UMDLattice_eq_false_atoms():
 
 test_UMDLattice_eq_true()
 test_UMDLattice_eq_false_basis()
-test_UMDLattice_eq_false_atoms()
+test_UMDLattice_eq_false_atoms_types()
+test_UMDLattice_eq_false_atoms_number()

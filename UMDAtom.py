@@ -35,5 +35,3 @@ class UMDAtom:
         self.Z = Z
         self.mass = mass
         self.valence = valence
-
-        return self
