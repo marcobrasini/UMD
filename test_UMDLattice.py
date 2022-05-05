@@ -230,3 +230,67 @@ def test_UMDLattice_cartesian_halfbasis():
 test_UMDLattice_cartesian_basis()
 test_UMDLattice_cartesian_allbasis()
 test_UMDLattice_cartesian_halfbasis()
+
+
+# %% UMDLattice __eq__ function tests
+def test_UMDLattice_eq_true():
+    """
+    Test the __eq__ function to compare two UMDLattice objects representing
+    two identical lattices. The value returned must be True, despite they can
+    have different names.
+
+    """
+    name1 = 'Lattice1Name'
+    name2 = 'Lattice2Name'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    Lattice1 = UMDLattice(name1, basis, atoms)
+    Lattice2 = UMDLattice(name2, basis, atoms)
+    assert Lattice1 == Lattice2
+
+
+def test_UMDLattice_eq_false_basis():
+    """
+    Test the __eq__ function to compare two UMDLattice objects representing
+    two different lattices, with same atoms but different lattice basis.
+    The value returned must be False.
+
+    """
+    name1 = 'Lattice1Name'
+    name2 = 'Lattice2Name'
+    basis1 = np.array([[2, 1, -3],
+                       [-1, 0, 0],
+                       [-4, 2, 1]])
+    basis2 = np.array([[5, -1, 0],
+                       [2, 0, -1],
+                       [0, 4, -2]])
+    atoms = {'X': 15, 'Y': 28, 'Z': 1}
+    Lattice1 = UMDLattice(name1, basis1, atoms)
+    Lattice2 = UMDLattice(name2, basis2, atoms)
+    assert not Lattice1 == Lattice2
+
+
+def test_UMDLattice_eq_false_atoms():
+    """
+    Test the __eq__ function to compare two UMDLattice objects representing
+    two different lattices, with same lattice basis but different atoms.
+    The value returned must be False.
+
+    """
+    name1 = 'Lattice1Name'
+    name2 = 'Lattice2Name'
+    basis = np.array([[2, 1, -3],
+                       [-1, 0, 0],
+                       [-4, 2, 1]])
+    atoms1 = {'X': 15, 'Y': 28, 'Z': 1}
+    atoms2 = {'X': 15, 'Y': 28, 'A': 1}
+    Lattice1 = UMDLattice(name1, basis, atoms1)
+    Lattice2 = UMDLattice(name2, basis, atoms2)
+    assert not Lattice1 == Lattice2
+
+
+test_UMDLattice_eq_true()
+test_UMDLattice_eq_false_basis()
+test_UMDLattice_eq_false_atoms()

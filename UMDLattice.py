@@ -37,7 +37,7 @@ class UMDLattice:
 
         Returns
         -------
-        UMDLattice object
+        UMDLattice object.
 
         """
         self.name = name
@@ -101,3 +101,24 @@ class UMDLattice:
         """
         cartesian = (self.dirBasis.T @ reduced.T).T
         return cartesian
+
+    def __eq__(self, other):
+        """
+        Overload of the == operator.
+
+        Parameters
+        ----------
+        other : UMDLattice object
+            The second term of the comparison.
+
+        Returns
+        -------
+        equal : bool
+            It returns True if the two lattice are identical, otherwise False.
+
+        """
+        equal = True
+        equal = equal and (self.atoms == other.atoms)
+        equal = equal and np.array_equal(self.dirBasis, other.dirBasis)
+        equal = equal and np.array_equal(self.invBasis, other.invBasis, True)
+        return equal
