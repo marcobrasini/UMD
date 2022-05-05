@@ -28,7 +28,7 @@ class UMDSimulation:
             The number of iterations in the simulation.
             The default is 0.
         snaptime : float, optional
-            The time duration of each molecular dynamic iteration.
+            The time duration of each molecular dynamic iteration in fs.
             The default is 0.
         lattice : UMDLattice, optional
             The lattice over which the simulation is working.
@@ -55,7 +55,7 @@ class UMDSimulation:
         Returns
         -------
         simtime : float
-            Simulation time.
+            Simulation time in ps.
 
         """
         simtime = self.Snaps * self.snapTime * 0.001
