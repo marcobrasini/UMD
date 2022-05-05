@@ -33,8 +33,49 @@ def UMDVaspParser(OUTCARfile):
             while line:
                 # The function load_SimulationCycle() returns a UMDSimulation
                 # object or None, if all the OUTCARfile has been read.
-                simulation = simulationCycleParser(simcycle, outcar, umd)
+                simulation = simulationCycleParser(outcar, umd, simcycle)
                 if simulation is None:
                     break
                 simcycle += 1   # update the simulation cycle number.
                 line = outcar.readline()
+
+
+def simulationCycleParser(outcar, umd, cycle):
+    """
+    Read from OUTCAR file and print on UMD file the data of a simulation cycle.
+
+    The function is implemented in two functions:
+        - UMDSimulation_from_outcar,
+          to read the lattice structure and the simulation parameters which
+          are fixed for every snapshot of the simulation.
+          If no UMDSimulation is initialized, then None is returned.
+        - UMDSnapshot_from_outcar,
+          to read each individual snapshots in the simulation.
+          The number of snapshots read depends on the number of iterations set
+          among the simulation parameters.
+
+    Parameters
+    ----------
+    outcar : input file
+        The OUTCAR file.
+    umd : output file
+        The UMD file.
+    cycle : int
+        The cycle number of the simulation.
+
+    Returns
+    -------
+    simulation : UMDsimulation
+        The UMDSimulation object initialized by the UMDSimulation_from_outcar
+        function. It is None when the OUTCAR file is finished.
+
+    """
+    simulation = UMDSimulation_from_outcar(outcar)
+    if simulation is None:
+        return
+    else:
+        simSteps = simulation.snaps
+        for step in range(0, simSteps):
+            snapshot = UMDSnapshot_from_outcar(outcar)
+            snapshot.save(umd)
+        return simulation
