@@ -11,9 +11,9 @@ from UMDAtom import UMDAtom
 import numpy as np
 
 
-X = UMDAtom('X')
-Y = UMDAtom('Y')
-Z = UMDAtom('Y')
+X = UMDAtom('X', mass=16.00)
+Y = UMDAtom('Y', mass=1.008)
+Z = UMDAtom('Y', mass=55.85)
 
 # %% UMDLattice __init__ function tests
 def test_UMDLattice_init_default():
@@ -101,6 +101,63 @@ def test_UMDLattice_natoms():
 
 
 test_UMDLattice_natoms()
+
+
+# %% UMDLattice mass function tests
+def test_UMDLattice_mass():
+    """
+    Test the mass function. The total mass of the cell must be equal to the 
+    sum of the masses of all the atoms in the cell.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {X: 15, Y: 28, Z: 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    assert Lattice.mass() == 324.074
+
+
+test_UMDLattice_mass()
+
+
+# %% UMDLattice mass function tests
+def test_UMDLattice_volume():
+    """
+    Test the volume function. The cell volume must be equal to the mixed
+    cross-dot product of the lattice basis vectors.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {X: 15, Y: 28, Z: 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    assert Lattice.volume() == 7
+
+
+test_UMDLattice_volume()
+
+    
+# %% UMDLattice mass function tests
+def test_UMDLattice_density():
+    """
+    Test the density function. The matter density in the cell must be equal to
+    the ratio between the total mass in the cell and the cell volume.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {X: 15, Y: 28, Z: 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    assert Lattice.density() == 324.074/7
+
+
+test_UMDLattice_density()
 
 
 # %% UMDLattice reduced function tests

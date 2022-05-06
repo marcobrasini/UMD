@@ -66,6 +66,48 @@ class UMDLattice:
         n = sum(self.atoms.values())
         return n
 
+    def mass(self):
+        """
+        Get the total mass of the lattice cell as sum of the atomic masses.
+
+        Returns
+        -------
+        mass : float
+            Total mass of the cell.
+
+        """
+        mass = 0
+        for atom, n in self.atoms.items():
+            mass += n*atom.mass
+        return mass
+    
+    def volume(self):
+        """
+        Get the lattice volume.
+
+        Returns
+        -------
+        volume : float
+            Lattice volume.
+
+        """
+        volume = np.cross(self.dirBasis[0], self.dirBasis[1])
+        volume = abs(np.dot(volume, self.dirBasis[2]))
+        return volume
+
+    def density(self):
+        """
+        Get the lattice density .
+
+        Returns
+        -------
+        density : float
+            Lattice density.
+
+        """
+        density = self.mass()/self.volume()
+        return density
+
     def reduced(self, cartesian):
         """
         Convert cartesian vectors in reduced coordinates.
