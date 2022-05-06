@@ -5,6 +5,8 @@ Created on Thu May  5 17:55:14 2022
 @author: marco
 """
 
+from UMDSimulation_from_outcar import UMDSimulation_from_outcar
+
 
 def UMDVaspParser(OUTCARfile):
     """
@@ -20,7 +22,7 @@ def UMDVaspParser(OUTCARfile):
     None.
 
     """
-    # We open the output UMDfile 
+    # We open the output UMDfile
     UMDfile = OUTCARfile.replace('outcar', 'umd')
     with open(UMDfile, 'w') as umd:
         simcycle = 0
@@ -70,7 +72,7 @@ def simulationCycleParser(outcar, umd, cycle):
         function. It is None when the OUTCAR file is finished.
 
     """
-    simulation = UMDSimulation_from_outcar(outcar)
+    simulation = UMDSimulation_from_outcar(outcar, cycle)
     if simulation is None:
         return
     else:
