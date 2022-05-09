@@ -19,10 +19,10 @@ def test_UMDSimulation_init_default():
     """
     simulation = UMDSimulation()
     assert simulation.name == ''
-    assert simulation.Cycle == -1
-    assert simulation.Snaps == 0
-    assert simulation.snapTime == 0.
-    assert simulation.Lattice == UMDLattice()
+    assert simulation.cycle == -1
+    assert simulation.steps == 0
+    assert simulation.steptime == 0.
+    assert simulation.lattice == UMDLattice()
 
 
 def test_UMDLattice_init_assignement():
@@ -31,17 +31,15 @@ def test_UMDLattice_init_assignement():
     matrix of lattice vectors.
 
     """
-    name = 'magx.xxaYYYYT'
     basis = np.identity(3)
     atoms = {'X': 2, 'Y': 4}
     lattice = UMDLattice(basis=basis, atoms=atoms)
-    simulation = UMDSimulation(name=name, cycle=2, snaps=30000, snaptime=0.5,        
-                               lattice=lattice)
-    assert simulation.name =='magx.xxaYYYYT'
-    assert simulation.Cycle == 2
-    assert simulation.Snaps == 30000
-    assert simulation.snapTime == 0.5
-    assert simulation.Lattice == lattice
+    simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
+    assert simulation.name == 'SimulationName'
+    assert simulation.cycle == 2
+    assert simulation.steps == 30000
+    assert simulation.steptime == 0.5
+    assert simulation.lattice == lattice
 
 
 test_UMDSimulation_init_default()
@@ -167,13 +165,11 @@ def test_UMDSimulation_str():
     descriptive and printable string object.
 
     """
-    name = 'magx.xxaYYYYT'
     basis = np.identity(3)
     atoms = {'X': 2, 'Y': 4}
     lattice = UMDLattice(basis=basis, atoms=atoms)
-    simulation = UMDSimulation(name=name, cycle=2, snaps=30000, snaptime=0.5,        
-                               lattice=lattice)
-    string  = 'Simulation: magx.xxaYYYYT\n'
+    simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
+    string = 'Simulation: SimulationName\n'
     string += 'Total cycles = 2\n'
     string += 'Total steps = 30000\n'
     string += 'Total time = 15.0 ps'
@@ -181,4 +177,3 @@ def test_UMDSimulation_str():
 
 
 test_UMDSimulation_str()
-

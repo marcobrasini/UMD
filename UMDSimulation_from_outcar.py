@@ -70,7 +70,7 @@ from UMDLattice import UMDLattice
 from UMDSimulation import UMDSimulation
 
 
-def UMDSimulation_from_outcar(outcar, cycle):
+def UMDSimulation_from_outcar(outcar, cyc):
     """
     Initialize a UMDSimulation object from a Vasp OUTCAR file.
 
@@ -78,7 +78,7 @@ def UMDSimulation_from_outcar(outcar, cycle):
     ----------
     outcar : input file
         The Vasp OUTCAR file.
-    cycle : int
+    cyc : int
         The cycle number of the simulation.
 
     Returns
@@ -91,12 +91,12 @@ def UMDSimulation_from_outcar(outcar, cycle):
     lattice_name = ''
     atoms_name = []
     atoms_mass = []
-    atoms_valenc = []
+    atoms_valence = []
     atoms_number = []
     basis = np.zeros((3, 3), dtype=float)
 
-    snaps = 0
-    snaptime = 0
+    steps = 0
+    steptime = 0
 
     # With the following cycle, we scroll all the lines of the OUTCAR file
     # header till the beginnig of the iterative part of the OUTCAR file.
@@ -120,7 +120,7 @@ def UMDSimulation_from_outcar(outcar, cycle):
             # of atoms per each type.
             while line:
                 if "ions per type =" in line:
-                    line = line.replace("ions per type", '').replace("=",'')
+                    line = line.replace("ions per type", '').replace("=", '')
                     atoms_number = [int(at) for at in line.strip().split()]
                     break
                 line = outcar.readline()
@@ -136,14 +136,14 @@ def UMDSimulation_from_outcar(outcar, cycle):
             # - 'ZVAL' to set the number of valence electrons per atom type
             while line:
                 if 'NSW' in line:
-                    snaps = int(line.strip().split()[2])
+                    steps = int(line.strip().split()[2])
                 if 'POTIM' in line:
-                    snaptime = float(line.strip().split()[2])
+                    steptime = float(line.strip().split()[2])
                 if 'POMASS' in line:
-                    line = line.replace("POMASS", '').replace("=",'')
+                    line = line.replace("POMASS", '').replace("=", '')
                     atoms_mass = [float(at) for at in line.strip().split()]
                 if 'ZVAL' in line:
-                    line = line.replace("ZVAL", '').replace("=",'')
+                    line = line.replace("ZVAL", '').replace("=", '')
                     atoms_valence = [float(at) for at in line.strip().split()]
                 if "DOS related values" in line:
                     # It marks the beginnig of the new section of parameters.
@@ -172,6 +172,7 @@ def UMDSimulation_from_outcar(outcar, cycle):
                                valence=atoms_valence[i])
                 atoms[atom] = atoms_number[i]
             lattice = UMDLattice(lattice_name, basis, atoms)
-            simulation = UMDSimulation(cycle, snaps, snaptime, lattice)
-            return simulation
+            if not lattice.atoms == {}:
+                simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+                return simulation
         line = outcar.readline()

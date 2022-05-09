@@ -403,3 +403,30 @@ def test_UMDLattice_str():
 
 
 test_UMDLattice_str()
+
+
+# %% UMDLattice isdefault function tests
+def test_UMDLattice_isdefault_true():
+    Lattice = UMDLattice()
+    assert Lattice.isdefault()
+
+
+def test_UMDLattice_isdefault_false_name():
+    Lattice = UMDLattice(name='Lattice')
+    assert not Lattice.isdefault()
+
+
+def test_UMDLattice_isdefault_false_basis():
+    Lattice = UMDLattice(basis=np.ones((3, 3)))
+    assert not Lattice.isdefault()
+
+
+def test_UMDLattice_isdefault_false_atoms():
+    Lattice = UMDLattice(atoms={X: 0})
+    assert not Lattice.isdefault()
+
+
+test_UMDLattice_isdefault_true()
+test_UMDLattice_isdefault_false_name()
+test_UMDLattice_isdefault_false_basis()
+test_UMDLattice_isdefault_false_atoms()

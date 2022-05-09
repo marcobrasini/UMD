@@ -16,7 +16,7 @@ class UMDSimulation:
 
     """
 
-    def __init__(self, name='', cycle=-1, snaps=0, snaptime=0.0,
+    def __init__(self, name='', cycle=-1, steps=0, steptime=0.0,
                  lattice=UMDLattice()):
         """
         Construct UMDSimulation object.
@@ -42,10 +42,10 @@ class UMDSimulation:
 
         """
         self.name = name
-        self.Cycle = cycle
-        self.Snaps = snaps
-        self.snapTime = snaptime
-        self.Lattice = lattice
+        self.cycle = cycle
+        self.steps = steps
+        self.steptime = steptime
+        self.lattice = lattice
 
     def time(self):
         """
@@ -57,12 +57,12 @@ class UMDSimulation:
 
         Returns
         -------
-        simtime : float
+        time : float
             Simulation time in ps.
 
         """
-        simtime = self.Snaps * self.snapTime * 0.001
-        return simtime
+        time = self.steps * self.steptime * 0.001
+        return time
 
     def __eq__(self, other):
         """
@@ -80,12 +80,12 @@ class UMDSimulation:
             False.
 
         """
-        eq = True
-        eq = eq and (self.name == other.name)
-        eq = eq and (self.Cycle == other.Cycle)
-        eq = eq and (self.Snaps == other.Snaps)
-        eq = eq and (self.snapTime == other.snapTime)
-        eq = eq and (self.Lattice == other.Lattice)
+        eq = isinstance(other, UMDSimulation)
+        eq *= (self.name == other.name)
+        eq *= (self.cycle == other.cycle)
+        eq *= (self.steps == other.steps)
+        eq *= (self.steptime == other.steptime)
+        eq *= (self.lattice == other.lattice)
         return eq
 
     def __str__(self):
@@ -99,7 +99,7 @@ class UMDSimulation:
 
         """
         string = 'Simulation: ' + self.name + '\n'
-        string += 'Total cycles = ' + str(self.Cycle) + '\n'
-        string += 'Total steps = ' + str(self.Snaps) + '\n'
+        string += 'Total cycles = ' + str(self.cycle) + '\n'
+        string += 'Total steps = ' + str(self.steps) + '\n'
         string += 'Total time = ' + str(self.time()) + ' ps'
         return string

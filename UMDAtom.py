@@ -51,11 +51,11 @@ class UMDAtom:
             It returns True if the two atoms are identical, otherwise False.
 
         """
-        equal = True
-        equal = equal and (self.name == other.name)
-        equal = equal and (self.Z == other.Z)
-        equal = equal and (self.mass == other.mass)
-        equal = equal and (self.valence == other.valence)
+        equal = isinstance(other, UMDAtom)
+        equal *= (self.name == other.name)
+        equal *= (self.Z == other.Z)
+        equal *= (self.mass == other.mass)
+        equal *= (self.valence == other.valence)
         return equal
 
     def __hash__(self):

@@ -8,7 +8,8 @@ Created on Tue May  3 18:24:02 2022
 import numpy as np
 
 
-NULL_Basis = np.zeros((3, 3), dtype=float)
+NULL_dirBasis = np.zeros((3, 3), dtype=float)
+NULL_invBasis = np.full((3, 3), np.nan)
 
 
 class UMDLattice:
@@ -19,7 +20,7 @@ class UMDLattice:
     the lattice unit cell and a set of atoms populating the cell.
     """
 
-    def __init__(self, name='', basis=NULL_Basis, atoms={}):
+    def __init__(self, name='', basis=NULL_dirBasis, atoms={}):
         """
         Construct UMDLattice object.
 
@@ -47,11 +48,11 @@ class UMDLattice:
         # If possible, we initialize the inverse basis matrix.
         # The inverse basis matrix is necessary to move from cartesian to
         # reduced coordinate system.
-        self.invBasis = np.copy(NULL_Basis)
+        self.invBasis = np.copy(NULL_dirBasis)
         try:
             self.invBasis = np.copy(np.linalg.inv(basis))
         except np.linalg.LinAlgError:
-            self.invBasis.fill(np.nan)
+            self.invBasis = np.copy(NULL_invBasis)
 
     def natoms(self):
         """
@@ -159,10 +160,10 @@ class UMDLattice:
             It returns True if the two lattice are identical, otherwise False.
 
         """
-        equal = True
-        equal = equal and (self.atoms == other.atoms)
-        equal = equal and np.array_equal(self.dirBasis, other.dirBasis)
-        equal = equal and np.array_equal(self.invBasis, other.invBasis, True)
+        equal = isinstance(other, UMDLattice)
+        equal *= (self.atoms == other.atoms)
+        equal *= np.array_equal(self.dirBasis, other.dirBasis)
+        equal *= np.array_equal(self.invBasis, other.invBasis, True)
         return equal
 
     def __str__(self):
@@ -181,3 +182,21 @@ class UMDLattice:
         string += '\t'.join([str(n) for n in self.atoms.keys()])+'\n'
         string += '\t'.join([str(n) for n in self.atoms.values()])
         return string
+
+    def isdefault(self):
+        """
+        Check if the object is a UMDLattice default object.
+
+        Returns
+        -------
+        default : bool
+            It returns True if it is a default-built UMDLattice object,
+            otherwise False.
+
+        """
+        default = True
+        default *= (self.name == '')
+        default *= (self.atoms == {})
+        default *= np.array_equal(self.dirBasis, NULL_dirBasis)
+        default *= np.array_equal(self.invBasis, NULL_invBasis, True)
+        return default
