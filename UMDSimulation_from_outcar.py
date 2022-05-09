@@ -89,9 +89,9 @@ def UMDSimulation_from_outcar(outcar, cycle):
     """
     # Variable necessary for the UMDLattice and UMDSimulation initialization.
     lattice_name = ''
-    atoms_names = []
-    atoms_masses = []
-    atoms_valences = []
+    atoms_name = []
+    atoms_mass = []
+    atoms_valenc = []
     atoms_number = []
     basis = np.zeros((3, 3), dtype=float)
 
@@ -110,7 +110,7 @@ def UMDSimulation_from_outcar(outcar, cycle):
             # atomic symbol reported in the 'TITLE' line.
             while line:
                 if "TITEL  =" in line:
-                    atoms_names.append(line.strip().split()[-2])
+                    atoms_name.append(line.strip().split()[-2])
                     break
                 line = outcar.readline()
 
@@ -120,7 +120,7 @@ def UMDSimulation_from_outcar(outcar, cycle):
             # of atoms per each type.
             while line:
                 if "ions per type =" in line:
-                    line = line.replace("ions per type =", '')
+                    line = line.replace("ions per type", '').replace("=",'')
                     atoms_number = [int(at) for at in line.strip().split()]
                     break
                 line = outcar.readline()
@@ -135,16 +135,16 @@ def UMDSimulation_from_outcar(outcar, cycle):
             # - 'POMASS' to set the atomic mass per atom type
             # - 'ZVAL' to set the number of valence electrons per atom type
             while line:
-                if 'NSW =' in line:
+                if 'NSW' in line:
                     snaps = int(line.strip().split()[2])
-                if 'POTIM =' in line:
+                if 'POTIM' in line:
                     snaptime = float(line.strip().split()[2])
-                if 'POMASS =' in line:
-                    line = line.replace("POMASS =", '')
-                    atoms_masses = [float(at) for at in line.strip().split()]
-                if 'ZVAL =' in line:
-                    line = line.replace("ZVAL =", '')
-                    atoms_valences = [int(at) for at in line.strip().split()]
+                if 'POMASS' in line:
+                    line = line.replace("POMASS", '').replace("=",'')
+                    atoms_mass = [float(at) for at in line.strip().split()]
+                if 'ZVAL' in line:
+                    line = line.replace("ZVAL", '').replace("=",'')
+                    atoms_valence = [float(at) for at in line.strip().split()]
                 if "DOS related values" in line:
                     # It marks the beginnig of the new section of parameters.
                     break
@@ -163,13 +163,13 @@ def UMDSimulation_from_outcar(outcar, cycle):
             # It is the beginning of the iterative part of the simulation and
             # it marks the end of the header part with simulation information.
             # At this point, the UMDSimulation can be built and returned.
-            assert len(atoms_names) == len(atoms_masses)
-            assert len(atoms_masses) == len(atoms_valences)
-            assert len(atoms_valences) == len(atoms_number)
+            assert len(atoms_name) == len(atoms_mass)
+            assert len(atoms_mass) == len(atoms_valence)
+            assert len(atoms_valence) == len(atoms_number)
             atoms = {}
-            for i in range(len(atoms_names)):
-                atom = UMDAtom(name=atoms_names[i], mass=atoms_masses[i],
-                               valence=atoms_valences[i])
+            for i in range(len(atoms_name)):
+                atom = UMDAtom(name=atoms_name[i], mass=atoms_mass[i],
+                               valence=atoms_valence[i])
                 atoms[atom] = atoms_number[i]
             lattice = UMDLattice(lattice_name, basis, atoms)
             simulation = UMDSimulation(cycle, snaps, snaptime, lattice)
