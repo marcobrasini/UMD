@@ -60,3 +60,26 @@ class UMDSimulation:
         """
         simtime = self.Snaps * self.snapTime * 0.001
         return simtime
+
+    def __eq__(self, other):
+        """
+        Overload of the == operator.
+
+        Parameters
+        ----------
+        other : UMDSimulation object
+            The second term of the comparison.
+
+        Returns
+        -------
+        equal : bool
+            It returns True if the two simulations are identical, otherwise
+            False.
+
+        """
+        eq = True
+        eq = eq and (self.Cycle == other.Cycle)
+        eq = eq and (self.Snaps == other.Snaps)
+        eq = eq and (self.snapTime == other.snapTime)
+        eq = eq and (self.Lattice == other.Lattice)
+        return eq
