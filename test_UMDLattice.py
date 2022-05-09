@@ -13,7 +13,8 @@ import numpy as np
 
 X = UMDAtom('X', mass=16.00)
 Y = UMDAtom('Y', mass=1.008)
-Z = UMDAtom('Y', mass=55.85)
+Z = UMDAtom('Z', mass=55.85)
+
 
 # %% UMDLattice __init__ function tests
 def test_UMDLattice_init_default():
@@ -49,7 +50,7 @@ def test_UMDLattice_init_assignement():
 def test_UMDLattice_init_basis_inversion():
     """
     Test the __init__ function matrix inversion operation for a non singular
-    matrix of lattice vectors. The matrix product ('dirBasis' x 'invBasis') 
+    matrix of lattice vectors. The matrix product ('dirBasis' x 'invBasis')
     must be equal (or close) to the identical matrix.
 
     """
@@ -64,7 +65,7 @@ def test_UMDLattice_init_basis_inversion():
 
 def test_UMDLattice_init_basis_inversion_error():
     """
-    Test the __init__ function matrix inversion operation for a singular 
+    Test the __init__ function matrix inversion operation for a singular
     matrix of lattice vectors. The invBasis attribute returned must be a
     matrix of np.nan.
 
@@ -106,7 +107,7 @@ test_UMDLattice_natoms()
 # %% UMDLattice mass function tests
 def test_UMDLattice_mass():
     """
-    Test the mass function. The total mass of the cell must be equal to the 
+    Test the mass function. The total mass of the cell must be equal to the
     sum of the masses of all the atoms in the cell.
 
     """
@@ -140,7 +141,7 @@ def test_UMDLattice_volume():
 
 test_UMDLattice_volume()
 
-    
+
 # %% UMDLattice mass function tests
 def test_UMDLattice_density():
     """
@@ -344,8 +345,8 @@ def test_UMDLattice_eq_false_atoms_types():
     name1 = 'Lattice1Name'
     name2 = 'Lattice2Name'
     basis = np.array([[2, 1, -3],
-                       [-1, 0, 0],
-                       [-4, 2, 1]])
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
     atoms1 = {X: 15, Y: 28}
     atoms2 = {X: 15, Z: 28}
     Lattice1 = UMDLattice(name1, basis, atoms1)
@@ -364,8 +365,8 @@ def test_UMDLattice_eq_false_atoms_number():
     name1 = 'Lattice1Name'
     name2 = 'Lattice2Name'
     basis = np.array([[2, 1, -3],
-                       [-1, 0, 0],
-                       [-4, 2, 1]])
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
     atoms1 = {X: 13, Y: 20, Z: 3}
     atoms2 = {X: 15, Y: 28, Z: 1}
     Lattice1 = UMDLattice(name1, basis, atoms1)
@@ -377,3 +378,28 @@ test_UMDLattice_eq_true()
 test_UMDLattice_eq_false_basis()
 test_UMDLattice_eq_false_atoms_types()
 test_UMDLattice_eq_false_atoms_number()
+
+
+# %% UMDLattice __str__ function tests
+def test_UMDLattice_str():
+    """
+    Test the __str__ function to convert the UMDLattice information into a
+    descriptive and printable string object.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {X: 15, Y: 28, Z: 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    string  = 'Lattice: LatticeName\n'
+    string += '2.00000000\t1.00000000\t-3.00000000\n'
+    string += '-1.00000000\t0.00000000\t0.00000000\n'
+    string += '-4.00000000\t2.00000000\t1.00000000\n'
+    string += 'X\tY\tZ\n'
+    string += '15\t28\t1'
+    assert str(Lattice) == string
+
+
+test_UMDLattice_str()

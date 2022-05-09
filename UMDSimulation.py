@@ -13,9 +13,11 @@ class UMDSimulation:
     Class to collect the simulation parameters.
 
     A simulation correspond to the run of a single job.
-    
+
     """
-    def __init__(self, cycle=-1, snaps=0, snaptime=0., lattice=UMDLattice()):
+
+    def __init__(self, name='', cycle=-1, snaps=0, snaptime=0.0,
+                 lattice=UMDLattice()):
         """
         Construct UMDSimulation object.
 
@@ -39,6 +41,7 @@ class UMDSimulation:
         UMDSimulation object.
 
         """
+        self.name = name
         self.Cycle = cycle
         self.Snaps = snaps
         self.snapTime = snaptime
@@ -78,8 +81,25 @@ class UMDSimulation:
 
         """
         eq = True
+        eq = eq and (self.name == other.name)
         eq = eq and (self.Cycle == other.Cycle)
         eq = eq and (self.Snaps == other.Snaps)
         eq = eq and (self.snapTime == other.snapTime)
         eq = eq and (self.Lattice == other.Lattice)
         return eq
+
+    def __str__(self):
+        """
+        Overload of the str function.
+
+        Returns
+        -------
+        string : string
+            Report of the simulation parameteres.
+
+        """
+        string = 'Simulation: ' + self.name + '\n'
+        string += 'Total cycles = ' + str(self.Cycle) + '\n'
+        string += 'Total steps = ' + str(self.Snaps) + '\n'
+        string += 'Total time = ' + str(self.time()) + ' ps'
+        return string

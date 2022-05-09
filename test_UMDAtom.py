@@ -131,3 +131,17 @@ def test_UMDAtom_hash_noteq_dict():
 
 test_UMDAtom_hash_eq_dict()
 test_UMDAtom_hash_noteq_dict()
+
+
+# %% UMDAtom __str__ function tests
+def test_UMDAtom_str():
+    """
+    Test the __str__ function to convert the UMDAtom information into a
+    string object correspondent with its atomic symbol.
+
+    """
+    atom = UMDAtom(name='O', Z=8, mass=16.00, valence=6)
+    assert str(atom) == 'O'
+
+
+test_UMDAtom_str()

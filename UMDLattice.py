@@ -80,7 +80,7 @@ class UMDLattice:
         for atom, n in self.atoms.items():
             mass += n*atom.mass
         return mass
-    
+
     def volume(self):
         """
         Get the lattice volume.
@@ -164,3 +164,20 @@ class UMDLattice:
         equal = equal and np.array_equal(self.dirBasis, other.dirBasis)
         equal = equal and np.array_equal(self.invBasis, other.invBasis, True)
         return equal
+
+    def __str__(self):
+        """
+        Overload of the str function.
+
+        Returns
+        -------
+        string : string
+            Report of the lattice values.
+
+        """
+        string = 'Lattice: ' + self.name + '\n'
+        for vector in self.dirBasis:
+            string += '\t'.join(['{:.8f}'.format(x) for x in vector])+'\n'
+        string += '\t'.join([str(n) for n in self.atoms.keys()])+'\n'
+        string += '\t'.join([str(n) for n in self.atoms.values()])
+        return string

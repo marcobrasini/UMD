@@ -70,3 +70,16 @@ class UMDAtom:
         """
         hash_atom = hash((self.name, self.Z, self.mass, self.valence))
         return hash_atom
+
+    def __str__(self):
+        """
+        Overload of the str function.
+
+        Returns
+        -------
+        string : string
+            Atomic symbol.
+
+        """
+        string = self.name
+        return string
