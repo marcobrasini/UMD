@@ -35,3 +35,38 @@ class UMDAtom:
         self.Z = Z
         self.mass = mass
         self.valence = valence
+
+    def __eq__(self, other):
+        """
+        Overload of the == operator.
+
+        Parameters
+        ----------
+        other : UMDAtom object
+            The second term of the comparison.
+
+        Returns
+        -------
+        equal : bool
+            It returns True if the two atoms are identical, otherwise False.
+
+        """
+        equal = True
+        equal = equal and (self.name == other.name)
+        equal = equal and (self.Z == other.Z)
+        equal = equal and (self.mass == other.mass)
+        equal = equal and (self.valence == other.valence)
+        return equal
+
+    def __hash__(self):
+        """
+        Overload of the __hash__ operator.
+
+        Returns
+        -------
+        hash_atom : int
+            The hash values of the object for dictionary keys comparison.
+
+        """
+        hash_atom = hash((self.name, self.Z, self.mass, self.valence))
+        return hash_atom
