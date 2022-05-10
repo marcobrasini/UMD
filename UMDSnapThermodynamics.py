@@ -37,7 +37,7 @@ class UMDSnapThermodynamics:
 
     def __str__(self):
         """
-        Overload of the str function.
+        Overload of the __str__ function.
 
         Returns
         -------
