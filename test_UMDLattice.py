@@ -222,9 +222,23 @@ def test_UMDLattice_reduced_halfbasis():
     assert np.allclose(reduced, np.identity(3)[:2])
 
 
+def test_UMDLattice_reduced_from_cartesian():
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {X: 15, Y: 28, Z: 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    vector = np.array([1, 3, 2])
+    cartesian = Lattice.cartesian(vector)
+    reduced = Lattice.reduced(cartesian)
+    assert np.allclose(reduced, vector)
+
+
 test_UMDLattice_reduced_basis()
 test_UMDLattice_reduced_allbasis()
 test_UMDLattice_reduced_halfbasis()
+test_UMDLattice_reduced_from_cartesian()
 
 
 # %% UMDLattice cartesian function tests
@@ -290,9 +304,23 @@ def test_UMDLattice_cartesian_halfbasis():
     assert np.allclose(cartesian, basis[:2])
 
 
+def test_UMDLattice_cartesian_from_reduced():
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {X: 15, Y: 28, Z: 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    vector = np.array([1, 3, 2])
+    reduced = Lattice.reduced(vector)
+    cartesian = Lattice.cartesian(reduced)
+    assert np.allclose(cartesian, vector)
+
+
 test_UMDLattice_cartesian_basis()
 test_UMDLattice_cartesian_allbasis()
 test_UMDLattice_cartesian_halfbasis()
+test_UMDLattice_cartesian_from_reduced()
 
 
 # %% UMDLattice __eq__ function tests
