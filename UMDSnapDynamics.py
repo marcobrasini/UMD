@@ -76,13 +76,10 @@ class UMDSnapDynamics:
 
         """
         self.displacement = self.position - position0
-        reduced_displacement = self.lattice.reduced(self.displacement)
-        for i in range(3):
-            delta = reduced_displacement[:, i]
-            delta = np.where(delta > +0.5, delta-1, delta)
-            delta = np.where(delta < -0.5, delta+1, delta)
-            reduced_displacement[:, i] = delta
-        self.displacement = self.lattice.cartesian(reduced_displacement)
+        delta = self.lattice.reduced(self.displacement)
+        delta = np.where(delta > +0.5, delta-1, delta)
+        delta = np.where(delta < -0.5, delta+1, delta)
+        self.displacement = self.lattice.cartesian(delta)
         displacement = self.displacement
         return displacement
 
