@@ -8,6 +8,7 @@ Created on Tue May 10 15:40:28 2022
 import numpy as np
 from UMDLattice import UMDLattice
 
+
 class UMDSnapDynamics:
     """
     Class UMDSnapDynamics to contain the dynamic data of a single molecular
@@ -15,7 +16,7 @@ class UMDSnapDynamics:
 
     """
 
-    def __init__(self, snaptime=0.0, lattice=UMDLattice(), 
+    def __init__(self, snaptime=0.0, lattice=UMDLattice(),
                  position=[], displacement=[], velocity=[], force=[]):
         """
         Construct the UMDSnapDynamics object.
@@ -59,7 +60,7 @@ class UMDSnapDynamics:
         if len(force) == self.natoms:
             self.force = force
 
-    def displacement(self, position0):
+    def get_displacement(self, position0):
         """
         Calculate the atom displacement with respect to some initial positions.
 
@@ -75,13 +76,13 @@ class UMDSnapDynamics:
 
         """
         self.displacement = self.position - position0
-        reduced_displacement = self.lattice.reduce(self.displacement)
+        reduced_displacement = self.lattice.reduced(self.displacement)
         for i in range(3):
-            delta = reduced_displacement.T[i]
+            delta = reduced_displacement[:, i]
             delta = np.where(delta > +0.5, delta-1, delta)
-            delta = np.where(delta > -0.5, delta+1, delta)
-            reduced_displacement.T[i] = delta
-        self.displacement = self.lattice.direct(reduced_displacement)
+            delta = np.where(delta < -0.5, delta+1, delta)
+            reduced_displacement[:, i] = delta
+        self.displacement = self.lattice.cartesian(reduced_displacement)
         displacement = self.displacement
         return displacement
 
@@ -109,10 +110,10 @@ class UMDSnapDynamics:
             Report of the atoms dynamical vectors.
 
         """
-        headerstyle = '{:'+str(3*w)+'}{:'+str(3*w)+'}{:'+str(3*w)+'}'
-        style = '{:'+str(w-1)+'.'+str(f)+'f}'
         dynamics = np.hstack((self.position, self.velocity, self.force))
+        headerstyle = '{:'+str(3*w)+'}{:'+str(3*w)+'}{:'+str(3*w)+'}'
         string = headerstyle.format('Positions', 'Velocities', 'Forces')
+        style = '{:'+str(w-1)+'.'+str(f)+'f}'
         for atom in dynamics:
             string += '\n ' + ' '.join([style.format(x) for x in atom])
         return string
