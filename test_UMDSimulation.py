@@ -170,9 +170,11 @@ def test_UMDSimulation_str():
     lattice = UMDLattice(basis=basis, atoms=atoms)
     simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
     string = 'Simulation: SimulationName\n'
-    string += 'Total cycles = 2\n'
-    string += 'Total steps = 30000\n'
-    string += 'Total time = 15.0 ps'
+    string += 'Total cycles =          2\n'
+    string += 'Total steps  =      30000\n'
+    string += 'Total time   =     15.000 ps'
+    print(string)
+    print(simulation)
     assert str(simulation) == string
 
 

@@ -99,7 +99,7 @@ class UMDSimulation:
 
         """
         string = 'Simulation: ' + self.name + '\n'
-        string += 'Total cycles = ' + str(self.cycle) + '\n'
-        string += 'Total steps = ' + str(self.steps) + '\n'
-        string += 'Total time = ' + str(self.time()) + ' ps'
+        string += 'Total cycles = {:10}\n'.format(self.cycle)
+        string += 'Total steps  = {:10}\n'.format(self.steps)
+        string += 'Total time   = {:10.3f} ps'.format(self.time())
         return string

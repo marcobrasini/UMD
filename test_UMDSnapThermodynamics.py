@@ -49,9 +49,9 @@ def test_UMDSnapThermodynamics_init_assignement():
     pressure = 23       # in GPa
     energy = -1050      # in eV
     snapthermodynamics = UMDSnapThermodynamics(temperature, pressure, energy)
-    string  = "Temperature = 1400 K\n"
-    string += "Pressure = 23 GPa\n"
-    string += "Energy = -1050 eV"
+    string  = "Temperature =    1400.0000 K\n"
+    string += "Pressure    =      23.0000 GPa\n"
+    string += "Energy      =   -1050.0000 eV"
     assert str(snapthermodynamics) == string
 
 
