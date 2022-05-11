@@ -13,10 +13,13 @@ import hypothesis.strategies as st
 
 import numpy as np
 import numpy.random as rnd
+import itertools as it
 from UMDAtom import UMDAtom
 from UMDLattice import UMDLattice
 
+
 rnd.seed(62815741)
+
 at = UMDAtom()
 
 
@@ -97,12 +100,55 @@ def test_UMDSnapDynamics_get_displacement_cubic_null(N):
     Test the get_displacement function when the atoms displacement is zero.
 
     """
-    lattice = UMDLattice(basis=np.identity(3), atoms={at: N})
+    basis = np.identity(3)
+    lattice = UMDLattice(basis=basis, atoms={at: N})
     position0 = rnd.uniform(size=(N, 3))
     position = np.copy(position0)
     snapdynamics = UMDSnapDynamics(lattice=lattice, position=position)
     displacement = snapdynamics.get_displacement(position0)
     assert np.array_equal(displacement, np.zeros((N, 3)))
+
+
+def test_UMDSnapDynamics_get_displacement_cubic():
+    """
+    Test the get_displacement function for the simple cubic structure.
+    In this case, it is very simple to determine the atoms displacement taking
+    into account the periodic boundary conditions.
+
+    """
+    basis = np.identity(3)
+    lattice = UMDLattice(basis=basis, atoms={at: 3})
+    pos0 = np.array([[0.1, 0.1, 0.1],
+                     [0.5, 0.5, 0.5],
+                     [0.9, 0.2, 0.8]])
+    pos1 = np.array([[0.8, 0.2, 0.9],
+                     [0.3, 0.6, 0.6],
+                     [0.1, 0.2, 0.9]])
+    disp = np.array([[-0.3, 0.1, -0.2],
+                     [-0.2, 0.1, 0.1],
+                     [0.2, 0.0, 0.1]])
+    snapdynamics = UMDSnapDynamics(lattice=lattice, position=pos1)
+    displacement = snapdynamics.get_displacement(pos0)
+    assert np.allclose(displacement, disp)
+
+
+@hp.given(N=st.integers(1, 500))
+def test_UMDSnapDynamics_get_displacement_cubic_size(N):
+    """
+    Test the get_displacement function results. Independently on the position
+    the atoms position in the unit cell, the displacement returned must be
+    smaller then the half unit cell size.
+
+    """
+    basis = np.identity(3)
+    lattice = UMDLattice(basis=basis, atoms={at: N})
+    pos0 = rnd.uniform(size=(N, 3))
+    pos1 = rnd.uniform(size=(N, 3))
+
+    snapdynamics = UMDSnapDynamics(lattice=lattice, position=pos1)
+    displacement = snapdynamics.get_displacement(pos0)
+    maxdisp = np.linalg.norm(np.array([0.5, 0.5, 0.5]))
+    assert (np.linalg.norm(displacement, axis=1) < maxdisp).all()
 
 
 @hp.given(N=st.integers(1, 500))
@@ -165,78 +211,9 @@ def test_UMDSnapDynamics_get_displacement_cubic_large_negative(N):
     assert np.allclose(displacement, (disp + 1) @ basis)
 
 
-@hp.given(N=st.integers(1, 500))
-def test_UMDSnapDynamics_get_displacement_cubic_size(N):
-    """
-    Test the get_displacement function results. Independently on the position
-    the atoms position in the unit cell, the displacement returned must be
-    smaller then the half unit cell.
-
-    """
-    basis = np.identity(3)
-    lattice = UMDLattice(basis=basis, atoms={at: N})
-    pos0 = rnd.uniform(size=(N, 3))
-    pos1 = rnd.uniform(size=(N, 3))
-
-    snapdynamics = UMDSnapDynamics(lattice=lattice, position=pos1)
-    displacement = snapdynamics.get_displacement(pos0)
-    max_displacement = np.linalg.norm(np.array([0.5, 0.5, 0.5]) @ basis)
-    assert (np.linalg.norm(displacement, axis=1) < max_displacement).all()
-
-
-def test_UMDSnapDynamics_get_displacement_small():
-    """
-    Test the get_displacement function when the atoms displacement is small.
-    A small displacement is a displacement whose reduced components are all
-    smaller than the half of the lattice basis vectors. In this case, no
-    periodic correction to the displacement is necessary.
-
-    """
-    basis = np.array([[1.0, 0.0, 1.0],
-                      [0.0, 1.0, 0.0],
-                      [0.0, 0.0, 2.0]])
-    lattice = UMDLattice(basis=basis, atoms={at: 2})
-    position0 = np.array([[0.1, 0.1, 0.1],
-                         [0.5, 0.5, 0.5]])
-    small_displacement = np.array([[-0.4, 0.1, 0.5],
-                                   [-0.2, 0.1, 0.5]])
-    real_displacement = small_displacement @ basis
-    position = position0 + real_displacement
-    snapdynamics = UMDSnapDynamics(lattice=lattice, position=position)
-    displacement = snapdynamics.get_displacement(position0)
-    assert np.allclose(displacement, real_displacement)
-
-
-def test_UMDSnapDynamics_get_displacement_large():
-    """
-    Test the get_displacement function when the atoms displacement is large.
-    A large displacement is a displacement whose some components are larger
-    than the half of the lattice basis vectors. In this case, a periodic
-    correction to the displacement is necessary.
-
-    """
-    basis = np.array([[1.0, 0.0, 1.0],
-                      [0.0, 1.0, 0.0],
-                      [0.0, 0.0, 2.0]])
-    lattice = UMDLattice(basis=basis, atoms={at: 2})
-    position0 = np.array([[0.1, 0.1, 0.1],
-                         [0.5, 0.5, 0.5]])
-    large_displacement = np.array([[0.7, 0.1, 0.5],
-                                   [0.2, 0.9, 0.5]])
-    real_displacement = large_displacement @ basis
-    position = position0 + real_displacement
-    snapdynamics = UMDSnapDynamics(lattice=lattice, position=position)
-    displacement = snapdynamics.get_displacement(position0)
-    large_displacement = np.array([[-0.3, 0.1, 0.5],
-                                   [0.2, -0.1, 0.5]])
-    real_displacement = large_displacement @ basis
-    assert np.allclose(displacement, real_displacement)
-
-
 test_UMDSnapDynamics_get_displacement_cubic_null()
+test_UMDSnapDynamics_get_displacement_cubic()
+test_UMDSnapDynamics_get_displacement_cubic_size()
 test_UMDSnapDynamics_get_displacement_cubic_small()
 test_UMDSnapDynamics_get_displacement_cubic_large_positive()
 test_UMDSnapDynamics_get_displacement_cubic_large_negative()
-test_UMDSnapDynamics_get_displacement_cubic_size()
-test_UMDSnapDynamics_get_displacement_small()
-test_UMDSnapDynamics_get_displacement_large()
