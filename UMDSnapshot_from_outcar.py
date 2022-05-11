@@ -10,7 +10,8 @@ at each Iteration in the OUTCAR file.
 
 The convergence loop of the X iteration starts with the line
 "---------------------------- Iteration X(   1) ----------------------------".
-Then, y convergence steps are performed untill the convergence condition is satified and the loop is aborted. The line marking the end of the loop is
+Then, y convergence steps are performed untill the convergence condition is
+satified and the loop is aborted. The line marking the end of the loop is
 "------------------ aborting loop because EDIFF is reached -----------------".
 From this line on, starts a section summarizing the results of the iteration
 and the data allows to initialize the UMDSnapshot.
@@ -147,7 +148,7 @@ def UMDSnapshot_from_outcar_null(outcar):
         line = outcar.readline()
 
 
-def UMDSnapshot_from_outcar(outcar, simulation, step):
+def UMDSnapshot_from_outcar(outcar, step):
     """
     Look for the snapshot data and initialize a UMDSnapshot object.
 
@@ -177,12 +178,12 @@ def UMDSnapshot_from_outcar(outcar, simulation, step):
     line = outcar.readline()
     while line:
         if "aborting loop because EDIFF is reached" in line:
-            snapshot = UMDSnapshot_load(outcar, simulation, step)
+            snapshot = UMDSnapshot_load(outcar, step)
             return snapshot
         line = outcar.readline()
 
 
-def UMDSnapshot_load(outcar, simulation, step):
+def UMDSnapshot_load(outcar, step):
     """
     Read the data and initialize the UMDSnapshot object.
 
@@ -202,19 +203,16 @@ def UMDSnapshot_load(outcar, simulation, step):
         the atoms dynamics.
 
     """
-    natoms = simulation.lattice.natoms()
-    steptime = simulation.steptime
+    natoms = UMDSnapDynamics.natoms
 
-    # Thermodynamics quantities
+    # Declare the thermodynamics quantities
     temperature = 0
     pressure = 0
     stress = 0
     energy = 0
-    magnetization = 0
-
-    # Dynamics quantities
+    # Declare the dynamics quantities
+    position0 = np.zeros((natoms, 3), dtype=float)
     position = np.zeros((natoms, 3), dtype=float)
-    displacement = np.zeros((natoms, 3), dtype=float)
     velocity = np.zeros((natoms, 3), dtype=float)
     force = np.zeros((natoms, 3), dtype=float)
     charges = np.zeros(natoms, dtype=float)
@@ -223,73 +221,166 @@ def UMDSnapshot_load(outcar, simulation, step):
     line = outcar.readline()
     while line:
         if "total charge" in line:
-            """
-             total charge
-
-            # of ion       s       p       d       tot
-            ------------------------------------------
-            """
-            line = outcar.readline()    # read the blank line
-            header = outcar.readline().replace('# of ion', '')
-            line = outcar.readline()    # read the separator -----------------
-            norbitals = len(header.strip().split())
-            charges = np.zeros((natoms, norbitals), dtype=float)
-            for i in range(natoms):
-                atom_charge = outcar.readline().strip().split()
-                charges[i] = atom_charge[1:]
-
-        elif "magnetization (x)" in line:
-            """
-             magnetization (x)
-
-            # of ion       s       p       d       tot
-            ------------------------------------------
-            """
-            line = outcar.readline()    # read the blank line
-            header = outcar.readline().replace('# of ion', '')
-            line = outcar.readline()    # read the separator -----------------
-            norbitals = len(header.strip().split())
-            magnets = np.zeros((natoms, norbitals), dtype=float)
-            for i in range(natoms):
-                atom_magnet = outcar.readline().strip().split()
-                magnets[i] = atom_magnet[1:]
-            magnetization = sum(magnets[:, -1])
-
-        elif "FORCE on cell =-STRESS" in line:
-            stress = np.zeros(6, dtype=float)
-            while line:
-                if "Total+kin." in line:
-                    stress = np.array(line.strip().split()[1:], dtype=float)
-                    stress = stress/10.   # to convert it from kBar to GPa
-                    break
-                line = outcar.readline()
+            charges = load_charges(outcar, natoms)
+        if "magnetization (x)" in line:
+            magnets = load_magnets(outcar, natoms)
+        if "FORCE on cell =-STRESS" in line:
+            stress = load_stress(outcar)
             pressure = np.mean(stress[:3])
-        
         if "FORCES acting on ions" in line:
-            while line:
-                if "POSITION" in line and "TOTAL-FORCE (eV/Angst)" in line:
-                    line = outcar.readline()    # read the separator ---------
-                    for i in range(natoms):
-                        data = outcar.readline().strip().split()
-                        position[i] = data[:3]
-                        force[i] = data[3:]
-                    break
-                line = outcar.readline()
+            position, force = load_dynamics(outcar, natoms)
+        if "ENERGY OF THE ELECTRON-ION-THERMOSTAT SYSTEM (eV)" in line:
+            energy, temperature = load_energy(outcar)
 
-        elif "ENERGY OF THE ELECTRON-ION-THERMOSTAT SYSTEM (eV)" in line:
-            while line:
-                if "lattice EKIN_LAT" in line:
-                    temperature = float(line.strip().split()[-2])
-                if "ETOTAL" in line:
-                    energy = float(line.strip().split()[-2])
-                    break
-                line = outcar.readline()
-
-            lattice = simulation.lattice
-            dynamics = UMDSnapDynamics(snaptime=steptime, lattice=lattice,
-                                       position=position, force=force)
-            thermodynamics = UMDSnapThermodynamics(temperature, pressure,
-                                                   energy)
-            snapshot = UMDSnapshot(step, thermodynamics, dynamics)
+            # Since the energy is the last snapshot section, after that we
+            # can initialize the UMDSnapDynamics and UMDSnapThermodynamics
+            # objecta and return the UMDSnapshot.
+            displace = UMDSnapDynamics.displacement(position, position0)
+            velocity = displace/UMDSnapDynamics.snaptime
+            dynamics = UMDSnapDynamics(position, velocity, force)
+            thdynamics = UMDSnapThermodynamics(temperature, pressure, energy)
+            snapshot = UMDSnapshot(step, thdynamics, dynamics)
+            position0 = position
             return snapshot
+        line = outcar.readline()
+
+
+def load_charges(outcar, natoms):
+    """
+    Load the electric charge value distribution of each atom in the orbitals.
+
+    The electric charge section is analyzed and once at the beginning of the
+    part with the data, a for loop over all the atoms available is performed.
+    The section structure is the following and the first line is already read.
+    "  total charge
+    ->
+      # of ion       s       p       d     [...]     tot
+      --------------------------------------------------
+          1         ...     ...     ...              ... "
+
+    Parameters
+    ----------
+    outcar : input file
+        The OUTCAR file.
+    natoms : int
+        The number of atoms in the lattice.
+
+    Returns
+    -------
+    charges: array.
+        Array of the electric charge distribution of each atom in orbitals.
+
+    """
+    line = outcar.readline()    # read the blank line
+    header = outcar.readline()  # read the header '# of ion      s      p ...'
+    line = outcar.readline()    # read the separator '-----------------------'
+    norbitals = len(header.replace('# of ion', '').strip().split())
+    charges = np.zeros((natoms, norbitals), dtype=float)
+    for i in range(natoms):
+        atom_charge = outcar.readline().strip().split()
+        charges[i] = atom_charge[1:]
+    return charges
+
+
+def load_magnets(outcar, natoms):
+    """
+    Load the magnetic moment distribution of each atom in the orbitals.
+
+    The magnetic moment section is analyzed and once at the beginning of the
+    part with the data, a for loop over all the atoms available is performed.
+    The section structure is the following and the first line is already read.
+    "  magnetization (x)
+    ->
+      # of ion       s       p       d     [...]     tot
+      --------------------------------------------------
+          1         ...     ...     ...              ... "
+
+    Parameters
+    ----------
+    outcar : input file
+        The OUTCAR file.
+    natoms : int
+        The number of atoms in the lattice.
+
+    Returns
+    -------
+    charges: array.
+        Array of the magnetic moment distribution of each atom in  orbitals.
+
+    """
+    line = outcar.readline()    # read the blank line
+    header = outcar.readline()
+    line = outcar.readline()    # read the separator -----------------
+    norbitals = len(header.replace('# of ion', '').strip().split())
+    magnets = np.zeros((natoms, norbitals), dtype=float)
+    for i in range(natoms):
+        atom_magnet = outcar.readline().strip().split()
+        magnets[i] = atom_magnet[1:]
+    return magnets
+
+
+def load_stress(outcar):
+    """
+    Load the stress tensor values on the cell.
+
+    The stress tensor section is analized and the Total+kin stress components 
+    are saved. It has the following and the first line is already read.
+    "   FORCE on cell =-STRESS in cart. coord.  units (eV):
+    -> Direction    XX        YY        ZZ        XY        YZ        ZX
+      -------------------------------------------------------------------
+      ...           ...       ...       ...       ...       ...       ...
+      ...
+      -------------------------------------------------------------------
+      Total         ...       ...       ...       ...       ...       ...
+      in kB         ...       ...       ...       ...       ...       ...
+      external pressure =      ... kB         Pullay stress =      ... kB
+
+      kinetic pressure (ideal gas correction) =     ... kB
+      total pressure  =    ... kB
+      Total+kin.    ...       ...       ...       ...       ...       ... "
+
+    Parameters
+    ----------
+    outcar : input file
+        The OUTCAR file.
+
+    Returns
+    -------
+    stress: array.
+        Array of the stress components (xx, yy, zz, xy, yz, zx).
+    """
+    stress = np.zeros(6, dtype=float)
+    line = outcar.readline()
+    while line:
+        if "Total+kin." in line:
+            stress = np.array(line.strip().split()[1:], dtype=float)
+            stress = stress/10.   # to convert it from kBar to GPa
+            return stress
+        line = outcar.readline()
+
+
+def load_dynamics(outcar, natoms):
+    dynamics = np.zeros((natoms, 6), dtype=float)
+    line = outcar.readline()
+    while line:
+        if "POSITION" in line and "TOTAL-FORCE (eV/Angst)" in line:
+            line = outcar.readline()    # read the separator ---------
+            for i in range(natoms):
+                dynamics[i] = outcar.readline().strip().split()
+            position = dynamics[:, :3]
+            force = dynamics[:, 3:]
+            return position, force
+        line = outcar.readline()
+
+
+def load_energy(outcar):
+    energy = 0.0
+    temperature = 0.0
+    line = outcar.readline()
+    while line:
+        if "lattice EKIN_LAT" in line:
+            temperature = float(line.strip().split()[-2])
+        elif "ETOTAL" in line:
+            energy = float(line.strip().split()[-2])
+            return energy, temperature
         line = outcar.readline()

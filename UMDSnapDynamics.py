@@ -15,9 +15,11 @@ class UMDSnapDynamics:
     dynamics simulation snapshot.
 
     """
+    snaptime = 0.0
+    lattice = UMDLattice()
+    natoms = 0
 
-    def __init__(self, snaptime=0.0, lattice=UMDLattice(),
-                 position=[], displacement=[], velocity=[], force=[]):
+    def __init__(self, position=[], velocity=[], force=[]):
         """
         Construct the UMDSnapDynamics object.
 
@@ -41,31 +43,28 @@ class UMDSnapDynamics:
         UMDSnapDynamics object.
 
         """
-        # We default initialize the attributes.
-        self.snaptime = snaptime
-        self.lattice = lattice
-        self.natoms = lattice.natoms()
-        self.position = np.zeros((self.natoms, 3), dtype=float)
-        self.displacement = np.zeros((self.natoms, 3), dtype=float)
-        self.velocity = np.zeros((self.natoms, 3), dtype=float)
-        self.force = np.zeros((self.natoms, 3), dtype=float)
-        # If position, displacement, velocity, force are given and are correct,
+        UMDSnapDynamics.natoms = UMDSnapDynamics.lattice.natoms()
+        self.position = np.zeros((UMDSnapDynamics.natoms, 3), dtype=float)
+        self.velocity = np.zeros((UMDSnapDynamics.natoms, 3), dtype=float)
+        self.force = np.zeros((UMDSnapDynamics.natoms, 3), dtype=float)
+        # If position, velocity, force are given and have correct shape,
         # then the corresponding attibutes are set equal to them.
-        if len(position) == self.natoms:
+        if len(position) == UMDSnapDynamics.natoms:
             self.position = position
-        if len(displacement) == self.natoms:
-            self.displacement = displacement
-        if len(velocity) == self.natoms:
+        if len(velocity) == UMDSnapDynamics.natoms:
             self.velocity = velocity
-        if len(force) == self.natoms:
+        if len(force) == UMDSnapDynamics.natoms:
             self.force = force
 
-    def get_displacement(self, position0):
+    @staticmethod
+    def displacement(position1, position0):
         """
         Calculate the atom displacement with respect to some initial positions.
 
         Parameters
         ----------
+        position1 : array
+            Final atoms positions.
         position0 : array
             Initial atoms positions took as reference.
 
@@ -75,27 +74,12 @@ class UMDSnapDynamics:
             Array of all the atoms displacements.
 
         """
-        self.displacement = self.position - position0
-        delta = self.lattice.reduced(self.displacement)
-        delta = np.where(delta > +0.5, delta-1, delta)
-        delta = np.where(delta < -0.5, delta+1, delta)
-        self.displacement = self.lattice.cartesian(delta)
-        displacement = self.displacement
+        displacement = position1 - position0
+        disp = UMDSnapDynamics.lattice.reduced(displacement)
+        disp = np.where(disp > +0.5, disp-1, disp)
+        disp = np.where(disp < -0.5, disp+1, disp)
+        displacement = UMDSnapDynamics.lattice.cartesian(disp)
         return displacement
-
-    def velocity(self):
-        """
-        Calculate the atom velocity from the atom displacement.
-
-        Returns
-        -------
-        velocity : array
-            Array of all the atoms velocities.
-
-        """
-        self.velocity = self.displacement/self.snaptime
-        velocity = self.velocity
-        return velocity
 
     def __str__(self, w=12, f=6):
         """
@@ -130,4 +114,4 @@ class UMDSnapDynamics:
 
         """
         dynamics = np.hstack((self.position, self.velocity, self.force))
-        np.savetxt(outfile, dynamics, fmt='%.8f', delimiter='\t')
+        np.savetxt(outfile, dynamics, fmt='%15.8f', delimiter='\t')
