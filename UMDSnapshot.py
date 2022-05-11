@@ -18,18 +18,18 @@ class UMDSnapshot:
 
     """
 
-    def __init__(self, snapiter, snapThermodynamics, snapDynamics):
-        self.snapIter = snapiter
+    def __init__(self, snapstep, snapThermodynamics, snapDynamics):
+        self.snapStep = snapstep
         self.snapThermodynamics = snapThermodynamics
         self.snapDynamics = snapDynamics
 
     def __str__(self):
-        string  = "Snapshot: " + str(self.snapIter) + '\n'
+        string  = "Snapshot: " + str(self.snapStep) + '\n'
         string += str(self.snapThermodynamics) + '\n'
         string += str(self.snapDynamics)
         return string
 
     def save(self, outfile):
-        outfile.write("Snapshot: " + str(self.snapIter) + '\n')
+        outfile.write("Snapshot: " + str(self.snapStep) + '\n')
         self.snapThermodynamics.save(outfile)
         self.snapDynamics.save(outfile)

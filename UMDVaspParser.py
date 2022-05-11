@@ -6,6 +6,7 @@ Created on Thu May  5 17:55:14 2022
 """
 
 from UMDSimulation_from_outcar import UMDSimulation_from_outcar
+from UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
 
 
 def UMDVaspParser(OUTCARfile):
@@ -76,8 +77,8 @@ def simulationCycleParser(outcar, umd, cycle):
     if simulation is None:
         return
     else:
-        simSteps = simulation.snaps
+        simSteps = simulation.steps
         for step in range(0, simSteps):
-            snapshot = UMDSnapshot_from_outcar(outcar)
+            snapshot = UMDSnapshot_from_outcar(outcar, simulation, step)
             snapshot.save(umd)
         return simulation
