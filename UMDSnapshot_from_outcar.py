@@ -178,12 +178,12 @@ def UMDSnapshot_from_outcar(outcar, step):
     line = outcar.readline()
     while line:
         if "aborting loop because EDIFF is reached" in line:
-            snapshot = UMDSnapshot_load(outcar, step)
+            snapshot = load_UMDSnapshot(outcar, step)
             return snapshot
         line = outcar.readline()
 
 
-def UMDSnapshot_load(outcar, step):
+def load_UMDSnapshot(outcar, step):
     """
     Read the data and initialize the UMDSnapshot object.
 
@@ -360,6 +360,43 @@ def load_stress(outcar):
 
 
 def load_dynamics(outcar, natoms):
+    """
+    Load the position and the force acting on each atom.
+    
+    The dynamics section is analized and and once at the beginning of the
+    part with the data (starting with "POSITION [...] TOTAL-FORCE (eV/Angst)"),
+    a for loop over all the atoms available is performed to read position and 
+    force. It has the following structure and the first line is already read.
+    " FORCES acting on ions
+      electron-ion       ewald-force     non-local-force   conv-correction
+      -----------------------------------------------------------------------
+      ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ...
+      ...
+      -----------------------------------------------------------------------
+       (tot_ele-ion)      (tot_ewald)      (tot_nonloc)     (tot_conv-corr)
+     
+      POSITION                            TOTAL-FORCE (eV/Angst)
+      ------------------------------------------------------------------------
+      position_x  position_y  position_z  force_x     force_y     force_z
+      ...
+      ------------------------------------------------------------------------
+      total drift:                        totforce_x  totforce_y  totforce_z
+
+    Parameters
+    ----------
+    outcar : input file
+        The OUTCAR file.
+    natoms : int
+        The number of atoms in the lattice.
+
+    Returns
+    -------
+    position : array
+        Array of the atoms positions.
+    force : array
+        Array of the atoms forces.
+
+    """
     dynamics = np.zeros((natoms, 6), dtype=float)
     line = outcar.readline()
     while line:
@@ -374,11 +411,49 @@ def load_dynamics(outcar, natoms):
 
 
 def load_energy(outcar):
+    """
+    Load the internal energy and the temperature of the electron-ion system.
+    
+    From the enrgy section, different energy contributions are analyzed and the
+    'ETOTAL' energy and the temperature reported in the 'kin. lattice  EKIN_LAT'
+    parameter are returned. The section structure is the follwing and the first
+    line is already read.        
+    " FREE ENERGIE OF THE ION-ELECTRON SYSTEM (eV)
+    ->---------------------------------------------------
+      free  energy   TOTEN  =          ... eV
+      energy without entropy=          ...    energy(sigma->0) =          ...
+     
+      (... electron-energy time convergence consideration)
+      (... ion-step motion time and RANDOM_SEED value used)
+     
+        ENERGY OF THE ELECTRON-ION-THERMOSTAT SYSTEM (eV)
+        ---------------------------------------------------
+      % ion-electron   TOTEN  =              ...  see above
+        kinetic energy EKIN   =              ...
+        kin. lattice  EKIN_LAT=              ...  (temperature ... K)
+        nose potential ES     =              ...
+        nose kinetic   EPS    =              ...
+        ---------------------------------------------------
+        total energy   ETOTAL =              ... eV                          "
+
+    Parameters
+    ----------
+    outcar : input file
+        The OUTCAR file.
+
+    Returns
+    -------
+    energy : float
+        System total internal energy.
+    temperature : float
+        System temperature.
+
+    """
     energy = 0.0
     temperature = 0.0
     line = outcar.readline()
     while line:
-        if "lattice EKIN_LAT" in line:
+        if "lattice  EKIN_LAT=" in line:
             temperature = float(line.strip().split()[-2])
         elif "ETOTAL" in line:
             energy = float(line.strip().split()[-2])

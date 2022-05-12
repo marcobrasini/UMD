@@ -113,5 +113,10 @@ class UMDSnapDynamics:
         None.
 
         """
+        headerstyle = '{:16}{:16}{:16}'
+        header  = headerstyle.format('Position_x', 'Position_y', 'Postion_z')
+        header += headerstyle.format('Velocity_x', 'Velocity_y', 'Postion_z')
+        header += headerstyle.format('Force_x', 'Force_y', 'Force_z') + '\n'
+        outfile.write(header)
         dynamics = np.hstack((self.position, self.velocity, self.force))
-        np.savetxt(outfile, dynamics, fmt='%15.8f', delimiter='\t')
+        np.savetxt(outfile, dynamics, fmt='%15.8f', delimiter=' ')

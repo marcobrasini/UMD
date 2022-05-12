@@ -5,19 +5,19 @@ Created on Fri May  6 18:19:27 2022
 @author: marco
 """
 """
-To test UMDSimulation_from_OUTCAR we use two examples of OUTCARfile:
+To test UMDSimulation_from_outcar we use three examples of OUTCARfile:
  - the OUTCAR_nomag, /tests/nomag5.70a1800T.outcar
  - the OUTCAR_mag,   /tests/mag5.70a1800T.outcar
  - the OUTCAR_magpU, /tests/magpU5.70a1800T.outcar
 
 Each simulation has the same structure:
  + it is run on a 2x2x2 supercelll of a bcc structure with lattice parameter
-   of 5.70 ang. The matrix of basis vectors is:    
+   of 5.70 ang. The matrix of basis vectors is:
        5.70     0.00     0.00
        0.00     5.70     0.00
        0.00     0.00     5.70
    and the cell contains the following elements:
-     - O: 15 atoms, 
+     - O: 15 atoms,
      - H: 28 atoms,
      - Fe: 1 atom.
  + the simulation is divided in three cycles:
@@ -41,8 +41,10 @@ testOUTCAR_mag = 'tests/mag5.70a1800T.outcar'
 testOUTCAR_magpU = 'tests/magpU5.70a1800T.outcar'
 
 
+# %%% The lattice structure and simulation values
 # According to the header, we initialize the lattice structure and the
-# simulation parameters used in the following tests as a reference to compare # the UMDSimulation_from_outcar results.
+# simulation parameters used in the following tests as a reference to compare
+# the UMDSimulation_from_outcar results.
 name = '2bccH2O+1Fe'
 basis = np.array([[5.7, 0.0, 0.0],
                   [0.0, 5.7, 0.0],
@@ -95,7 +97,7 @@ def test_UMDSimulation_from_single_outcar_magpU():
     """
     Test UMDSimulation_from_outcar function when it reads many OUTCAR files,
     each one correspondent to a single simulation cycle with its own
-    parameters (all in magnetic configuration with +U potential correction). 
+    parameters (all in magnetic configuration with +U potential correction).
     For each cycle file, the UMDSimulation_from_outcar must return a
     UMDSimulation object equal to what described in the header.
 

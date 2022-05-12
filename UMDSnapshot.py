@@ -6,6 +6,7 @@ Created on Thu May  5 19:28:41 2022
 """
 
 import numpy as np
+from UMDLattice import UMDLattice
 
 
 class UMDSnapshot:
