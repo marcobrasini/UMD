@@ -44,7 +44,7 @@ import numpy as np
 
 from UMDAtom import UMDAtom
 from UMDLattice import UMDLattice
-from UMDSnapDynamics import UMDSnapDynamics
+from UMDSnapshot import UMDSnapshot
 
 
 snap_reference = 1044
@@ -55,7 +55,7 @@ testOUTCAR_magpU = 'tests/magpU5.70a1800T.outcar'
 
 # %% The lattice structure values
 # According to the header, we initialize the structure vaules, necessary to
-# set the UMDSnapDynamics attributes and make the load_Snapshot function work
+# set the UMDSnapshot attributes and make the load_Snapshot function work
 # properly.
 name = '2bccH2O+1Fe'
 basis = np.array([[5.7, 0.0, 0.0],
@@ -65,9 +65,6 @@ H = UMDAtom('H', mass=1.00, valence=1.0)
 O = UMDAtom('O', mass=16.00, valence=6.0)
 Fe = UMDAtom('Fe', mass=55.85, valence=8.0)
 lattice = UMDLattice(name, basis, atoms={O: 15, H: 28, Fe: 1})
-
-UMDSnapDynamics.lattice = lattice
-UMDSnapDynamics.natoms = lattice.natoms()
 
 
 # %% nomag snapshot reference value
@@ -358,6 +355,7 @@ def test_load_UMDSnapshot_nomag():
     snapshot data (in non magnetic configuration).
 
     """
+    UMDSnapshot.reset(0.5, lattice)
     testSnap = testOUTCAR_nomag + '.snap'+str(snap_reference)
     with open(testSnap, 'r') as outcar:
         snapshot = load_UMDSnapshot(outcar, snap_reference)
@@ -375,6 +373,7 @@ def test_load_UMDSnapshot_mag():
     snapshot data (in magnetic configuration).
 
     """
+    UMDSnapshot.reset(0.5, lattice)
     testSnap = testOUTCAR_mag + '.snap'+str(snap_reference)
     with open(testSnap, 'r') as outcar:
         snapshot = load_UMDSnapshot(outcar, snap_reference)
@@ -392,6 +391,7 @@ def test_load_UMDSnapshot_magpU():
     snapshot data (in magnetic configuration with +U potential correction).
 
     """
+    UMDSnapshot.reset(0.5, lattice)
     testSnap = testOUTCAR_magpU + '.snap'+str(snap_reference)
     with open(testSnap, 'r') as outcar:
         snapshot = load_UMDSnapshot(outcar, snap_reference)
@@ -419,6 +419,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_concatenated_nomag():
 
     """
     snap = 0
+    UMDSnapshot.reset(0.5, lattice)
     with open(testOUTCAR_nomag, 'r') as outcar:
         while True:
             snapshot = UMDSnapshot_from_outcar(outcar, snap)
@@ -443,6 +444,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_concatenated_mag():
 
     """
     snap = 0
+    UMDSnapshot.reset(0.5, lattice)
     with open(testOUTCAR_mag, 'r') as outcar:
         while True:
             snapshot = UMDSnapshot_from_outcar(outcar, snap)
@@ -467,6 +469,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_concatenated_magpU():
 
     """
     snap = 0
+    UMDSnapshot.reset(0.5, lattice)
     with open(testOUTCAR_magpU, 'r') as outcar:
         while True:
             snapshot = UMDSnapshot_from_outcar(outcar, snap)

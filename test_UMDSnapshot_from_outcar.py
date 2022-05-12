@@ -34,11 +34,25 @@ import numpy as np
 from UMDAtom import UMDAtom
 from UMDLattice import UMDLattice
 from UMDSimulation import UMDSimulation
+from UMDSnapshot import UMDSnapshot
 
 
 testOUTCAR_nomag = 'tests/nomag5.70a1800T.outcar'
 testOUTCAR_mag = 'tests/mag5.70a1800T.outcar'
 testOUTCAR_magpU = 'tests/magpU5.70a1800T.outcar'
+
+# %% The lattice structure values
+# According to the header, we initialize the lattice structure and the
+# simulation parameters, necessary to reset the UMDSnapshot attributes and
+# make the load_Snapshot function work properly.
+name = '2bccH2O+1Fe'
+basis = np.array([[5.7, 0.0, 0.0],
+                  [0.0, 5.7, 0.0],
+                  [0.0, 0.0, 5.7]])
+H = UMDAtom('H', mass=1.00, valence=1.0)
+O = UMDAtom('O', mass=16.00, valence=6.0)
+Fe = UMDAtom('Fe', mass=55.85, valence=8.0)
+lattice = UMDLattice(name, basis, atoms={O: 15, H: 28, Fe: 1})
 simulation_parameter = [(300, 0.5), (600, 0.5), (1000, 0.4)]
 
 
@@ -53,6 +67,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_single_nomag():
 
     """
     for cyc in range(3):
+        UMDSnapshot.reset(simulation_parameter[cyc][1], lattice)
         testOUTCAR = testOUTCAR_nomag + '.cyc'+str(cyc)
         with open(testOUTCAR, 'r') as outcar:
             nsnapshot = 0
@@ -74,6 +89,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_single_mag():
 
     """
     for cyc in range(3):
+        UMDSnapshot.reset(simulation_parameter[cyc][1], lattice)
         testOUTCAR = testOUTCAR_mag + '.cyc'+str(cyc)
         with open(testOUTCAR, 'r') as outcar:
             nsnapshot = 0
@@ -95,6 +111,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_single_magpU():
 
     """
     for cyc in range(3):
+        UMDSnapshot.reset(simulation_parameter[cyc][1], lattice)
         testOUTCAR = testOUTCAR_magpU + '.cyc'+str(cyc)
         with open(testOUTCAR, 'r') as outcar:
             nsnapshot = 0
@@ -118,6 +135,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_concatenated_nomag():
 
     """
     nsnapshot = 0
+    UMDSnapshot.reset(lattice)
     with open(testOUTCAR_nomag, 'r') as outcar:
         while True:
             snapshot = UMDSnapshot_from_outcar(outcar, nsnapshot)
@@ -139,6 +157,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_concatenated_mag():
 
     """
     nsnapshot = 0
+    UMDSnapshot.reset(lattice)
     with open(testOUTCAR_nomag, 'r') as outcar:
         while True:
             snapshot = UMDSnapshot_from_outcar(outcar, nsnapshot)
@@ -160,6 +179,7 @@ def test_UMDSnapshot_from_outcar_nSnapshot_concatenated_magpU():
 
     """
     nsnapshot = 0
+    UMDSnapshot.reset(lattice)
     with open(testOUTCAR_mag, 'r') as outcar:
         while True:
             snapshot = UMDSnapshot_from_outcar(outcar, nsnapshot)

@@ -15,6 +15,7 @@ import numpy as np
 import numpy.random as rnd
 from UMDAtom import UMDAtom
 from UMDLattice import UMDLattice
+from UMDSnapshot import UMDSnapshot
 
 
 rnd.seed(62815741)
@@ -28,13 +29,8 @@ def test_UMDSnapDynamics_init_default():
     Test the __init__ function defualt constructor.
 
     """
-    UMDSnapDynamics.snaptime = 0.0
-    UMDSnapDynamics.lattice = UMDLattice()
-    
+    UMDSnapshot.reset()
     snapdynamics = UMDSnapDynamics()
-    assert snapdynamics.snaptime == 0.0
-    assert snapdynamics.lattice == UMDLattice()
-    assert snapdynamics.natoms == 0
     assert snapdynamics.position == []
     assert snapdynamics.velocity == []
     assert snapdynamics.force == []
@@ -48,16 +44,12 @@ def test_UMDSnapDynamics_init_assignement(snaptime, natoms):
 
     """
     lattice = UMDLattice('', np.identity(3), {at: natoms})
-    UMDSnapDynamics.snaptime = snaptime
-    UMDSnapDynamics.lattice = lattice
+    UMDSnapshot.reset(snaptime, lattice)
 
     position = rnd.uniform(size=(natoms, 3))
     velocity = rnd.uniform(size=(natoms, 3))
     force = rnd.uniform(size=(natoms, 3))
     snapdynamics = UMDSnapDynamics(position, velocity, force)
-    assert snapdynamics.snaptime == snaptime
-    assert snapdynamics.lattice == lattice
-    assert snapdynamics.natoms == natoms
     assert np.array_equal(snapdynamics.position, position)
     assert np.array_equal(snapdynamics.velocity, velocity)
     assert np.array_equal(snapdynamics.force, force)
@@ -74,7 +66,7 @@ def test_UMDSnapDynamics_str():
     descriptive and printable string object.
 
     """
-    UMDSnapDynamics.lattice = UMDLattice(basis=np.identity(3), atoms={at: 2})
+    UMDSnapshot.reset(lattice=UMDLattice(atoms={at: 2}))
     position = np.array([[0.23, 0.17, -1.43], [-0.76, 1.02, -0.71]])
     velocity = np.array([[0.42, -1.34, -0.22], [0.10, 0.49, 0.95]])
     force = np.array([[-1.58, 0.82, 0.03], [0.22, -0.49, -1.73]])
@@ -102,7 +94,7 @@ def test_UMDSnapDynamics_displacement_cubic_null(N):
 
     """
     basis = np.identity(3)
-    UMDSnapDynamics.lattice = UMDLattice(basis=basis, atoms={at: N})
+    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
     pos0 = rnd.uniform(size=(N, 3))
     pos1 = np.copy(pos0)
     displacement = UMDSnapDynamics.displacement(pos1, pos0)
@@ -117,7 +109,7 @@ def test_UMDSnapDynamics_displacement_cubic():
 
     """
     basis = np.identity(3)
-    UMDSnapDynamics.lattice = UMDLattice(basis=basis, atoms={at: 3})
+    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: 3}))
     pos0 = np.array([[0.1, 0.1, 0.1],
                      [0.5, 0.5, 0.5],
                      [0.9, 0.2, 0.8]])
@@ -140,7 +132,7 @@ def test_UMDSnapDynamics_displacement_cubic_size(N):
 
     """
     basis = np.identity(3)
-    UMDSnapDynamics.lattice = UMDLattice(basis=basis, atoms={at: N})
+    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
     pos0 = rnd.uniform(size=(N, 3))
     pos1 = rnd.uniform(size=(N, 3))
     displacement = UMDSnapDynamics.displacement(pos1, pos0)
@@ -158,7 +150,7 @@ def test_UMDSnapDynamics_displacement_cubic_small(N):
 
     """
     basis = np.identity(3)
-    UMDSnapDynamics.lattice = UMDLattice(basis=basis, atoms={at: N})
+    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
     pos0 = rnd.uniform(size=(N, 3))
     disp = rnd.uniform(-0.5, 0.5, size=(N, 3))
     pos1 = pos0 + (disp @ basis)
@@ -176,7 +168,7 @@ def test_UMDSnapDynamics_displacement_cubic_large_positive(N):
 
     """
     basis = np.identity(3)
-    UMDSnapDynamics.lattice = UMDLattice(basis=basis, atoms={at: N})
+    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
     pos0 = rnd.uniform(size=(N, 3))
     disp = rnd.uniform(0.5, 1, size=(N, 3))
     pos1 = pos0 + (disp @ basis)
@@ -194,7 +186,7 @@ def test_UMDSnapDynamics_displacement_cubic_large_negative(N):
 
     """
     basis = np.identity(3)
-    UMDSnapDynamics.lattice = UMDLattice(basis=basis, atoms={at: N})
+    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
     pos0 = rnd.uniform(size=(N, 3))
     disp = rnd.uniform(-1, -0.5, size=(N, 3))
     pos1 = pos0 + (disp @ basis)

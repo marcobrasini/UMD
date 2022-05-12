@@ -7,7 +7,7 @@ Created on Thu May  5 17:55:14 2022
 
 from UMDSimulation_from_outcar import UMDSimulation_from_outcar
 from UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
-from UMDSnapDynamics import UMDSnapDynamics
+from UMDSnapshot import UMDSnapshot
 
 
 def UMDVaspParser(OUTCARfile):
@@ -79,9 +79,7 @@ def simulationCycleParser(outcar, umd, cycle):
         return
     else:
         simSteps = simulation.steps
-        UMDSnapDynamics.snaptime = simulation.steptime
-        UMDSnapDynamics.lattice = simulation.lattice
-        UMDSnapDynamics.natoms = simulation.lattice.natoms()
+        UMDSnapshot.reset(simulation.steptime, simulation.lattice)
         for step in range(0, simSteps):
             snapshot = UMDSnapshot_from_outcar(outcar, step)
             snapshot.save(umd)

@@ -203,8 +203,8 @@ def load_UMDSnapshot(outcar, step):
         the atoms dynamics.
 
     """
-    natoms = UMDSnapDynamics.natoms
-
+    natoms = UMDSnapshot.natoms
+    print(natoms)
     # Declare the thermodynamics quantities
     temperature = 0
     pressure = 0
@@ -236,7 +236,7 @@ def load_UMDSnapshot(outcar, step):
             # can initialize the UMDSnapDynamics and UMDSnapThermodynamics
             # objecta and return the UMDSnapshot.
             displace = UMDSnapDynamics.displacement(position, position0)
-            velocity = displace/UMDSnapDynamics.snaptime
+            velocity = displace/UMDSnapshot.snaptime
             dynamics = UMDSnapDynamics(position, velocity, force)
             thdynamics = UMDSnapThermodynamics(temperature, pressure, energy)
             snapshot = UMDSnapshot(step, thdynamics, dynamics)

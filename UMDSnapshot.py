@@ -18,6 +18,15 @@ class UMDSnapshot:
         - Dynamic data (like atoms position, velocity, force)
 
     """
+    snaptime = 0.0 
+    lattice = UMDLattice()
+    natoms = 0
+
+    @staticmethod
+    def reset(snaptime=0.0, lattice=UMDLattice()):
+        UMDSnapshot.snaptime = snaptime
+        UMDSnapshot.lattice = lattice
+        UMDSnapshot.natoms = lattice.natoms()
 
     def __init__(self, snapstep, snapThermodynamics, snapDynamics):
         self.snapStep = snapstep

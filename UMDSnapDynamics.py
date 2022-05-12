@@ -6,7 +6,8 @@ Created on Tue May 10 15:40:28 2022
 """
 
 import numpy as np
-from UMDLattice import UMDLattice
+
+from UMDSnapshot import UMDSnapshot
 
 
 class UMDSnapDynamics:
@@ -15,9 +16,6 @@ class UMDSnapDynamics:
     dynamics simulation snapshot.
 
     """
-    snaptime = 0.0
-    lattice = UMDLattice()
-    natoms = 0
 
     def __init__(self, position=[], velocity=[], force=[]):
         """
@@ -43,17 +41,16 @@ class UMDSnapDynamics:
         UMDSnapDynamics object.
 
         """
-        UMDSnapDynamics.natoms = UMDSnapDynamics.lattice.natoms()
-        self.position = np.zeros((UMDSnapDynamics.natoms, 3), dtype=float)
-        self.velocity = np.zeros((UMDSnapDynamics.natoms, 3), dtype=float)
-        self.force = np.zeros((UMDSnapDynamics.natoms, 3), dtype=float)
+        self.position = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
+        self.velocity = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
+        self.force = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
         # If position, velocity, force are given and have correct shape,
         # then the corresponding attibutes are set equal to them.
-        if len(position) == UMDSnapDynamics.natoms:
+        if len(position) == UMDSnapshot.natoms:
             self.position = position
-        if len(velocity) == UMDSnapDynamics.natoms:
+        if len(velocity) == UMDSnapshot.natoms:
             self.velocity = velocity
-        if len(force) == UMDSnapDynamics.natoms:
+        if len(force) == UMDSnapshot.natoms:
             self.force = force
 
     @staticmethod
@@ -75,10 +72,10 @@ class UMDSnapDynamics:
 
         """
         displacement = position1 - position0
-        disp = UMDSnapDynamics.lattice.reduced(displacement)
+        disp = UMDSnapshot.lattice.reduced(displacement)
         disp = np.where(disp > +0.5, disp-1, disp)
         disp = np.where(disp < -0.5, disp+1, disp)
-        displacement = UMDSnapDynamics.lattice.cartesian(disp)
+        displacement = UMDSnapshot.lattice.cartesian(disp)
         return displacement
 
     def __str__(self, w=12, f=6):
