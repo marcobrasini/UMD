@@ -7,6 +7,7 @@ Created on Thu May  5 17:55:14 2022
 
 from UMDSimulation_from_outcar import UMDSimulation_from_outcar
 from UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
+from UMDSimulation import UMDSimulation
 from UMDSnapshot import UMDSnapshot
 
 
@@ -27,7 +28,17 @@ def UMDVaspParser(OUTCARfile):
     # We open the output UMDfile
     UMDfile = OUTCARfile.replace('outcar', 'umd')
     with open(UMDfile, 'w') as umd:
-        simcycle = 0
+        # Initialize and print a default UMDSimulation, totSimulation.
+        # totSimulation records the real simulation information considered.
+        # It is immediately printed in order to save the space that is
+        # necessary to print the simulation total info at the end.
+        simulation_name = OUTCARfile.replace('.outcar', '').split('/')[-1]
+        totSimulation = UMDSimulation()
+        totSimulation.save(umd)
+
+        cycle = 0
+        totSteps = 0
+        totTime = 0.0
         # We open the input OUTCARfile
         with open(OUTCARfile, 'r') as outcar:
             # We read a line per time untill the end of the OUTCARfile.
@@ -37,11 +48,20 @@ def UMDVaspParser(OUTCARfile):
             while line:
                 # The function load_SimulationCycle() returns a UMDSimulation
                 # object or None, if all the OUTCARfile has been read.
-                simulation = simulationCycleParser(outcar, umd, simcycle)
+                simulation = simulationCycleParser(outcar, umd, cycle)
                 if simulation is None:
                     break
-                simcycle += 1   # update the simulation cycle number.
+                cycle += 1   # update the simulation cycle number.
+                totSteps += simulation.steps
+                totTime += simulation.simtime()
                 line = outcar.readline()
+
+        # Overwrite the defualt totSimulation initially printed in umd file,
+        # with the updated and collective simulation info.
+        umd.seek(0)
+        totSimulation = UMDSimulation(name=simulation_name, cycle=cycle,
+                                      steps=totSteps, time=totTime)
+        totSimulation.save(umd)
 
 
 def simulationCycleParser(outcar, umd, cycle):
@@ -84,3 +104,6 @@ def simulationCycleParser(outcar, umd, cycle):
             snapshot = UMDSnapshot_from_outcar(outcar, step)
             snapshot.save(umd)
         return simulation
+
+
+UMDVaspParser('tests/mag5.70a1800T.outcar')
