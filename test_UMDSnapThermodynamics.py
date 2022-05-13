@@ -39,7 +39,7 @@ test_UMDSnapThermodynamics_init_assignement()
 
 
 # %% UMDSnapThermodynamics __str__ function tests
-def test_UMDSnapThermodynamics_init_assignement():
+def test_UMDSnapThermodynamics_str():
     """
     Test the __str__ function to convert the UMDSnapThermodynamics information
     into a descriptive and printable string object.
@@ -55,4 +55,22 @@ def test_UMDSnapThermodynamics_init_assignement():
     assert str(snapthermodynamics) == string
 
 
-test_UMDSnapThermodynamics_init_assignement()
+def test_UMDSnapThermodynamics_str_length():
+    """
+    Test the __str__ function correct length of the string object returned.
+    Its length is constant and must be equal to 89 characters:
+        29 the Temperature line
+        31 the Pressure line
+        29 the Energy line
+
+    """
+    temperature = 1400  # in K
+    pressure = 23       # in GPa
+    energy = -1050      # in eV
+    snapthermodynamics = UMDSnapThermodynamics(temperature, pressure, energy)
+    stringlength = (14+12+3) + (14+12+5) + (14+12+3)
+    assert len(str(snapthermodynamics)) == stringlength
+
+
+test_UMDSnapThermodynamics_str()
+test_UMDSnapThermodynamics_str_length()

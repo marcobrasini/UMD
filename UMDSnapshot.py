@@ -34,7 +34,7 @@ class UMDSnapshot:
         self.snapDynamics = snapDynamics
 
     def __str__(self):
-        string  = "Snapshot: " + str(self.snapStep) + '\n'
+        string  = "Snapshot: {:10}\n".format(self.snapStep)
         string += str(self.snapThermodynamics) + '\n'
         string += str(self.snapDynamics)
         return string

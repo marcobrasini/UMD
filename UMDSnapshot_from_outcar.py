@@ -203,32 +203,30 @@ def load_UMDSnapshot(outcar, step):
         the atoms dynamics.
 
     """
-    natoms = UMDSnapshot.natoms
-    print(natoms)
     # Declare the thermodynamics quantities
     temperature = 0
     pressure = 0
     stress = 0
     energy = 0
     # Declare the dynamics quantities
-    position0 = np.zeros((natoms, 3), dtype=float)
-    position = np.zeros((natoms, 3), dtype=float)
-    velocity = np.zeros((natoms, 3), dtype=float)
-    force = np.zeros((natoms, 3), dtype=float)
-    charges = np.zeros(natoms, dtype=float)
-    magnets = np.zeros(natoms, dtype=float)
+    position0 = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
+    position = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
+    velocity = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
+    force = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
+    charges = np.zeros(UMDSnapshot.natoms, dtype=float)
+    magnets = np.zeros(UMDSnapshot.natoms, dtype=float)
 
     line = outcar.readline()
     while line:
         if "total charge" in line:
-            charges = load_charges(outcar, natoms)
+            charges = load_charges(outcar, UMDSnapshot.natoms)
         if "magnetization (x)" in line:
-            magnets = load_magnets(outcar, natoms)
+            magnets = load_magnets(outcar, UMDSnapshot.natoms)
         if "FORCE on cell =-STRESS" in line:
             stress = load_stress(outcar)
             pressure = np.mean(stress[:3])
         if "FORCES acting on ions" in line:
-            position, force = load_dynamics(outcar, natoms)
+            position, force = load_dynamics(outcar, UMDSnapshot.natoms)
         if "ENERGY OF THE ELECTRON-ION-THERMOSTAT SYSTEM (eV)" in line:
             energy, temperature = load_energy(outcar)
 

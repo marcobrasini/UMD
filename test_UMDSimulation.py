@@ -169,13 +169,25 @@ def test_UMDSimulation_str():
     atoms = {'X': 2, 'Y': 4}
     lattice = UMDLattice(basis=basis, atoms=atoms)
     simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
-    string = 'Simulation: SimulationName\n'
+    string = 'Simulation: SimulationName                \n'
     string += 'Total cycles =          2\n'
     string += 'Total steps  =      30000\n'
-    string += 'Total time   =     15.000 ps'
-    print(string)
-    print(simulation)
+    string += 'Total time   =    15.0000 ps'
     assert str(simulation) == string
 
 
+def test_UMDSimulation_str_legnth():
+    """
+    Test the __str__ function correct length of the string object returned.
+
+    """
+    basis = np.identity(3)
+    atoms = {'X': 2, 'Y': 4}
+    lattice = UMDLattice(basis=basis, atoms=atoms)
+    simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
+    stringlength = (12+30+1) + (15+10+1) + (15+10+1) + (15+10+3)
+    assert len(str(simulation)) == stringlength
+
+
 test_UMDSimulation_str()
+test_UMDSimulation_str_legnth()

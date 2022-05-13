@@ -98,8 +98,8 @@ class UMDSimulation:
             Report of the simulation parameteres.
 
         """
-        string = 'Simulation: ' + self.name + '\n'
+        string  = 'Simulation: {:30}\n'.format(self.name)
         string += 'Total cycles = {:10}\n'.format(self.cycle)
         string += 'Total steps  = {:10}\n'.format(self.steps)
-        string += 'Total time   = {:10.3f} ps'.format(self.time())
+        string += 'Total time   = {:10.4f} ps'.format(self.time())
         return string

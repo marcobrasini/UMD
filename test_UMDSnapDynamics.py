@@ -83,8 +83,28 @@ def test_UMDSnapDynamics_str():
     assert str(snapdynamics) == string
 
 
-test_UMDSnapDynamics_str()
+@hp.given(N=st.integers(1, 500))
+def test_UMDSnapDynamics_str_legnth(N):
+    """
+    Test the __str__ function correct length of the string object returned.
+    Its length depends on the number of atoms in the lattice.
+    Indeed, each line is made of 109 characters:
+        12 (the width for each numeber)
+        *3 (number of components: x, y, z)
+        *3 (number of quantities: position, velocity, force)
+        +1 (the '\n' character)
+    and there are N+1 lines, one for each atom plus the header line.
+    Moreover we must eliminate the last '\n' character.
+    
+    """
+    UMDSnapshot.reset(lattice=UMDLattice(atoms={at: N}))
+    snapdynamics = UMDSnapDynamics()
+    stringlenght = 109 * (N+1) - 1
+    assert len(str(snapdynamics)) == stringlenght
 
+
+test_UMDSnapDynamics_str()
+test_UMDSnapDynamics_str_legnth()
 
 # %% UMDSnapDynamics displacement function tests
 @hp.given(N=st.integers(1, 500))
