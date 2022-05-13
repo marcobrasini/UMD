@@ -173,6 +173,6 @@ def UMDSimulation_from_outcar(outcar, cyc):
                 atoms[atom] = atoms_number[i]
             lattice = UMDLattice(lattice_name, basis, atoms)
             if not lattice.atoms == {}:
-                simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+                simulation = UMDSimulation('', lattice, cyc, steps, steptime)
                 return simulation
         line = outcar.readline()

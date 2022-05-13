@@ -19,10 +19,11 @@ def test_UMDSimulation_init_default():
     """
     simulation = UMDSimulation()
     assert simulation.name == ''
+    assert simulation.lattice == UMDLattice()
     assert simulation.cycle == -1
     assert simulation.steps == 0
-    assert simulation.steptime == 0.
-    assert simulation.lattice == UMDLattice()
+    assert simulation.steptime == 0.0
+    assert simulation.time == 0.0
 
 
 def test_UMDLattice_init_assignement():
@@ -34,25 +35,32 @@ def test_UMDLattice_init_assignement():
     basis = np.identity(3)
     atoms = {'X': 2, 'Y': 4}
     lattice = UMDLattice(basis=basis, atoms=atoms)
-    simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
+    simulation = UMDSimulation('SimulationName', lattice, 2, 30000, 0.5, 15.0)
     assert simulation.name == 'SimulationName'
+    assert simulation.lattice == lattice
     assert simulation.cycle == 2
     assert simulation.steps == 30000
     assert simulation.steptime == 0.5
-    assert simulation.lattice == lattice
+    assert simulation.time == 15.0
 
 
 test_UMDSimulation_init_default()
 test_UMDLattice_init_assignement()
 
 
-# %% UMDSimulation time function tests
-def test_UMDSimulation_time():
-    simulation = UMDSimulation('', 2, 30000, 0.5)
-    assert simulation.time() == 15.
+# %% UMDSimulation simtime function tests
+def test_UMDSimulation_simtime_with_time():
+    simulation = UMDSimulation('', cycle=2, steps=30000, steptime=0.5, time=10)
+    assert simulation.simtime() == 10.0
 
 
-test_UMDSimulation_time()
+def test_UMDSimulation_simtime_with_no_time():
+    simulation = UMDSimulation('', cycle=2, steps=30000, steptime=0.5)
+    assert simulation.simtime() == 15.0
+
+
+test_UMDSimulation_simtime_with_time()
+test_UMDSimulation_simtime_with_no_time()
 
 
 # %% UMDSimulation __eq__ function tests
@@ -66,8 +74,8 @@ def test_UMDSimulation_eq_true():
     atoms = {'X': 2, 'Y': 4}
     lattice1 = UMDLattice(basis=basis, atoms=atoms)
     lattice2 = UMDLattice(basis=basis, atoms=atoms)
-    simulation1 = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice1)
-    simulation2 = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice2)
+    simulation1 = UMDSimulation('SimulationName', lattice1, 2, 30000, 0.5, 3.)
+    simulation2 = UMDSimulation('SimulationName', lattice2, 2, 30000, 0.5, 3.)
     assert simulation1 == simulation2
 
 
@@ -81,56 +89,8 @@ def test_UMDSimulation_eq_false_name():
     atoms = {'X': 2, 'Y': 4}
     lattice1 = UMDLattice(basis=basis, atoms=atoms)
     lattice2 = UMDLattice(basis=basis, atoms=atoms)
-    simulation1 = UMDSimulation('SimulationName1', 2, 30000, 0.5, lattice1)
-    simulation2 = UMDSimulation('SimulationName2', 1, 30000, 0.5, lattice2)
-    assert not simulation1 == simulation2
-
-
-def test_UMDSimulation_eq_false_cycle():
-    """
-    Test the __eq__ function to compare two UMDSimulation objects representing
-    two simulations with different cycle number. The value returned must be
-    False.
-
-    """
-    basis = np.identity(3)
-    atoms = {'X': 2, 'Y': 4}
-    lattice1 = UMDLattice(basis=basis, atoms=atoms)
-    lattice2 = UMDLattice(basis=basis, atoms=atoms)
-    simulation1 = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice1)
-    simulation2 = UMDSimulation('SimulationName', 1, 30000, 0.5, lattice2)
-    assert not simulation1 == simulation2
-
-
-def test_UMDSimulation_eq_false_snaps():
-    """
-    Test the __eq__ function to compare two UMDSimulation objects representing
-    two simulations with different number of snapshots. The value returned
-    must be False.
-
-    """
-    basis = np.identity(3)
-    atoms = {'X': 2, 'Y': 4}
-    lattice1 = UMDLattice(basis=basis, atoms=atoms)
-    lattice2 = UMDLattice(basis=basis, atoms=atoms)
-    simulation1 = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice1)
-    simulation2 = UMDSimulation('SimulationName', 2, 20000, 0.5, lattice2)
-    assert not simulation1 == simulation2
-
-
-def test_UMDSimulation_eq_false_snaptime():
-    """
-    Test the __eq__ function to compare two UMDSimulation objects representing
-    two simulations with different snapshots time duration. The value returned
-    must be False.
-
-    """
-    basis = np.identity(3)
-    atoms = {'X': 2, 'Y': 4}
-    lattice1 = UMDLattice(basis=basis, atoms=atoms)
-    lattice2 = UMDLattice(basis=basis, atoms=atoms)
-    simulation1 = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice1)
-    simulation2 = UMDSimulation('SimulationName', 2, 30000, 0.4, lattice2)
+    simulation1 = UMDSimulation('SimulationName1', lattice1, 2, 30000, 0.5, 3.)
+    simulation2 = UMDSimulation('SimulationName2', lattice2, 2, 30000, 0.5, 3.)
     assert not simulation1 == simulation2
 
 
@@ -145,17 +105,82 @@ def test_UMDSimulation_eq_false_lattice():
     atoms2 = {'X': 2}
     lattice1 = UMDLattice(basis=basis, atoms=atoms1)
     lattice2 = UMDLattice(basis=basis, atoms=atoms2)
-    simulation1 = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice1)
-    simulation2 = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice2)
+    simulation1 = UMDSimulation('SimulationName', lattice1, 2, 30000, 0.5, 3.)
+    simulation2 = UMDSimulation('SimulationName', lattice2, 2, 30000, 0.5, 3.)
+    assert not simulation1 == simulation2
+
+
+def test_UMDSimulation_eq_false_cycle():
+    """
+    Test the __eq__ function to compare two UMDSimulation objects representing
+    two simulations with different cycle number. The value returned must be
+    False.
+
+    """
+    basis = np.identity(3)
+    atoms = {'X': 2, 'Y': 4}
+    lattice1 = UMDLattice(basis=basis, atoms=atoms)
+    lattice2 = UMDLattice(basis=basis, atoms=atoms)
+    simulation1 = UMDSimulation('SimulationName', lattice1, 2, 30000, 0.5, 3.)
+    simulation2 = UMDSimulation('SimulationName', lattice2, 1, 30000, 0.5, 3.)
+    assert not simulation1 == simulation2
+
+
+def test_UMDSimulation_eq_false_snaps():
+    """
+    Test the __eq__ function to compare two UMDSimulation objects representing
+    two simulations with different number of snapshots. The value returned
+    must be False.
+
+    """
+    basis = np.identity(3)
+    atoms = {'X': 2, 'Y': 4}
+    lattice1 = UMDLattice(basis=basis, atoms=atoms)
+    lattice2 = UMDLattice(basis=basis, atoms=atoms)
+    simulation1 = UMDSimulation('SimulationName', lattice1, 2, 30000, 0.5, 3.)
+    simulation2 = UMDSimulation('SimulationName', lattice2, 2, 20000, 0.5, 3.)
+    assert not simulation1 == simulation2
+
+
+def test_UMDSimulation_eq_false_snaptime():
+    """
+    Test the __eq__ function to compare two UMDSimulation objects representing
+    two simulations with different snapshots time duration. The value returned
+    must be False.
+
+    """
+    basis = np.identity(3)
+    atoms = {'X': 2, 'Y': 4}
+    lattice1 = UMDLattice(basis=basis, atoms=atoms)
+    lattice2 = UMDLattice(basis=basis, atoms=atoms)
+    simulation1 = UMDSimulation('SimulationName', lattice1, 2, 30000, 0.5, 3.)
+    simulation2 = UMDSimulation('SimulationName', lattice2, 2, 30000, 0.3, 3.)
+    assert not simulation1 == simulation2
+
+
+def test_UMDSimulation_eq_false_time():
+    """
+    Test the __eq__ function to compare two UMDSimulation objects representing
+    two simulations with different snapshots time duration. The value returned
+    must be False.
+
+    """
+    basis = np.identity(3)
+    atoms = {'X': 2, 'Y': 4}
+    lattice1 = UMDLattice(basis=basis, atoms=atoms)
+    lattice2 = UMDLattice(basis=basis, atoms=atoms)
+    simulation1 = UMDSimulation('SimulationName', lattice1, 2, 30000, 0.5, 3.)
+    simulation2 = UMDSimulation('SimulationName', lattice2, 2, 30000, 0.5, 1.)
     assert not simulation1 == simulation2
 
 
 test_UMDSimulation_eq_true()
 test_UMDSimulation_eq_false_name()
+test_UMDSimulation_eq_false_lattice()
 test_UMDSimulation_eq_false_cycle()
 test_UMDSimulation_eq_false_snaps()
 test_UMDSimulation_eq_false_snaptime()
-test_UMDSimulation_eq_false_lattice()
+test_UMDSimulation_eq_false_time()
 
 
 # %% UMDSimulation __str__ function tests
@@ -168,7 +193,7 @@ def test_UMDSimulation_str():
     basis = np.identity(3)
     atoms = {'X': 2, 'Y': 4}
     lattice = UMDLattice(basis=basis, atoms=atoms)
-    simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
+    simulation = UMDSimulation('SimulationName', lattice, 2, 30000, 0.5)
     string = 'Simulation: SimulationName                \n'
     string += 'Total cycles =          2\n'
     string += 'Total steps  =      30000\n'
@@ -184,7 +209,7 @@ def test_UMDSimulation_str_legnth():
     basis = np.identity(3)
     atoms = {'X': 2, 'Y': 4}
     lattice = UMDLattice(basis=basis, atoms=atoms)
-    simulation = UMDSimulation('SimulationName', 2, 30000, 0.5, lattice)
+    simulation = UMDSimulation('SimulationName', lattice, 2, 30000, 0.5)
     stringlength = (12+30+1) + (15+10+1) + (15+10+1) + (15+10+3)
     assert len(str(simulation)) == stringlength
 

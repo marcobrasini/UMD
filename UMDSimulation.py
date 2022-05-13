@@ -16,13 +16,16 @@ class UMDSimulation:
 
     """
 
-    def __init__(self, name='', cycle=-1, steps=0, steptime=0.0,
-                 lattice=UMDLattice()):
+    def __init__(self, name='', lattice=UMDLattice(), cycle=-1, steps=0,
+                 steptime=0.0, time=0.0):
         """
         Construct UMDSimulation object.
 
         Parameters
         ----------
+        lattice : UMDLattice, optional
+            The lattice over which the simulation is working.
+            The default is UMDLattice().
         cycle : int, optional
             The cycle number of the simulation.
             The default is -1.
@@ -32,9 +35,9 @@ class UMDSimulation:
         snaptime : float, optional
             The time duration of each molecular dynamic iteration in fs.
             The default is 0.
-        lattice : UMDLattice, optional
-            The lattice over which the simulation is working.
-            The default is UMDLattice().
+        time : float, optional
+            The time accumulated during all the simulation.
+            The default is 0
 
         Returns
         -------
@@ -42,12 +45,13 @@ class UMDSimulation:
 
         """
         self.name = name
+        self.lattice = lattice
         self.cycle = cycle
         self.steps = steps
         self.steptime = steptime
-        self.lattice = lattice
+        self.time = time
 
-    def time(self):
+    def simtime(self):
         """
         Calculate the total time of the simulation.
 
@@ -61,7 +65,9 @@ class UMDSimulation:
             Simulation time in ps.
 
         """
-        time = self.steps * self.steptime * 0.001
+        time = self.time
+        if time == 0.0:
+            time = self.steps * self.steptime * 0.001
         return time
 
     def __eq__(self, other):
@@ -86,6 +92,7 @@ class UMDSimulation:
         eq *= (self.steps == other.steps)
         eq *= (self.steptime == other.steptime)
         eq *= (self.lattice == other.lattice)
+        eq *= (self.time) == other.time
         return eq
 
     def __str__(self):
@@ -101,5 +108,21 @@ class UMDSimulation:
         string  = 'Simulation: {:30}\n'.format(self.name)
         string += 'Total cycles = {:10}\n'.format(self.cycle)
         string += 'Total steps  = {:10}\n'.format(self.steps)
-        string += 'Total time   = {:10.4f} ps'.format(self.time())
+        string += 'Total time   = {:10.4f} ps'.format(self.simtime())
         return string
+
+    def save(self, outfile):
+        """
+        Print on file the UMDSimulation data.
+
+        Parameters
+        ----------
+        outfile : output file
+            The output file where to print the UMDSimulation.
+
+        Returns
+        -------
+        None.
+
+        """
+        outfile.write(str(self)+'\n\n')

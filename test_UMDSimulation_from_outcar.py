@@ -69,7 +69,7 @@ def test_UMDSimulation_from_single_outcar_nomag():
     for cyc in range(3):
         testOUTCAR = testOUTCAR_nomag + '.cyc'+str(cyc)
         steps, steptime = simulation_parameter[cyc]
-        simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+        simulation = UMDSimulation('', lattice, cyc, steps, steptime)
         with open(testOUTCAR, 'r') as outcar:
             simulation_from_outcar = UMDSimulation_from_outcar(outcar, cyc)
             assert simulation == simulation_from_outcar
@@ -87,7 +87,7 @@ def test_UMDSimulation_from_single_outcar_mag():
     for cyc in range(3):
         testOUTCAR = testOUTCAR_mag + '.cyc'+str(cyc)
         steps, steptime = simulation_parameter[cyc]
-        simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+        simulation = UMDSimulation('', lattice, cyc, steps, steptime)
         with open(testOUTCAR, 'r') as outcar:
             simulation_from_outcar = UMDSimulation_from_outcar(outcar, cyc)
             assert simulation == simulation_from_outcar
@@ -105,7 +105,7 @@ def test_UMDSimulation_from_single_outcar_magpU():
     for cyc in range(3):
         testOUTCAR = testOUTCAR_magpU + '.cyc'+str(cyc)
         steps, steptime = simulation_parameter[cyc]
-        simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+        simulation = UMDSimulation('', lattice, cyc, steps, steptime)
         with open(testOUTCAR, 'r') as outcar:
             simulation_from_outcar = UMDSimulation_from_outcar(outcar, cyc)
             assert simulation == simulation_from_outcar
@@ -137,7 +137,7 @@ def test_UMDSimulation_from_concatenated_outcar_nomag():
                 break
             else:
                 steps, steptime = simulation_parameter[cyc]
-                simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+                simulation = UMDSimulation('', lattice, cyc, steps, steptime)
                 assert simulation == simulation_from_outcar
                 cyc += 1
         assert cyc == 3
@@ -162,7 +162,7 @@ def test_UMDSimulation_from_concatenated_outcar_mag():
                 break
             else:
                 steps, steptime = simulation_parameter[cyc]
-                simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+                simulation = UMDSimulation('', lattice, cyc, steps, steptime)
                 assert simulation == simulation_from_outcar
                 cyc += 1
 
@@ -186,7 +186,7 @@ def test_UMDSimulation_from_concatenated_outcar_magpU():
                 break
             else:
                 steps, steptime = simulation_parameter[cyc]
-                simulation = UMDSimulation('', cyc, steps, steptime, lattice)
+                simulation = UMDSimulation('', lattice, cyc, steps, steptime)
                 assert simulation == simulation_from_outcar
                 cyc += 1
 
