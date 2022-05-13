@@ -5,10 +5,18 @@ Created on Thu May  5 17:55:14 2022
 @author: marco
 """
 
+import numpy as np
+
 from UMDSimulation_from_outcar import UMDSimulation_from_outcar
 from UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
+from UMDSnapshot_from_outcar import UMDSnapshot_from_outcar_null
 from UMDSimulation import UMDSimulation
 from UMDSnapshot import UMDSnapshot
+
+
+loadedSteps = 0
+initialStep = 0
+nSteps = np.infty
 
 
 def UMDVaspParser(OUTCARfile):
@@ -37,8 +45,8 @@ def UMDVaspParser(OUTCARfile):
         totSimulation.save(umd)
 
         cycle = 0
-        totSteps = 0
-        totTime = 0.0
+        totalTime = 0.0
+        totalSteps = 0
         # We open the input OUTCARfile
         with open(OUTCARfile, 'r') as outcar:
             # We read a line per time untill the end of the OUTCARfile.
@@ -52,15 +60,18 @@ def UMDVaspParser(OUTCARfile):
                 if simulation is None:
                     break
                 cycle += 1   # update the simulation cycle number.
-                totSteps += simulation.steps
-                totTime += simulation.simtime()
+                totalSteps += simulation.steps
+                totalTime += simulation.simtime()
+                if loadedSteps >= initialStep + nSteps:
+                    break
                 line = outcar.readline()
 
         # Overwrite the defualt totSimulation initially printed in umd file,
         # with the updated and collective simulation info.
         umd.seek(0)
         totSimulation = UMDSimulation(name=simulation_name, cycle=cycle,
-                                      steps=totSteps, time=totTime)
+                                      steps=totalSteps,
+                                      time=totalTime)
         totSimulation.save(umd)
 
 
@@ -94,15 +105,33 @@ def simulationCycleParser(outcar, umd, cycle):
         function. It is None when the OUTCAR file is finished.
 
     """
+    global loadedSteps, initialStep, nSteps
+
     simulation = UMDSimulation_from_outcar(outcar, cycle)
     if simulation is None:
         return
     else:
-        simSteps = simulation.steps
+        simsteps = simulation.steps
+        finalStep = min(initialStep+nSteps, loadedSteps+simsteps)
         UMDSnapshot.reset(simulation.steptime, simulation.lattice)
-        for step in range(0, simSteps):
-            snapshot = UMDSnapshot_from_outcar(outcar, step)
-            snapshot.save(umd)
+        if initialStep > loadedSteps + simsteps:
+            for step in range(loadedSteps, loadedSteps + simsteps):
+                UMDSnapshot_from_outcar_null(outcar)
+            simulation.steps = 0
+        elif initialStep > loadedSteps:
+            for step in range(loadedSteps, initialStep):
+                UMDSnapshot_from_outcar_null(outcar)
+            for step in range(initialStep, finalStep):
+                snapshot = UMDSnapshot_from_outcar(outcar, step)
+                snapshot.save(umd)
+            simulation.steps = finalStep - initialStep
+        else:
+            for step in range(loadedSteps, finalStep):
+                snapshot = UMDSnapshot_from_outcar(outcar, step)
+                snapshot.save(umd)
+            simulation.steps = finalStep - loadedSteps
+
+        loadedSteps += simsteps
         return simulation
 
 
