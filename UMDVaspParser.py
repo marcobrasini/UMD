@@ -19,7 +19,7 @@ initialStep = 0
 nSteps = np.infty
 
 
-def UMDVaspParser(OUTCARfile):
+def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
     """
     Generate the UMD file extracting information from a Vasp OUTCAR file.
 
@@ -30,9 +30,16 @@ def UMDVaspParser(OUTCARfile):
 
     Returns
     -------
-    None.
+    totSimulation : UMDSimulation
+        UMDSimulation object with the total cumulative information of all the
+        cycles.
 
     """
+    global initialStep, nSteps, loadedSteps
+    loadedSteps = 0
+    initialStep = step0
+    nSteps = nsteps
+
     # We open the output UMDfile
     UMDfile = OUTCARfile.replace('outcar', 'umd')
     with open(UMDfile, 'w') as umd:
@@ -73,6 +80,7 @@ def UMDVaspParser(OUTCARfile):
                                       steps=totalSteps,
                                       time=totalTime)
         totSimulation.save(umd)
+        return totSimulation
 
 
 def simulationCycleParser(outcar, umd, cycle):
@@ -133,6 +141,3 @@ def simulationCycleParser(outcar, umd, cycle):
 
         loadedSteps += simsteps
         return simulation
-
-
-UMDVaspParser('tests/mag5.70a1800T.outcar')
