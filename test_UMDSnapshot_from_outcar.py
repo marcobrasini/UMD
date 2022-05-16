@@ -41,6 +41,7 @@ testOUTCAR_nomag = 'tests/nomag5.70a1800T.outcar'
 testOUTCAR_mag = 'tests/mag5.70a1800T.outcar'
 testOUTCAR_magpU = 'tests/magpU5.70a1800T.outcar'
 
+
 # %% The lattice structure values
 # According to the header, we initialize the lattice structure and the
 # simulation parameters, necessary to reset the UMDSnapshot attributes and

@@ -7,7 +7,7 @@ Created on Mon May 16 17:45:26 2022
 
 
 import sys
-import time
+import functools as ft
 
 
 class ProgressBar:
@@ -44,7 +44,7 @@ class ProgressBar:
         self.barLoaded = 0
         self.barStepLoaded = 0
 
-    def __call__(self, func, *args, **kwargs):
+    def __call__(self, func):
         """
         Overload of the __call__ function.
 
@@ -63,7 +63,8 @@ class ProgressBar:
             The result of the function func(*args, **kwargs).
 
         """
-        def wrap(*args, **kwargs):
+        @ft.wraps(func)
+        def wrapper(*args, **kwargs):
             # Print the initial empty bar.
             self.printbeg()
             # Define the iterator through the function yielding
@@ -78,7 +79,7 @@ class ProgressBar:
             except StopIteration as result:
                 self.printend()
                 return result
-        return wrap
+        return wrapper
 
     def update(self, progress):
         """
