@@ -45,9 +45,10 @@ class UMDSnapThermodynamics:
             Report of the thermodynamics values of the snapshot.
 
         """
-        string  = "Temperature = {:12.4f} K\n" .format(self.temperature)
-        string += "Pressure    = {:12.4f} GPa\n".format(self.pressure)
-        string += "Energy      = {:12.4f} eV".format(self.energy)
+        string  = "Thermodynamics:\n"
+        string += "    Temperature = {:12.4f} K\n" .format(self.temperature)
+        string += "    Pressure    = {:12.4f} GPa\n".format(self.pressure)
+        string += "    Energy      = {:12.4f} eV".format(self.energy)
         return string
 
     def save(self, outfile):

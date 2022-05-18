@@ -49,9 +49,10 @@ def test_UMDSnapThermodynamics_str():
     pressure = 23       # in GPa
     energy = -1050      # in eV
     snapthermodynamics = UMDSnapThermodynamics(temperature, pressure, energy)
-    string  = "Temperature =    1400.0000 K\n"
-    string += "Pressure    =      23.0000 GPa\n"
-    string += "Energy      =   -1050.0000 eV"
+    string  = "Thermodynamics:\n"
+    string += "    Temperature =    1400.0000 K\n"
+    string += "    Pressure    =      23.0000 GPa\n"
+    string += "    Energy      =   -1050.0000 eV"
     assert str(snapthermodynamics) == string
 
 
@@ -68,7 +69,7 @@ def test_UMDSnapThermodynamics_str_length():
     pressure = 23       # in GPa
     energy = -1050      # in eV
     snapthermodynamics = UMDSnapThermodynamics(temperature, pressure, energy)
-    stringlength = (14+12+3) + (14+12+5) + (14+12+3)
+    stringlength = 16 + (4+14+12+3) + (4+14+12+5) + (4+14+12+3)
     assert len(str(snapthermodynamics)) == stringlength
 
 

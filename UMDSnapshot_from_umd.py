@@ -26,11 +26,15 @@ def UMDSnapThermodynamics_from_umd(umd):
         A UMDSnapThermodynamics object.
 
     """
-    temperature = float(umd.readline().split()[-2])
-    pressure = float(umd.readline().split()[-2])
-    energy = float(umd.readline().split()[-2])
-    snapThermodynamics = UMDSnapThermodynamics(temperature, pressure, energy)
-    return snapThermodynamics
+    line = umd.readline()
+    while line:
+        if 'Thermodynamics:' in line:
+            T = float(umd.readline().split()[-2])
+            P = float(umd.readline().split()[-2])
+            E = float(umd.readline().split()[-2])
+            snapThermodynamics = UMDSnapThermodynamics(T, P, E)
+            return snapThermodynamics
+        line = umd.readline()
 
 
 def UMDSnapDynamics_from_umd(umd):
@@ -48,17 +52,20 @@ def UMDSnapDynamics_from_umd(umd):
         A UMDSnapDynamics object.
 
     """
-    line = umd.readline()  # read the header line
-    natoms = UMDSnapshot.natoms
-    dynamics = np.zeros((natoms, 9), dtype=float)
-    for i in range(natoms):
-        line = umd.readline().strip().split()
-        dynamics[i] = line
-    position = dynamics[:, 0:3]
-    velocity = dynamics[:, 3:6]
-    force = dynamics[:, 6:9]
-    snapDynamics = UMDSnapDynamics(position, velocity, force)
-    return snapDynamics
+    line = umd.readline()
+    while line:
+        if 'Position' in line and 'Velocity' in line and 'Force' in line:
+            natoms = UMDSnapshot.natoms
+            dynamics = np.zeros((natoms, 9), dtype=float)
+            for i in range(natoms):
+                line = umd.readline().strip().split()
+                dynamics[i] = line
+            position = dynamics[:, 0:3]
+            velocity = dynamics[:, 3:6]
+            force = dynamics[:, 6:9]
+            snapDynamics = UMDSnapDynamics(position, velocity, force)
+            return snapDynamics
+        line = umd.readline()
 
 
 def UMDSnapshot_from_umd(umd):
