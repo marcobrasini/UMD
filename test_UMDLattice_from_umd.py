@@ -31,6 +31,7 @@ def test_UMDLattice_from_umd():
         assert lattice.name == '3bccH2O+1Fe'
         assert lattice.atoms == {O: 15, H: 28, Fe: 1}
         assert np.array_equal(lattice.dirBasis, 5.70*np.identity(3))
+        umd.close()
 
 
 def test_UMDLattice_from_umd_None():
@@ -42,6 +43,7 @@ def test_UMDLattice_from_umd_None():
     with open('tests/test_file_empty.umd', 'r') as umd:
         lattice = UMDLattice_from_umd(umd)
         assert lattice is None
+        umd.close()
 
 
 test_UMDLattice_from_umd()
