@@ -7,6 +7,7 @@ Created on Wed May 18 15:33:58 2022
 
 
 import numpy as np
+from UMDAtom import UMDAtom
 from UMDLattice import UMDLattice
 from UMDSimulation import UMDSimulation
 
@@ -31,11 +32,11 @@ def UMDLattice_from_umd(umd):
     line = umd.readline()
     while line:
         if 'Lattice:' in line:
-            name = line.replace('Lattice', '').strip()
+            name = line.replace('Lattice:', '').strip()
             basis = np.zeros((3, 3))
             for i in range(3):
                 basis[i] = umd.readline().strip().split()
-            atoms_name = umd.readline().split()
+            atoms_name = [UMDAtom(at) for at in umd.readline().split()]
             atoms_number = [int(n) for n in umd.readline().split()]
             atoms = dict(zip(atoms_name, atoms_number))
             lattice = UMDLattice(name=name, basis=basis, atoms=atoms)
