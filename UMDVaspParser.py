@@ -60,14 +60,14 @@ def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
 
         # We open the input OUTCARfile
         with open(OUTCARfile, 'r') as outcar:
-            # We read a line per time untill the end of the OUTCARfile.
+            # We read line by line untill the end of the OUTCAR file.
             # At each step of the loop, a complete simulation cycle is read
             # by the function load_SimulationCycle.
             line = outcar.readline()
             while line:
                 # The function load_SimulationCycle() returns a UMDSimulation
-                # object or None, if all the OUTCARfile has been read.
-                simulation = simulationVaspParser(outcar, umd,
+                # object or None, if all the OUTCAR file has been read.
+                simulation = load_SimulationCycle(outcar, umd,
                                                   totSimulation.cycle)
                 if simulation is None:
                     break
@@ -181,7 +181,7 @@ def simulation_after_initialStep(outcar, umd, simulation):
     simulation.steps = finalStep - loadedSteps
 
 
-def simulationVaspParser(outcar, umd, cycle):
+def load_SimulationCycle(outcar, umd, cycle):
     """
     Read from OUTCAR file and print on UMD file the data of a simulation cycle.
 
