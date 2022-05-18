@@ -421,16 +421,32 @@ def test_UMDLattice_str():
                       [-4, 2, 1]])
     atoms = {X: 15, Y: 28, Z: 1}
     Lattice = UMDLattice(name, basis, atoms)
-    string  = 'Lattice: LatticeName\n'
-    string += '2.00000000\t1.00000000\t-3.00000000\n'
-    string += '-1.00000000\t0.00000000\t0.00000000\n'
-    string += '-4.00000000\t2.00000000\t1.00000000\n'
-    string += 'X\tY\tZ\n'
-    string += '15\t28\t1'
+    string  = 'Lattice: LatticeName                   \n'
+    string += '       2.000000        1.000000       -3.000000\n'
+    string += '      -1.000000        0.000000        0.000000\n'
+    string += '      -4.000000        2.000000        1.000000\n'
+    string += 'X     Y     Z    \n'
+    string += '   15    28     1'
     assert str(Lattice) == string
 
 
+def test_UMDLattice_str_length():
+    """
+    Test the __str__ function correct length of the string object returned.
+
+    """
+    name = 'LatticeName'
+    basis = np.array([[2, 1, -3],
+                      [-1, 0, 0],
+                      [-4, 2, 1]])
+    atoms = {X: 15, Y: 28, Z: 1}
+    Lattice = UMDLattice(name, basis, atoms)
+    stringlength = (9+30+1) + 3*(15+1+15+1+15+1) + 2*(5+1)*len(atoms) - 1
+    assert len(str(Lattice)) == stringlength
+
+
 test_UMDLattice_str()
+test_UMDLattice_str_length()
 
 
 # %% UMDLattice isdefault function tests

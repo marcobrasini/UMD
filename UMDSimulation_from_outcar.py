@@ -125,7 +125,7 @@ def UMDSimulation_from_outcar(outcar, cyc):
                     break
                 line = outcar.readline()
         elif "SYSTEM =" in line:
-            lattice_name = line.strip().split()[-2]
+            lattice_name = line.strip().split()[-1]
 
         elif "Startparameter for this run:" in line:
             # Once in the 'Startparameter for this run' group of parameters,

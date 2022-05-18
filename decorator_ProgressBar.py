@@ -74,6 +74,7 @@ class ProgressBar:
                     # Execute the iterator in the function.
                     # If a good value is yield, it updates the progress bar.
                     progress = next(progress_generator)
+                    assert progress < 1, "wrapped function must yield <1."
                     self.update(progress)
             # If the StopIteration is yield, print the completly full bar.
             except StopIteration as result:
@@ -143,6 +144,6 @@ class ProgressBar:
 
         """
         done = "="*int(self.barLength)
-        bar = "["+done+"] {:5.1f}%".format(100)
+        bar = "["+done+"] {:5.1f}%\n".format(100)
         self.barStream.write('\r'+self.barMsg+' '+bar)
         self.barStream.flush()

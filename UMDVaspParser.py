@@ -52,12 +52,12 @@ def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
         # It is immediately printed in order to save the space that is
         # necessary to print the simulation total info at the end.
         simulation_name = OUTCARfile.replace('.outcar', '').split('/')[-1]
-        totSimulation = UMDSimulation()
+        totSimulation = UMDSimulation(name=simulation_name, cycle=0)
         totSimulation.save(umd)
+        totSimulation.lattice.save(umd)
+        umd.write(' '*6*20+'\n')
+        umd.write(' '*6*20+'\n')
 
-        cycle = 0
-        totalTime = 0.0
-        totalSteps = 0
         # We open the input OUTCARfile
         with open(OUTCARfile, 'r') as outcar:
             # We read a line per time untill the end of the OUTCARfile.
@@ -67,12 +67,14 @@ def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
             while line:
                 # The function load_SimulationCycle() returns a UMDSimulation
                 # object or None, if all the OUTCARfile has been read.
-                simulation = simulationCycleParser(outcar, umd, cycle)
+                simulation = simulationVaspParser(outcar, umd,
+                                                  totSimulation.cycle)
                 if simulation is None:
                     break
-                cycle += 1   # update the simulation cycle number.
-                totalSteps += simulation.steps
-                totalTime += simulation.simtime()
+                totSimulation.cycle += 1
+                totSimulation.steps += simulation.steps
+                totSimulation.time += simulation.simtime()
+                totSimulation.lattice = simulation.lattice
                 if loadedSteps >= initialStep + nSteps:
                     break
                 line = outcar.readline()
@@ -80,11 +82,8 @@ def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
         # Overwrite the defualt totSimulation initially printed in umd file,
         # with the updated and collective simulation info.
         umd.seek(0)
-        totSimulation = UMDSimulation(name=simulation_name,
-                                      cycle=cycle,
-                                      steps=totalSteps,
-                                      time=totalTime)
         totSimulation.save(umd)
+        totSimulation.lattice.save(umd)
         print(totSimulation)
         return totSimulation
 
@@ -182,7 +181,7 @@ def simulation_after_initialStep(outcar, umd, simulation):
     simulation.steps = finalStep - loadedSteps
 
 
-def simulationCycleParser(outcar, umd, cycle):
+def simulationVaspParser(outcar, umd, cycle):
     """
     Read from OUTCAR file and print on UMD file the data of a simulation cycle.
 
@@ -238,3 +237,6 @@ def simulationCycleParser(outcar, umd, cycle):
         loadedSteps += simsteps
         print(' ... {} snapshots saved.\n'.format(simulation.steps))
         return simulation
+
+
+UMDVaspParser('tests/mag5.70a1800T.outcar')

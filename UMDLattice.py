@@ -176,12 +176,30 @@ class UMDLattice:
             Report of the lattice values.
 
         """
-        string = 'Lattice: ' + self.name + '\n'
+        string = 'Lattice: {:30}\n'.format(self.name)
         for vector in self.dirBasis:
-            string += '\t'.join(['{:.8f}'.format(x) for x in vector])+'\n'
-        string += '\t'.join([str(n) for n in self.atoms.keys()])+'\n'
-        string += '\t'.join([str(n) for n in self.atoms.values()])
+            string += ' '.join(['{:15.6f}'.format(x) for x in vector])+'\n'
+        atoms_name = self.atoms.keys()
+        atoms_val = self.atoms.values()
+        string += ' '.join(['{:5}'.format(str(n)) for n in atoms_name])+'\n'
+        string += ' '.join(['{:5}'.format(n) for n in atoms_val])
         return string
+    
+    def save(self, outfile):
+        """
+        Print on file the UMDLattice information.
+
+        Parameters
+        ----------
+        outfile : output file
+            The output file where to print the UMDLattice.
+
+        Returns
+        -------
+        None.
+
+        """
+        outfile.write(str(self)+'\n\n')
 
     def isdefault(self):
         """
