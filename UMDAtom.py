@@ -3,7 +3,7 @@
                                     UMDAtom
 ===============================================================================
 
-This module provides the UMDAtom class useful for describe chemical elements.
+This module provides the UMDAtom class useful to represent chemical elements.
 The UMDAtom objects are mainly used to initialize the 'atoms' parameter of a
 UMDLattice object, in which they represent the key of the 'atoms' dictionary.
 
@@ -24,13 +24,17 @@ class UMDAtom:
     Parameters
     ----------
     name : string, optional
-        The atomic symbol. The default is ''.
+        The atomic symbol.
+        The default is ''.
     Z : int, optional
-        The atomic number. The default is 0.
+        The atomic number.
+        The default is 0.
     mass : float, optional
-        The atomic mass. The default is 0.0.
+        The atomic mass.
+        The default is 0.0.
     valence : int, optional
-        The number of valence electrons. The default is 0.
+        The number of valence electrons.
+        The default is 0.
 
     Methods
     -------
@@ -40,7 +44,7 @@ class UMDAtom:
         Convert a UMDAtoms objects into a string.
     """
 
-    def __init__(self, name='', Z=0, mass=0.0, valence=0):
+    def __init__(self, Z=0, name='', mass=0.0, valence=0):
         """
         Construct UMDAtom object.
 
@@ -60,8 +64,8 @@ class UMDAtom:
         UMDAtom object.
 
         """
-        self.name = name
         self.Z = Z
+        self.name = name
         self.mass = mass
         self.valence = valence
 
@@ -81,8 +85,9 @@ class UMDAtom:
 
         """
         equal = isinstance(other, UMDAtom)
-        equal *= (self.name == other.name)
+        print(self.Z, other.Z)
         equal *= (self.Z == other.Z)
+        equal *= (self.name == other.name)
         equal *= (self.mass == other.mass)
         equal *= (self.valence == other.valence)
         return equal
@@ -97,7 +102,7 @@ class UMDAtom:
             The hash values of the object.
 
         """
-        hash_atom = hash((self.name, self.Z, self.mass, self.valence))
+        hash_atom = hash((self.Z, self.name, self.mass, self.valence))
         return hash_atom
 
     def __str__(self):
