@@ -1,16 +1,45 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu May  5 17:12:50 2022
+===============================================================================
+                                    UMDAtom
+===============================================================================
 
-@author: marco
+This module provides the UMDAtom class useful for describe chemical elements.
+The UMDAtom objects are mainly used to initialize the 'atoms' parameter of a
+UMDLattice object, in which they represent the key of the 'atoms' dictionary.
+
+Classes
+-------
+    UMDAtom
+
+See Also
+--------
+    UMDLattice
 """
 
 
 class UMDAtom:
     """
-    Class to contain the infomration about the atomic elements in the lattice.
-    
+    UMDAtom class to represent atomic elements.
+
+    Parameters
+    ----------
+    name : string, optional
+        The atomic symbol. The default is ''.
+    Z : int, optional
+        The atomic number. The default is 0.
+    mass : float, optional
+        The atomic mass. The default is 0.0.
+    valence : int, optional
+        The number of valence electrons. The default is 0.
+
+    Methods
+    -------
+    __eq__
+        Compare two UMDAtom objects.
+    __str__
+        Convert a UMDAtoms objects into a string.
     """
+
     def __init__(self, name='', Z=0, mass=0.0, valence=0):
         """
         Construct UMDAtom object.
@@ -38,7 +67,7 @@ class UMDAtom:
 
     def __eq__(self, other):
         """
-        Overload of the == operator.
+        Compare two UMDAtom objects.
 
         Parameters
         ----------
@@ -60,12 +89,12 @@ class UMDAtom:
 
     def __hash__(self):
         """
-        Overload of the __hash__ operator.
+        Get the hash value for dictionary keys comparison.
 
         Returns
         -------
         hash_atom : int
-            The hash values of the object for dictionary keys comparison.
+            The hash values of the object.
 
         """
         hash_atom = hash((self.name, self.Z, self.mass, self.valence))
@@ -73,12 +102,12 @@ class UMDAtom:
 
     def __str__(self):
         """
-        Overload of the str function.
+        Convert a UMDAtom object into a string.
 
         Returns
         -------
         string : string
-            Atomic symbol.
+            The atomic symbol.
 
         """
         string = self.name
