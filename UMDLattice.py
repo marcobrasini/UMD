@@ -1,26 +1,75 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue May  3 18:24:02 2022
+===============================================================================
+                                   UMDLattice
+===============================================================================
 
-@author: marco
+This module provides the UMDLattice class useful to represent a lattice
+structure. The UMDLattice objects are mainly used to describe the environment
+in which the UMDSimulation take place but not only, also to perform dynamics
+calculations on the atoms.
+
+Classes
+-------
+    UMDLattice
+
+See Also
+--------
+    UMDSimulation
 """
 
 import numpy as np
 
 
-NULL_dirBasis = np.zeros((3, 3), dtype=float)
-NULL_invBasis = np.full((3, 3), np.nan)
+DEFAULT_basis = np.identity(3, dtype=float)
 
 
 class UMDLattice:
     """
-    Class to contain the information about the simulation lattice.
+    UMDLattice class to represent a braivais crystal lattice.
 
-    The UMDLattice class is defined by three 3-dim lattice vectors defining
-    the lattice unit cell and a set of atoms populating the cell.
+    The UMDLattice objects are defined by three 3-dim lattice vectors defining
+    the lattice unit cell and the periodic structure, but also by a set of
+    atoms populating the cell.
+
+    Parameters
+    ----------
+    name : string, optional
+        The name of the lattice.
+        The default is ''.
+    basis : numpy array (3,3), optional
+        A matrix composed by the three lattice vectors 'a', 'b' and 'c'.
+        The matrix strucure is the following:
+            basis = np.array([[ax, ay, az], [bx, by, bz], [cx, cy, cz]])
+        The default is np.zeros((3, 3)).
+    atoms : dict, optional
+        A dictionary made of atomic species coupled with their respective
+        number of copies present into the unit cell. Typically the single item
+        has the structure {UMDAtom: number_of_atoms}.
+        The default is {}.
+
+    Methods
+    -------
+    __eq__
+        Compare two UMDLattice objects.
+    __str__
+        Convert a UMDLattice objects into a string.
+    save
+        Print the UMDLattice information on an output stream.
+    natoms
+        Get the total number of atoms of any type in the unit cell.
+    mass
+        Get the total mass of all the atoms into the unit cell.
+    volume
+        Get the volume of the unit cell.
+    density
+        Get the mass density into the unit cell.
+    cartesian
+        Convert 3-dim vectors from reduced to cartesian coordinates.
+    reduced
+        Convert 3-dim vectors from cartesian to reduced coordinates.
     """
 
-    def __init__(self, name='', basis=NULL_dirBasis, atoms={}):
+    def __init__(self, name='', basis=DEFAULT_basis, atoms={}):
         """
         Construct UMDLattice object.
 
@@ -30,10 +79,14 @@ class UMDLattice:
             The name of the lattice.
             The default is ''.
         basis : numpy array (3,3), optional
-            Matrix made of lattice vectors.
+            A matrix composed by the three lattice vectors 'a', 'b' and 'c'.
+            The matrix strucure is the following:
+                basis = np.array([[ax, ay, az], [bx, by, bz], [cx, cy, cz]])
             The default is np.zeros((3, 3)).
         atoms : dict, optional
-            Dictionary of atoms with their number into the lattice.
+            A dictionary made of atomic species coupled with their respective
+            number of copies present into the unit cell. Typically, the single
+            item has the structure {UMDAtom: number_of_atoms}.
             The default is {}.
 
         Returns
@@ -44,110 +97,11 @@ class UMDLattice:
         self.name = name
         self.atoms = atoms
         self.dirBasis = np.copy(basis)
-
-        # If possible, we initialize the inverse basis matrix.
-        # The inverse basis matrix is necessary to move from cartesian to
-        # reduced coordinate system.
-        self.invBasis = np.copy(NULL_dirBasis)
-        try:
-            self.invBasis = np.copy(np.linalg.inv(basis))
-        except np.linalg.LinAlgError:
-            self.invBasis = np.copy(NULL_invBasis)
-
-    def natoms(self):
-        """
-        Get the number of atoms of any type in the lattice.
-
-        Returns
-        -------
-        n : int
-            Total number of atoms in the lattice.
-
-        """
-        n = sum(self.atoms.values())
-        return n
-
-    def mass(self):
-        """
-        Get the total mass of the lattice cell as sum of the atomic masses.
-
-        Returns
-        -------
-        mass : float
-            Total mass of the cell.
-
-        """
-        mass = 0
-        for atom, n in self.atoms.items():
-            mass += n*atom.mass
-        return mass
-
-    def volume(self):
-        """
-        Get the lattice volume.
-
-        Returns
-        -------
-        volume : float
-            Lattice volume.
-
-        """
-        volume = np.cross(self.dirBasis[0], self.dirBasis[1])
-        volume = abs(np.dot(volume, self.dirBasis[2]))
-        return volume
-
-    def density(self):
-        """
-        Get the lattice density .
-
-        Returns
-        -------
-        density : float
-            Lattice density.
-
-        """
-        density = self.mass()/self.volume()
-        return density
-
-    def reduced(self, cartesian):
-        """
-        Convert cartesian vectors in reduced coordinates.
-
-        Parameters
-        ----------
-        cartesian : array(N,3)
-            Array of N 3-dim vectors in cartesian coordinates.
-
-        Returns
-        -------
-        reduced : array(N,3)
-            Array of N 3-dim vectors in reduced coordinates.
-
-        """
-        reduced = cartesian @ self.invBasis
-        return reduced
-
-    def cartesian(self, reduced):
-        """
-        Convert reduced vectors in cartesian coordinates.
-
-        Parameters
-        ----------
-        reduced : array(N,3)
-            Array of N 3-dim vectors in reduced coordinates.
-
-        Returns
-        -------
-        cartesian : array(N,3)
-            Array of N 3-dim vectors in cartesian coordinates.
-
-        """
-        cartesian = reduced @ self.dirBasis
-        return cartesian
+        self.invBasis = np.copy(np.linalg.inv(basis))
 
     def __eq__(self, other):
         """
-        Overload of the == operator.
+        Compare two UMDLattice objects.
 
         Parameters
         ----------
@@ -168,12 +122,12 @@ class UMDLattice:
 
     def __str__(self):
         """
-        Overload of the str function.
+        Convert a UMDLattice objects into a string.
 
         Returns
         -------
         string : string
-            Report of the lattice values.
+            A descriptive string reporting the UMDLattice values.
 
         """
         string = 'Lattice: {:30}\n'.format(self.name)
@@ -183,16 +137,17 @@ class UMDLattice:
         atoms_val = self.atoms.values()
         string += ' '.join(['{:5}'.format(str(n)) for n in atoms_name])+'\n'
         string += ' '.join(['{:5}'.format(n) for n in atoms_val])
+        print(string)
         return string
-    
+
     def save(self, outfile):
         """
-        Print on file the UMDLattice information.
+        Print the UMDLattice information on an output stream.
 
         Parameters
         ----------
-        outfile : output file
-            The output file where to print the UMDLattice.
+        outfile : output stream
+            The output stream where to print the UMDLattice.
 
         Returns
         -------
@@ -200,6 +155,97 @@ class UMDLattice:
 
         """
         outfile.write(str(self)+'\n\n')
+
+    def natoms(self):
+        """
+        Get the total number of atoms of any type in the unit cell.
+
+        Returns
+        -------
+        natoms : int
+            The total number of atoms in the unit cell.
+
+        """
+        natoms = sum(self.atoms.values())
+        return natoms
+
+    def mass(self):
+        """
+        Get the total mass of all the atoms into the unit cell.
+
+        Returns
+        -------
+        mass : float
+            The unit cell total mass.
+
+        """
+        mass = 0
+        for atom, n in self.atoms.items():
+            mass += n*atom.mass
+        return mass
+
+    def volume(self):
+        """
+        Get the volume of the unit cell.
+
+        Returns
+        -------
+        volume : float
+            The unit cell volume.
+
+        """
+        volume = np.cross(self.dirBasis[0], self.dirBasis[1])
+        volume = abs(np.dot(volume, self.dirBasis[2]))
+        return volume
+
+    def density(self):
+        """
+        Get the mass density into the unit cell.
+
+        Returns
+        -------
+        density : float
+            The unit cell mass.
+
+        """
+        density = self.mass()/self.volume()
+        return density
+
+    def reduced(self, cartesian):
+        """
+        Convert cartesian vectors in reduced coordinates.
+
+        Parameters
+        ----------
+        cartesian : array(N,3)
+            An array of N 3-dim vectors in cartesian coordinates.
+
+        Returns
+        -------
+        reduced : array(N,3)
+            An array of N 3-dim vectors in reduced coordinates.
+
+        """
+        reduced = cartesian @ self.invBasis
+        return reduced
+
+    def cartesian(self, reduced):
+        """
+        Convert reduced vectors in cartesian coordinates.
+
+        Parameters
+        ----------
+        reduced : array(N,3)
+            An array of N 3-dim vectors in reduced coordinates.
+
+        Returns
+        -------
+        cartesian : array(N,3)
+            An array of N 3-dim vectors in cartesian coordinates.
+
+        """
+        cartesian = reduced @ self.dirBasis
+        return cartesian
 
     def isdefault(self):
         """
@@ -215,6 +261,6 @@ class UMDLattice:
         default = True
         default *= (self.name == '')
         default *= (self.atoms == {})
-        default *= np.array_equal(self.dirBasis, NULL_dirBasis)
-        default *= np.array_equal(self.invBasis, NULL_invBasis, True)
+        default *= np.array_equal(self.dirBasis, DEFAULT_basis)
+        default *= np.array_equal(self.invBasis, DEFAULT_basis)
         return default
