@@ -9,7 +9,7 @@ from ..UMDAtom import UMDAtom
 import pytest
 import hypothesis as hp
 import hypothesis.strategies as st
-from .generate_test_data import generateUMDAtom
+from .generate_scenarios import generateUMDAtom
 
 
 # %% unit tests for O atom 

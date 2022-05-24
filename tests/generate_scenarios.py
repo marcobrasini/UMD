@@ -13,6 +13,7 @@ from typing import Any, Dict
 from dataclasses import dataclass
 
 
+# %% Generate UMDAtom data scenarios for testing
 @dataclass
 class GenerateUMDAtom:
     Z: st.SearchStrategy[int]
@@ -36,4 +37,31 @@ def generateUMDAtom(draw, settings=settingUMDAtom) -> Dict[str, Any]:
     mass = draw(settings.mass)
     valence = draw(settings.valence)
     data = {"Z": Z, "name": name, "mass": mass, "valence": valence}
+    return data
+
+
+# %% Generate UMDLattice scenarios for testing
+
+
+# %% Generate UMDSimulationRun data scenarios for testing
+@dataclass
+class GenerateUMDSimulationRun:
+    cycle: st.SearchStrategy[int]
+    steps: st.SearchStrategy[int]
+    steptime: st.SearchStrategy[float]
+
+
+settingUMDSimulationRun = GenerateUMDSimulationRun(
+    cycle=st.integers(min_value=0, max_value=10000000),
+    steps=st.integers(min_value=0, max_value=1000),
+    steptime=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)
+    )
+
+
+@st.composite
+def generateUMDSimulationRun(draw, settings=settingUMDSimulationRun):
+    cycle = draw(settings.cycle)
+    steps = draw(settings.steps)
+    steptime = draw(settings.steptime)
+    data = {"cycle": cycle, "steps": steps, "steptime": steptime}
     return data
