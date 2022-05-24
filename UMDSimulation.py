@@ -21,8 +21,8 @@ See Also
 """
 
 
-from UMDLattice import UMDLattice
-from UMDSimulationRun import UMDSimulationRun
+from .UMDLattice import UMDLattice
+from .UMDSimulationRun import UMDSimulationRun
 
 
 class UMDSimulation:
@@ -84,7 +84,7 @@ class UMDSimulation:
         """
         self.name = name
         self.lattice = lattice
-        self.runs = [runs]
+        self.runs = [*runs]
 
     def __str__(self):
         """
@@ -97,9 +97,9 @@ class UMDSimulation:
 
         """
         string  = 'Simulation: {:30}\n'.format(self.name)
-        string += 'Total cycles = {:10}\n'.format(len(self.runs))
-        string += 'Total steps  = {:10}\n'.format(self.steps())
-        string += 'Total time   = {:10.4f} fs'.format(self.time())
+        string += '  Total cycles = {:12}\n'.format(len(self.runs))
+        string += '  Total steps  = {:12}\n'.format(self.steps())
+        string += '  Total time   = {:12.3f} fs'.format(self.time())
         return string
 
     def save(self, outfile):
@@ -118,6 +118,19 @@ class UMDSimulation:
         """
         outfile.write(str(self)+'\n\n')
         outfile.write(str(self.lattice)+'\n\n')
+
+    def cycle(self):
+        """
+        Get the total number of runs in the simulation.
+
+        Returns
+        -------
+        cycle : float
+            The total number of runs in the simulation.
+
+        """
+        cycle = len(self.runs)
+        return cycle
 
     def steps(self):
         """
@@ -141,7 +154,7 @@ class UMDSimulation:
         Returns
         -------
         time : float
-            the total amount of time simulated during the simulation.
+            The total amount of time simulated during the simulation.
 
         """
         time = 0
@@ -163,4 +176,9 @@ class UMDSimulation:
         None.
 
         """
-        self.runs.append(run)
+        errmsg = ("The next run cycle must be {}".format(self.cycle())
+                  + " and not {}.".format(run.cycle))
+        if self.cycle() == run.cycle:
+            self.runs.append(run)
+        else:
+            raise AttributeError(errmsg)

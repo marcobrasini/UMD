@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue May 24 13:13:34 2022
-
-@author: marco
+===============================================================================
+                        UMDSimulationRun class tests                              
+===============================================================================
 """
 
 from ..UMDSimulationRun import UMDSimulationRun
