@@ -45,6 +45,8 @@ class UMDSimulationRun:
     -------
     __str__
         Convert a UMDSimulationRun objects into a string.
+    time
+        Get the total amount of time simulated by the simulation run.
 
     """
 
@@ -87,3 +89,16 @@ class UMDSimulationRun:
         string += '  Steps     = {:8}\n'.format(self.steps)
         string += '  Step time = {:8.3f} (fs)'.format(self.steptime)
         return string
+
+    def time(self):
+        """
+        Get the total amount of time simulated by the simulation run.
+
+        Returns
+        -------
+        time : float
+            The total amount of time simulated by the simulation run in fs.
+
+        """
+        time = self.steps * self.steptime
+        return time

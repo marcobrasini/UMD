@@ -12,7 +12,7 @@ import pytest
 import hypothesis as hp
 import hypothesis.strategies as st
 
-from .generate_test_data import generateUMDSimulationRun
+from .generate_scenarios import generateUMDSimulationRun
 
 
 # %% UMDSimulationRun unit tests
@@ -62,6 +62,11 @@ class TestUMDSimulationRun_unit:
         """
         stringlength = 14+23+27
         assert len(str(self.run)) == stringlength
+    
+    # %% UMDSimulationRun time function tests
+    def test_UMDSimulationRun_time(self):
+        time = self.steps*self.steptime
+        assert self.run.time() == time
 
 
 # %% ===================================================================== %% #
@@ -77,3 +82,16 @@ def test_UMDSimulationRun_init_assignement(data):
     assert run.cycle == data["cycle"]
     assert run.steps == data["steps"]
     assert run.steptime == data["steptime"]
+
+
+@hp.given(st.data())
+def test_UMDSimulationRun_time(data):
+    """
+    Test the UMDSimulationRun time function. The simulated time returned must
+    be equal to the product of the number of iterations, 'steps', and the ionic
+    relaxation time of each iteration, 'steptime'.
+
+    """
+    data = data.draw(generateUMDSimulationRun())
+    run = UMDSimulationRun(**data)
+    assert run.time() == data["steps"]*data["steptime"]
