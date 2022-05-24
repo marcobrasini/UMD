@@ -67,6 +67,7 @@ class UMDLattice:
         Convert 3-dim vectors from reduced to cartesian coordinates.
     reduced
         Convert 3-dim vectors from cartesian to reduced coordinates.
+
     """
 
     def __init__(self, name='', basis=DEFAULT_basis, atoms={}):
@@ -111,7 +112,8 @@ class UMDLattice:
         Returns
         -------
         equal : bool
-            It returns True if the two lattice are identical, otherwise False.
+            It returns True if the two lattice represented are identical, 
+            otherwise False.
 
         """
         equal = isinstance(other, UMDLattice)

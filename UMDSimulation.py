@@ -1,43 +1,81 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue May  3 18:24:26 2022
+===============================================================================
+                                UMDSimulation
+===============================================================================
 
-@author: marco
+This module provides the UMDSimulation class useful to collect molecular 
+dynamics simulation information. A molecular dynamics siulation can be obtained
+by multiple simulation runs concatenated, and UMDSimulation objects contains
+information of each single run and it is able to get cumulative information on
+the number of iterations performed and the total amount of time simulated.
+
+Classes
+-------
+    UMDSimulation
+
+See Also
+--------
+    UMDLattice
+    UMDSimulationRun
+    
 """
+
 
 from UMDLattice import UMDLattice
+from UMDSimulationRun import UMDSimulationRun
 
 
 class UMDSimulation:
     """
-    Class to collect the simulation parameters.
+    UMDSimulation class to collect all the simulation parameters.
 
-    A simulation correspond to the run of a single job.
+    A UMDSimulation object collects molecular dynamics simulation information.
+    A molecular dynamics simulation can be obtained by multiple simulation run
+    concatenated, and so it is defined by a UMDLattice object and list of
+    UMDSimulationRun objects. The UMDSimulation objects contains information
+    of each single run and it is able to get cumulative information on the
+    number of iterations performed and the total amount of time simulated.
+
+    Parameters
+    ----------
+    name : string
+        The name of the simulation.
+    lattice : UMDLattice
+        A UMDLattice object representing the periodic lattice where the
+        molecular dynamics simulation takes place.
+    *runs : UMDSimulationRun
+        A list of UMDSimulationRun objcts each one containing the parameters of
+        a single simulation run.
+
+    Methods
+    -------
+    __str__
+        Convert a UMDSimulation objects into a string.
+    save
+        Print the UMDSimulation information on an output stream.
+    steps
+        Get the total number of iterations performed during the simulation.
+    time
+        Get the total amount of time simulated during the simulation.
+    add
+        Add a new UMDSimulationRun to the UMDSimulation.
 
     """
 
-    def __init__(self, name='', lattice=UMDLattice(), cycle=-1, steps=0,
-                 steptime=0.0, time=0.0):
+    def __init__(self, name, lattice: UMDLattice, *runs: UMDSimulationRun):
         """
-        Construct UMDSimulation object.
+        Construct a UMDSimulation object.
 
         Parameters
         ----------
-        lattice : UMDLattice, optional
-            The lattice over which the simulation is working.
-            The default is UMDLattice().
-        cycle : int, optional
-            The cycle number of the simulation.
-            The default is -1.
-        snaps : int, optional
-            The number of iterations in the simulation.
-            The default is 0.
-        snaptime : float, optional
-            The time duration of each molecular dynamic iteration in fs.
-            The default is 0.
-        time : float, optional
-            The time accumulated during all the simulation.
-            The default is 0
+        name : string
+            The name of the simulation.
+        lattice : UMDLattice
+            A UMDLattice object representing the periodic lattice where the
+            molecular dynamics simulation takes place.
+        *runs : UMDSimulationRun
+            A list of UMDSimulationRun objcts each one containing the
+            parameters of a single simulation run.
 
         Returns
         -------
@@ -46,79 +84,32 @@ class UMDSimulation:
         """
         self.name = name
         self.lattice = lattice
-        self.cycle = cycle
-        self.steps = steps
-        self.steptime = steptime
-        self.time = time
-
-    def simtime(self):
-        """
-        Calculate the total time of the simulation.
-
-        The simulation time is calculated as the product of the constant
-        time of each snapshot, 'snapTime', and the number of snapshots in the
-        current simulation, Snaps.
-
-        Returns
-        -------
-        time : float
-            Simulation time in ps.
-
-        """
-        time = self.time
-        if time == 0.0:
-            time = self.steps * self.steptime * 0.001
-        return time
-
-    def __eq__(self, other):
-        """
-        Overload of the == operator.
-
-        Parameters
-        ----------
-        other : UMDSimulation object
-            The second term of the comparison.
-
-        Returns
-        -------
-        equal : bool
-            It returns True if the two simulations are identical, otherwise
-            False.
-
-        """
-        eq = isinstance(other, UMDSimulation)
-        eq *= (self.name == other.name)
-        eq *= (self.cycle == other.cycle)
-        eq *= (self.steps == other.steps)
-        eq *= (self.steptime == other.steptime)
-        eq *= (self.lattice == other.lattice)
-        eq *= (self.time) == other.time
-        return eq
+        self.runs = [runs]
 
     def __str__(self):
         """
-        Overload of the str function.
+        Convert a UMDSimulation objects into a string.
 
         Returns
         -------
         string : string
-            Report of the simulation parameteres.
+            A descriptive string reporting of the simulation parameteres.
 
         """
         string  = 'Simulation: {:30}\n'.format(self.name)
-        string += 'Total cycles = {:10}\n'.format(self.cycle)
-        string += 'Total steps  = {:10}\n'.format(self.steps)
-        string += 'Total time   = {:10.4f} ps'.format(self.simtime())
+        string += 'Total cycles = {:10}\n'.format(len(self.runs))
+        string += 'Total steps  = {:10}\n'.format(self.steps())
+        string += 'Total time   = {:10.4f} fs'.format(self.time())
         return string
 
     def save(self, outfile):
         """
-        Print on file the UMDSimulation data.
+        Print the UMDSimulation information on an output stream.
 
         Parameters
         ----------
-        outfile : output file
-            The output file where to print the UMDSimulation.
+        outfile : output stream
+            The output stream where to print the UMDSimulation.
 
         Returns
         -------
@@ -126,3 +117,50 @@ class UMDSimulation:
 
         """
         outfile.write(str(self)+'\n\n')
+        outfile.write(str(self.lattice)+'\n\n')
+
+    def steps(self):
+        """
+        Get the total number of iterations performed during the simulation.
+
+        Returns
+        -------
+        steps : int
+            The total number of iterations performed during the simulation.
+
+        """
+        steps = 0
+        for run in self.runs:
+            steps += run.steps
+        return steps
+
+    def time(self):
+        """
+        Get the total amount of time simulated during the simulation.
+
+        Returns
+        -------
+        time : float
+            the total amount of time simulated during the simulation.
+
+        """
+        time = 0
+        for run in self.runs:
+            time += run.time()
+        return time
+
+    def add(self, run):
+        """
+        Add a new UMDSimulationRun to the UMDSimulation.
+
+        Parameters
+        ----------
+        run : UMDSimulationRun
+            The new UMDSimulationRun object to add at the UMDSimulation.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.runs.append(run)
