@@ -4,9 +4,9 @@
 ===============================================================================
 """
 
-from ..UMDSimulation import UMDSimulation
-from ..UMDSimulationRun import UMDSimulationRun
-from ..UMDLattice import UMDLattice
+from ..libs.UMDSimulation import UMDSimulation
+from ..libs.UMDSimulationRun import UMDSimulationRun
+from ..libs.UMDLattice import UMDLattice
 
 import pytest
 

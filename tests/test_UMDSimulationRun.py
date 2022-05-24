@@ -4,7 +4,7 @@
 ===============================================================================
 """
 
-from ..UMDSimulationRun import UMDSimulationRun
+from ..libs.UMDSimulationRun import UMDSimulationRun
 
 
 import pytest
@@ -16,6 +16,12 @@ from .generate_scenarios import generateUMDSimulationRun
 
 # %% UMDSimulationRun unit tests
 class TestUMDSimulationRun_unit:
+    """
+    The unit tests implemented test an instance of the UMDSimulationRun class
+    representing a simulation run with the following characteristic:
+        - run : cycle=3, steps=12000 and steptime=0.45 fs (5400 fs in total)
+    
+    """
 
     cycle = 3
     steps = 12000

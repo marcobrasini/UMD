@@ -66,3 +66,30 @@ def generateUMDSimulationRun(draw, settings=settingUMDSimulationRun):
     steptime = draw(settings.steptime)
     data = {"cycle": cycle, "steps": steps, "steptime": steptime}
     return data
+
+
+# %% Generate UMDSnapThermodynamics data scenarios for testing
+@dataclass
+class GenerateUMDSnapThermodynamics:
+    temperature: st.SearchStrategy[float]
+    pressure: st.SearchStrategy[float]
+    energy: st.SearchStrategy[float]
+
+
+settingUMDSnapThermodynamics = GenerateUMDSnapThermodynamics(
+    temperature=st.floats(min_value=0.0, max_value=100000.0, 
+                          allow_nan=False, allow_infinity=False),
+    pressure=st.floats(min_value=0.0, max_value=100000.0, 
+                       allow_nan=False, allow_infinity=False),
+    energy=st.floats(min_value=-100000.0, max_value=100000.0, 
+                     allow_nan=False, allow_infinity=False)
+    )
+
+
+@st.composite
+def generateUMDSnapThermodynamics(draw, settings=settingUMDSnapThermodynamics):
+    temperature = draw(settings.temperature)
+    pressure = draw(settings.pressure)
+    energy = draw(settings.energy)
+    data = {"temperature": temperature, "pressure": pressure, "energy": energy}
+    return data
