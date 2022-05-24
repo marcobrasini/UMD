@@ -11,20 +11,20 @@ import pytest
 import numpy as np
 
 
-#%% Unit test for a generic lattice
+# %% Unit test for a generic lattice
 class Test_UMDLattice_unit:
     """
-    The unit tests implemented test an instance of the UMDLattice class 
-    representing a generic lattice. 
+    The unit tests implemented test an instance of the UMDLattice class
+    representing a generic lattice.
     The lattice represented has a triclinic structure with basis vectors:
                 a = (2, 0, 0), b = (1, 2, 0), c = (1, 1, 1)
     and it containg 21 atoms of two different types implemented with the
     UMDAtom class:
         15 atoms of type 'X' and with mass 3.00
         6 atoms of type 'Y' and with mass 4.50
-    
+
     """
-    
+
     X = UMDAtom(name='X', mass=3.00)
     Y = UMDAtom(name='Y', mass=4.50)
     atoms = {X: 15, Y: 6}
@@ -39,7 +39,7 @@ class Test_UMDLattice_unit:
     # %% UMDLattice __init__ function tests
     def test_UMDLattice_init_default(self):
         """
-        Test the __init__ function defualt constructor.
+        Test the __init__ function default constructor.
 
         """
         lattice = UMDLattice()
@@ -312,7 +312,6 @@ class Test_UMDLattice_unit:
         reduced = self.lattice.reduced(vector)
         cartesian = self.lattice.cartesian(reduced)
         assert np.allclose(cartesian, vector)
-
 
     # %% UMDLattice isdefault function tests
     def test_UMDLattice_isdefault_true(self):

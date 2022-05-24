@@ -43,6 +43,8 @@ class UMDSimulationRun:
 
     Methods
     -------
+    __eq__
+        Compare two UMDSimulationRun objects.
     __str__
         Convert a UMDSimulationRun objects into a string.
     time
@@ -74,6 +76,28 @@ class UMDSimulationRun:
         self.cycle = cycle
         self.steps = steps
         self.steptime = steptime
+
+    def __eq__(self, other):
+        """
+        Compare two UMDSimulationRun objects.
+
+        Parameters
+        ----------
+        other : UMDSimulationRun
+            The second term of the comparison.
+
+        Returns
+        -------
+        eq : bool
+            It returns True if the two simulation runs collected are the same,
+            otherwise False.
+
+        """
+        eq  = isinstance(other, UMDSimulationRun)
+        eq *= (self.cycle == other.cycle)
+        eq *= (self.steps == other.steps)
+        eq *= (self.steptime == other.steptime)
+        return eq
 
     def __str__(self):
         """

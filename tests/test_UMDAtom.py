@@ -12,7 +12,7 @@ import hypothesis.strategies as st
 from .generate_scenarios import generateUMDAtom
 
 
-# %% unit tests for O atom 
+# %% UMDAtom unit tests for O atom 
 class Test_UMDAtom_unit:
     """
     The unit tests implemented test an instance of the UMDAtom class

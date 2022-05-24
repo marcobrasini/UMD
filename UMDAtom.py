@@ -85,7 +85,6 @@ class UMDAtom:
 
         """
         equal = isinstance(other, UMDAtom)
-        print(self.Z, other.Z)
         equal *= (self.Z == other.Z)
         equal *= (self.name == other.name)
         equal *= (self.mass == other.mass)

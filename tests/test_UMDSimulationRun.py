@@ -20,7 +20,6 @@ class TestUMDSimulationRun_unit:
     cycle = 3
     steps = 12000
     steptime = 0.45
-    run = UMDSimulationRun(cycle, steps, steptime)
 
     # %% UMDSimulationRun __init__ function tests
     def test_UMDSimulationRun_init_default(self):
@@ -38,10 +37,55 @@ class TestUMDSimulationRun_unit:
         Test the __init__ function assignement operations.
 
         """
-        assert self.run.cycle == self.cycle
-        assert self.run.steps == self.steps
-        assert self.run.steptime == self.steptime
+        run = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        assert run.cycle == self.cycle
+        assert run.steps == self.steps
+        assert run.steptime == self.steptime
 
+    # %% UMDSimulationRun __eq__ function tests
+    def test_UMDSimulationRun_eq_true(self):
+        """
+        Test the __eq__ function to compare two UMDSimulationRun objects
+        refering to the same simulation run. The value returned must be True.
+
+        """
+        run1 = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        run2 = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        assert run1 == run2
+    
+    def test_UMDSimulationRun_eq_false_cycle(self):
+        """
+        Test the __eq__ function to compare two UMDSimulationRun objects
+        refering to different simulations run cycles. The value returned must
+        be False.
+
+        """
+        run1 = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        run2 = UMDSimulationRun(self.cycle+1, self.steps, self.steptime)
+        assert not run1 == run2
+    
+    def test_UMDSimulationRun_eq_false_steps(self):
+        """
+        Test the __eq__ function to compare two UMDSimulationRun objects
+        refering to simulations run with different steps. The value returned
+        must be False.
+
+        """
+        run1 = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        run2 = UMDSimulationRun(self.cycle, self.steps+1, self.steptime)
+        assert not run1 == run2
+    
+    def test_UMDSimulationRun_eq_false_steptime(self):
+        """
+        Test the __eq__ function to compare two UMDSimulationRun objects
+        refering to simulations run with different steptime. The value returned
+        must be False.
+
+        """
+        run1 = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        run2 = UMDSimulationRun(self.cycle, self.steps, self.steptime+1.0)
+        assert not run1 == run2
+        
     # %% UMDSimulationRun __str__ function tests
     def test_UMDSimulationRun_str(self):
         """
@@ -52,20 +96,23 @@ class TestUMDSimulationRun_unit:
         string  = "Run        3:\n"
         string += "  Steps     =    12000\n"
         string += "  Step time =    0.450 (fs)"
-        assert str(self.run) == string
+        run = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        assert str(run) == string
 
     def test_UMDSimulationRun_str_length(self):
         """
         Test the __str__ function correct length of the string object returned.
-        
+
         """
         stringlength = 14+23+27
-        assert len(str(self.run)) == stringlength
-    
+        run = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        assert len(str(run)) == stringlength
+
     # %% UMDSimulationRun time function tests
     def test_UMDSimulationRun_time(self):
         time = self.steps*self.steptime
-        assert self.run.time() == time
+        run = UMDSimulationRun(self.cycle, self.steps, self.steptime)
+        assert run.time() == time
 
 
 # %% ===================================================================== %% #
@@ -81,6 +128,33 @@ def test_UMDSimulationRun_init_assignement(data):
     assert run.cycle == data["cycle"]
     assert run.steps == data["steps"]
     assert run.steptime == data["steptime"]
+
+
+@hp.given(data1=st.data(), data2=st.data())
+def test_UMDSimulationRun_eq(data1, data2):
+    """
+    Test the UMDSimulationRun __eq__ function. The value returned must be True
+    if the two simulation are the same, otherwise False.
+
+    """
+    data1 = data1.draw(generateUMDSimulationRun())
+    data2 = data2.draw(generateUMDSimulationRun())
+    run1 = UMDSimulationRun(**data1)
+    run2 = UMDSimulationRun(**data2)
+    assert (run1 == run2) == (data1 == data2)
+
+
+@hp.given(st.data())
+def test_UMDSimulationRun_str_length(data):
+    """
+    Test the UMDSimulationRun str function. The string returned must have a
+    length of exactly 64 characters.
+
+    """
+    stringlength = 64
+    data = data.draw(generateUMDSimulationRun())
+    run = UMDSimulationRun(**data)
+    assert len(str(run)) == stringlength
 
 
 @hp.given(st.data())

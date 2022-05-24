@@ -112,7 +112,7 @@ class UMDLattice:
         Returns
         -------
         equal : bool
-            It returns True if the two lattice represented are identical, 
+            It returns True if the two lattice represented are identical,
             otherwise False.
 
         """
@@ -139,7 +139,6 @@ class UMDLattice:
         atoms_val = self.atoms.values()
         string += ' '.join(['{:5}'.format(str(n)) for n in atoms_name])+'\n'
         string += ' '.join(['{:5}'.format(n) for n in atoms_val])
-        print(string)
         return string
 
     def save(self, outfile):
