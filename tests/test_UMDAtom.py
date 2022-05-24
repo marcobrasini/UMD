@@ -4,7 +4,7 @@
 ===============================================================================
 """
 
-from ..UMDAtom import UMDAtom
+from ..libs.UMDAtom import UMDAtom
 
 import pytest
 import hypothesis as hp

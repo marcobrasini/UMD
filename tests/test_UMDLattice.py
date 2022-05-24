@@ -4,8 +4,8 @@
 ===============================================================================
 """
 
-from ..UMDLattice import UMDLattice
-from ..UMDAtom import UMDAtom
+from ..libs.UMDLattice import UMDLattice
+from ..libs.UMDAtom import UMDAtom
 
 import pytest
 import numpy as np
