@@ -3,7 +3,7 @@
                                 UMDSimulation
 ===============================================================================
 
-This module provides the UMDSimulation class useful to collect molecular 
+This module provides the UMDSimulation class useful to collect molecular
 dynamics simulation information. A molecular dynamics siulation can be obtained
 by multiple simulation runs concatenated, and UMDSimulation objects contains
 information of each single run and it is able to get cumulative information on
@@ -17,12 +17,11 @@ See Also
 --------
     UMDLattice
     UMDSimulationRun
-    
+
 """
 
 
 from .UMDLattice import UMDLattice
-from .UMDSimulationRun import UMDSimulationRun
 
 
 class UMDSimulation:
@@ -62,7 +61,7 @@ class UMDSimulation:
 
     """
 
-    def __init__(self, name, lattice: UMDLattice, *runs: UMDSimulationRun):
+    def __init__(self, *runs, name='', lattice=UMDLattice()):
         """
         Construct a UMDSimulation object.
 
@@ -85,6 +84,12 @@ class UMDSimulation:
         self.name = name
         self.lattice = lattice
         self.runs = [*runs]
+
+    def __eq__(self, other):
+        eq = isinstance(other, UMDSimulation)
+        eq *= (self.lattice == other.lattice)
+        eq *= (self.runs == other.runs)
+        return eq
 
     def __str__(self):
         """
@@ -170,6 +175,12 @@ class UMDSimulation:
         ----------
         run : UMDSimulationRun
             The new UMDSimulationRun object to add at the UMDSimulation.
+
+        Raises
+        ------
+        AttributeError
+            When rum.cycle if not consistent with the number of simulation runs
+            already concatenated.
 
         Returns
         -------

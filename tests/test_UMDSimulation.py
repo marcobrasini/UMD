@@ -22,28 +22,76 @@ class TestUMDSimulation:
     and the amount of time simulated is 1300 fs.
     """
 
-    name = ""
-    lattice = UMDLattice()
+    name = "SimulationName"
+    lattice = UMDLattice(atoms={'X': 1})
     run0 = UMDSimulationRun(0, 1000, 0.5)
     run1 = UMDSimulationRun(1, 2000, 0.4)
 
     # %% UMDSimulation __init__ function tests
-    def test_UMDSimulation_init_norun(self):
+    def test_UMDSimulation_init_no_run(self):
         """
         Test the __init__ function default constructor.
 
         """
-        simulation = UMDSimulation(name=self.name, lattice=self.lattice)
-        assert simulation.name == self.name
-        assert simulation.lattice == self.lattice
+        simulation = UMDSimulation()
+        assert simulation.name == ""
+        assert simulation.lattice == UMDLattice()
         assert simulation.runs == []
 
     def test_UMDSimulation_init(self):
-        simulation = UMDSimulation(self.name, self.lattice, self.run0, self.run1)
+        """
+        Test the __init__ constructor assignement operations.
+
+        """
+        simulation = UMDSimulation(self.run0, self.run1,
+                                   name=self.name, lattice=self.lattice)
         assert simulation.name == self.name
         assert simulation.lattice == self.lattice
         assert simulation.runs[0] == self.run0
         assert simulation.runs[1] == self.run1
+
+    # %% UMDSimulation __eq__ function tests
+    def test_UMDSimulation_eq_true(self):
+        """
+        Test the __eq__ function to compare two UMDSimulation objects refering
+        to the same simulation. The value returned must be True.
+
+        """
+        simulation1 = UMDSimulation(self.run0, self.run1,
+                                    name=self.name, lattice=self.lattice)
+        simulation2 = UMDSimulation(self.run0, self.run1,
+                                    name=self.name, lattice=self.lattice)
+        assert simulation1 == simulation2
+
+    def test_UMDSimulation_eq_false_lattice(self):
+        """
+        Test the __eq__ function to compare two UMDSimulation objects refering
+        to simulation on different lattices. The value returned must be False.
+
+        """
+        simulation1 = UMDSimulation(self.run0, lattice=self.lattice)
+        simulation2 = UMDSimulation(self.run0, lattice=UMDLattice())
+        assert not simulation1 == simulation2
+
+    def test_UMDSimulation_eq_false_run_type(self):
+        """
+        Test the __eq__ function to compare two UMDSimulation objects refering
+        to simulation with different runs. The value returned must be False.
+
+        """
+        simulation1 = UMDSimulation(self.run0)
+        simulation2 = UMDSimulation(self.run1)
+        assert not simulation1 == simulation2
+
+    def test_UMDSimulation_eq_false_run_number(self):
+        """
+        Test the __eq__ function to compare two UMDSimulation objects refering
+        to simulation with different cycles. The value returned must be False.
+
+        """
+        simulation1 = UMDSimulation(self.run0, self.run1)
+        simulation2 = UMDSimulation(self.run1)
+        assert not simulation1 == simulation2
 
     # %% UMDSimulation __str__ function tests
     def test_UMDSimulation_str(self):
@@ -52,11 +100,12 @@ class TestUMDSimulation:
         a descriptive and printable string object.
 
         """
-        string  = 'Simulation:                               \n'
+        string  = 'Simulation: SimulationName                \n'
         string += '  Total cycles =            2\n'
         string += '  Total steps  =         3000\n'
         string += '  Total time   =     1300.000 fs'
-        simulation = UMDSimulation(self.name, self.lattice, self.run0, self.run1)
+        simulation = UMDSimulation(self.run0, self.run1,
+                                   name=self.name, lattice=self.lattice)
         assert str(simulation) == string
 
     def test_UMDSimulation_str_length(self):
@@ -65,7 +114,8 @@ class TestUMDSimulation:
 
         """
         stringlength = 43+30+30+32
-        simulation = UMDSimulation(self.name, self.lattice, self.run0, self.run1)
+        simulation = UMDSimulation(self.run0, self.run1,
+                                   name=self.name, lattice=self.lattice)
         assert len(str(simulation)) == stringlength
 
     # %% UMDSimulation cycle function tests
@@ -75,7 +125,7 @@ class TestUMDSimulation:
         of runs concatenated.
 
         """
-        simulation = UMDSimulation(self.name, self.lattice, self.run0, self.run1)
+        simulation = UMDSimulation(self.run0, self.run1)
         assert simulation.cycle() == 2
 
     # %% UMDSimulation steps function tests
@@ -85,7 +135,7 @@ class TestUMDSimulation:
         all the number of iterations performed during each simulation run.
 
         """
-        simulation = UMDSimulation(self.name, self.lattice, self.run0, self.run1)
+        simulation = UMDSimulation(self.run0, self.run1)
         assert simulation.steps() == 3000
 
     # %% UMDSimulation time function tests
@@ -95,7 +145,7 @@ class TestUMDSimulation:
         all the amounts of time simulated during each simulation run.
 
         """
-        simulation = UMDSimulation(self.name, self.lattice, self.run0, self.run1)
+        simulation = UMDSimulation(self.run0, self.run1)
         assert simulation.time() == 1300.00
 
     # %% UMDSimulation time function tests
@@ -107,7 +157,7 @@ class TestUMDSimulation:
         increased by one.
 
         """
-        simulation = UMDSimulation(self.name, self.lattice, self.run0)
+        simulation = UMDSimulation(self.run0, lattice=self.lattice)
         simulation.add(self.run1)
         assert simulation.cycle() == 2
         assert simulation.runs[-1] == self.run1
@@ -118,6 +168,6 @@ class TestUMDSimulation:
         add function must raise an AttributeError.
 
         """
-        simulation = UMDSimulation(self.name, self.lattice, self.run0)
+        simulation = UMDSimulation(self.run0, lattice=self.lattice)
         with pytest.raises(AttributeError):
             self.simulation.add(self.run0)

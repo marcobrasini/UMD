@@ -52,9 +52,10 @@ class GenerateUMDSimulationRun:
 
 
 settingUMDSimulationRun = GenerateUMDSimulationRun(
-    cycle=st.integers(min_value=0, max_value=10000000),
-    steps=st.integers(min_value=0, max_value=1000),
-    steptime=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False)
+    cycle=st.integers(min_value=0, max_value=100),
+    steps=st.integers(min_value=0, max_value=100000),
+    steptime=st.floats(min_value=0.0, max_value=10.0, 
+                       allow_nan=False, allow_infinity=False)
     )
 
 
