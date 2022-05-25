@@ -9,7 +9,7 @@ from ..libs.UMDAtom import UMDAtom
 import pytest
 import hypothesis as hp
 import hypothesis.strategies as st
-from .generate_scenarios import generateUMDAtom
+from .test_scenarios_UMDAtom import dataUMDAtom
 
 
 # %% UMDAtom unit tests for O atom 
@@ -133,7 +133,7 @@ def test_UMDAtom_init_assignement(data):
     Test the __init__ function assignement operations.
 
     """
-    data = data.draw(generateUMDAtom())
+    data = data.draw(dataUMDAtom())
     atom = UMDAtom(**data)
     assert atom.Z == data['Z']
     assert atom.name == data['name']
@@ -148,8 +148,8 @@ def test_UMDAtom_eq(data1, data2):
     two identical atoms the value returned must be True, otherwise False.
 
     """
-    data1 = data1.draw(generateUMDAtom())
-    data2 = data2.draw(generateUMDAtom())
+    data1 = data1.draw(dataUMDAtom())
+    data2 = data2.draw(dataUMDAtom())
     atom1 = UMDAtom(**data1)
     atom2 = UMDAtom(**data2)
     assert (atom1 == atom2) == (data1 == data2)
@@ -163,8 +163,8 @@ def test_UMDAtom_hash(data1, data2):
     dictionary comparison must be True, otherwise False.
 
     """
-    data1 = data1.draw(generateUMDAtom())
-    data2 = data2.draw(generateUMDAtom())
+    data1 = data1.draw(dataUMDAtom())
+    data2 = data2.draw(dataUMDAtom())
     atom1 = UMDAtom(**data1)
     atom2 = UMDAtom(**data2)
     assert ({atom1: 1} == {atom2: 1}) == (data1 == data2)
@@ -176,6 +176,6 @@ def test_UMDAtom_str(data):
     Test the __init__ function assignement operations.
 
     """
-    data = data.draw(generateUMDAtom())
+    data = data.draw(dataUMDAtom())
     atom = UMDAtom(**data)
     assert str(atom) == data['name']
