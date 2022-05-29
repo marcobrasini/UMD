@@ -11,7 +11,8 @@ import pytest
 import hypothesis as hp
 import hypothesis.strategies as st
 
-from .generate_scenarios import generateUMDSimulationRun
+from .test_scenarios_UMDSimulationRun import dataUMDSimulationRun
+from .test_scenarios_UMDSimulationRun import getUMDSimulationRun
 
 
 # %% UMDSimulationRun unit tests
@@ -129,7 +130,7 @@ def test_UMDSimulationRun_init_assignement(data):
     Test the __init__ function assignement operations.
 
     """
-    data = data.draw(generateUMDSimulationRun())
+    data = data.draw(dataUMDSimulationRun())
     run = UMDSimulationRun(**data)
     assert run.cycle == data["cycle"]
     assert run.steps == data["steps"]
@@ -143,8 +144,8 @@ def test_UMDSimulationRun_eq(data1, data2):
     if the two simulation are the same, otherwise False.
 
     """
-    data1 = data1.draw(generateUMDSimulationRun())
-    data2 = data2.draw(generateUMDSimulationRun())
+    data1 = data1.draw(dataUMDSimulationRun())
+    data2 = data2.draw(dataUMDSimulationRun())
     run1 = UMDSimulationRun(**data1)
     run2 = UMDSimulationRun(**data2)
     assert (run1 == run2) == (data1 == data2)
@@ -158,8 +159,7 @@ def test_UMDSimulationRun_str_length(data):
 
     """
     stringlength = 64
-    data = data.draw(generateUMDSimulationRun())
-    run = UMDSimulationRun(**data)
+    run = data.draw(getUMDSimulationRun())
     assert len(str(run)) == stringlength
 
 
@@ -171,6 +171,6 @@ def test_UMDSimulationRun_time(data):
     relaxation time of each iteration, 'steptime'.
 
     """
-    data = data.draw(generateUMDSimulationRun())
+    data = data.draw(dataUMDSimulationRun())
     run = UMDSimulationRun(**data)
     assert run.time() == data["steps"]*data["steptime"]
