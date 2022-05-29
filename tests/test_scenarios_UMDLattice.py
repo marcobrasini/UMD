@@ -8,17 +8,16 @@ derivatives, like UMDSimulation.
 
 Classes
 -------
-    ScenariosUMDAtom
+    ScenariosUMDLattice
 
 Functions
 ---------
-    dataUMDAtom
-    getUMDAtom
-    getUMDAtom_dictionary
+    dataUMDLattice
+    getUMDLattice
 
 See Also
 --------
-    test_UMDAtom
+    test_UMDLattice
 
 """
 
@@ -53,7 +52,7 @@ setUMDLattice = ScenariosUMDLattice(
 
 # %% Strategies generator functions
 @st.composite
-def dataUMDLattice(draw, n):
+def dataUMDLattice(draw, n=1):
     """
     Generate the input data for a UMDLattice.
 
@@ -66,7 +65,7 @@ def dataUMDLattice(draw, n):
 
 
 @st.composite
-def getUMDLattice(draw, n):
+def getUMDLattice(draw, n=1):
     """
     Generate directly a UMDLattice object.
 

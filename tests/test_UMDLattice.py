@@ -9,6 +9,11 @@ from ..libs.UMDAtom import UMDAtom
 
 import pytest
 import numpy as np
+import hypothesis as hp
+import hypothesis.strategies as st
+
+from .test_scenarios import getNumpyArray
+from .test_scenarios_UMDLattice import dataUMDLattice, getUMDLattice
 
 
 # %% Unit test for a generic lattice
@@ -301,11 +306,12 @@ class Test_UMDLattice_unit:
 
     def test_UMDLattice_cartesian_from_reduced(self):
         """
-        Test the reduced function to convert a set of vectors in cartesian
-        coordiates to reduced coordinates refered to the lattice vector system.
-        To test it, we assert that a vector in reduced coordinates must be
-        equal (or close) to itself, when it is firts tranformed in cartesian
-        coordinates and then back again into reduced coordinates.
+        Test the cartesian function to convert a set of vectors in reduced
+        coordiates refered to the lattice vector system to cartesian
+        coordinates.
+        To test it, we assert that a vector in cartesian coordinates must be
+        equal (or close) to itself, when it is firts tranformed in reduced
+        coordinates and then back again into cartesian coordinates.
 
         """
         vector = np.array([1, 3, 2])
@@ -313,23 +319,124 @@ class Test_UMDLattice_unit:
         cartesian = self.lattice.cartesian(reduced)
         assert np.allclose(cartesian, vector)
 
-    # %% UMDLattice isdefault function tests
-    def test_UMDLattice_isdefault_true(self):
-        Lattice = UMDLattice()
-        assert Lattice.isdefault()
-
-    def test_UMDLattice_isdefault_false_name(self):
-        Lattice = UMDLattice(name='Lattice')
-        assert not Lattice.isdefault()
-
-    def test_UMDLattice_isdefault_false_basis(self):
-        Lattice = UMDLattice(basis=2*np.identity(3))
-        assert not Lattice.isdefault()
-
-    def test_UMDLattice_isdefault_false_atoms(self):
-        Lattice = UMDLattice(atoms={self.X: 0})
-        assert not Lattice.isdefault()
-
 
 # %% ===================================================================== %% #
 # %% hypothesis tests
+@hp.given(data=st.data(), ntypes=st.integers(1, 100))
+def test_UMDLattice_init(data, ntypes):
+    """
+    Test the __init__ function assignement operations.
+
+    """
+    data = data.draw(dataUMDLattice(ntypes))
+    lattice = UMDLattice(**data)
+    assert lattice.name == data['name']
+    assert lattice.atoms == data['atoms']
+    assert np.array_equal(lattice.dirBasis, data['basis'])
+    assert np.array_equal(lattice.invBasis, np.linalg.inv(data['basis']))
+
+
+@hp.given(data1=st.data(), data2=st.data())
+def test_UMDLattice_eq(data1, data2):
+    """
+    Test the __eq__ function.
+
+    """
+    data1 = data1.draw(dataUMDLattice())
+    data2 = data2.draw(dataUMDLattice())
+    equal = (data1['atoms'] == data2['atoms']
+             and np.array_equal(data1['basis'], data2['basis']))
+    lattice1 = UMDLattice(**data1)
+    lattice2 = UMDLattice(**data2)
+    assert (lattice1 == lattice2) == equal
+
+
+@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
+def test_UMDLattice_reduced_shape(lattice, vectors, n):
+    """
+    Test the reduced function to convert vectors in cartesian coordinates to
+    reduced coordiates refered to the lattice vector system.
+    The set of vectors in reduced coordinates must conserve the shape.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    vectors = vectors.draw(getNumpyArray(n, 3))
+    reduced = lattice.reduced(vectors)
+    assert reduced.shape == vectors.shape
+
+
+@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
+def test_UMDLattice_cartesian_shape(lattice, vectors, n):
+    """
+    Test the cartesian function to convert vectors in cartesian coordiates
+    to reduced coordinates refered to the lattice vector system.
+    The set of vectors in cartesian coordinates must conserve the shape.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    vectors = vectors.draw(getNumpyArray(n, 3))
+    cartesian = lattice.cartesian(vectors)
+    assert cartesian.shape == vectors.shape
+
+
+@hp.given(lattice=st.data())
+def test_UMDLattice_reduced_basis(lattice):
+    """
+    Test the reduced function to convert vectors in cartesian coordiates to
+    reduced coordinates refered to the lattice vector system.
+    To test it, we assert that a matrix of basis vectors in cartesian
+    coordinates must be equal to the identical matrix in reduced coordinates.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    reduced = lattice.reduced(lattice.dirBasis)
+    assert np.allclose(reduced, np.identity(3))
+
+
+@hp.given(lattice=st.data())
+def test_UMDLattice_cartesian_basis(lattice):
+    """
+    Test the cartesian function to convert vectors in cartesian coordiates
+    to reduced coordinates refered to the lattice vector system.
+    To test it, we assert that an identical matrix of in reduced coordinates
+    must be equal to the matrix of basis vectors in cartesian coordinates.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    cartesian = lattice.cartesian(np.identity(3))
+    assert np.allclose(cartesian, lattice.dirBasis)
+
+
+@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
+def test_UMDLattice_reduced_from_cartesian(lattice, vectors, n):
+    """
+    Test the reduced function to convert a set of vectors in cartesian
+    coordiates to reduced coordinates refered to the lattice vector system.
+    To test it, we assert that a vector in reduced coordinates must be
+    equal (or close) to itself, when it is firts tranformed in cartesian
+    coordinates and then back again into reduced coordinates.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    vectors = vectors.draw(getNumpyArray(n, 3))
+    cartesian = lattice.cartesian(vectors)
+    reduced = lattice.reduced(cartesian)
+    assert np.allclose(reduced, vectors)
+
+
+@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
+def test_UMDLattice_cartesian_from_reduced(lattice, vectors, n):
+    """
+    Test the cartesian function to convert a set of vectors in reduced
+    coordiates refered to the lattice vector system to cartesian
+    coordinates.
+    To test it, we assert that a vector in cartesian coordinates must be
+    equal (or close) to itself, when it is firts tranformed in reduced
+    coordinates and then back again into cartesian coordinates.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    vectors = vectors.draw(getNumpyArray(n, 3))
+    reduced = lattice.reduced(vectors)
+    cartesian = lattice.cartesian(reduced)
+    assert np.allclose(cartesian, vectors)
