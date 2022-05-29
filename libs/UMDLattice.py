@@ -35,17 +35,14 @@ class UMDLattice:
     ----------
     name : string, optional
         The name of the lattice.
-        The default is ''.
     basis : numpy array (3,3), optional
         A matrix composed by the three lattice vectors 'a', 'b' and 'c'.
         The matrix strucure is the following:
             basis = np.array([[ax, ay, az], [bx, by, bz], [cx, cy, cz]])
-        The default is np.zeros((3, 3)).
     atoms : dict, optional
         A dictionary made of atomic species coupled with their respective
         number of copies present into the unit cell. Typically the single item
         has the structure {UMDAtom: number_of_atoms}.
-        The default is {}.
 
     Methods
     -------
@@ -83,7 +80,7 @@ class UMDLattice:
             A matrix composed by the three lattice vectors 'a', 'b' and 'c'.
             The matrix strucure is the following:
                 basis = np.array([[ax, ay, az], [bx, by, bz], [cx, cy, cz]])
-            The default is np.zeros((3, 3)).
+            The default is np.identity(3).
         atoms : dict, optional
             A dictionary made of atomic species coupled with their respective
             number of copies present into the unit cell. Typically, the single
@@ -247,21 +244,3 @@ class UMDLattice:
         """
         cartesian = reduced @ self.dirBasis
         return cartesian
-
-    def isdefault(self):
-        """
-        Check if the object is a UMDLattice default object.
-
-        Returns
-        -------
-        default : bool
-            It returns True if it is a default-built UMDLattice object,
-            otherwise False.
-
-        """
-        default = True
-        default *= (self.name == '')
-        default *= (self.atoms == {})
-        default *= np.array_equal(self.dirBasis, DEFAULT_basis)
-        default *= np.array_equal(self.invBasis, DEFAULT_basis)
-        return default

@@ -52,6 +52,10 @@ setUMDAtom = ScenariosUMDAtom(
 # %% Strategies generator functions
 @st.composite
 def dataUMDAtom(draw):
+    """
+    Generate the input data for a UMDAtom.
+
+    """
     Z = draw(setUMDAtom.Z)
     name = draw(setUMDAtom.name)
     mass = draw(setUMDAtom.mass)
@@ -62,6 +66,10 @@ def dataUMDAtom(draw):
 
 @st.composite
 def getUMDAtom(draw):
+    """
+    Generate directly a UMDAtom object.
+    
+    """
     data = draw(dataUMDAtom())
     atom = UMDAtom(**data)
     return atom
@@ -69,7 +77,7 @@ def getUMDAtom(draw):
 
 @st.composite
 def getUMDAtom_dictionary(draw, n=1):
-    atom_key = draw(st.lists(getUMDAtom(), min_size=n, max_size=n))
+    atom_key = draw(st.lists(getUMDAtom(), min_size=n, max_size=n, unique=True))
     atom_val = draw(st.lists(st.integers(1), min_size=n, max_size=n))
     atom_dict = dict(zip(atom_key, atom_val))
     return atom_dict

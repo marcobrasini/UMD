@@ -173,7 +173,7 @@ def test_UMDAtom_hash(data1, data2):
 @hp.given(data=st.data())
 def test_UMDAtom_str(data):
     """
-    Test the __init__ function assignement operations.
+    Test the __str__ function.
 
     """
     data = data.draw(dataUMDAtom())
