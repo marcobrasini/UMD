@@ -98,7 +98,7 @@ def test_dataUMDLattice(data, n):
 @hp.given(data=st.data(), n=st.integers(1, 10))
 def test_getUMDLattice(data, n):
     """
-    Test dataUMDLattice generator function.
+    Test getUMDLattice generator function.
 
     """
     lattice = data.draw(getUMDLattice(n))

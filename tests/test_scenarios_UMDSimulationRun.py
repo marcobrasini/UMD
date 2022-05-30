@@ -14,10 +14,12 @@ Functions
 ---------
     dataUMDSimulationRun
     getUMDSimulationRun
+    getUMDSimulationRun_list
 
 See Also
 --------
     test_UMDSimulationRun
+    test_sceanrios_UMDSimulation
 
 """
 
@@ -31,13 +33,13 @@ from dataclasses import dataclass
 
 
 @dataclass
-class GenerateUMDSimulationRun:
+class ScenariosUMDSimulationRun:
     cycle: st.SearchStrategy[int]
     steps: st.SearchStrategy[int]
     steptime: st.SearchStrategy[float]
 
 
-setUMDSimulationRun = GenerateUMDSimulationRun(
+setUMDSimulationRun = ScenariosUMDSimulationRun(
     cycle=st.integers(min_value=0, max_value=100),
     steps=st.integers(min_value=0, max_value=100000),
     steptime=st.floats(min_value=0.0, max_value=10.0,
@@ -70,9 +72,25 @@ def getUMDSimulationRun(draw):
     return run
 
 
+@st.composite
+def getUMDSimulationRun_list(draw, n=1):
+    """
+    Strategy to generate a list of n UMDSimulationRun objects.
+
+    """
+    runs = draw(st.lists(getUMDSimulationRun(), min_size=n, max_size=n))
+    for i in range(n):
+        runs[i].cycle = i
+    return runs
+
+
 # %% Strategies generator tests
 @hp.given(st.data())
 def test_dataUMDSimulationRun(data):
+    """
+    Test dataUMDSimulationRun generator function.
+    
+    """
     data = data.draw(dataUMDSimulationRun())
     assert isinstance(data['cycle'], int)
     assert data['cycle'] >= 0
@@ -84,5 +102,23 @@ def test_dataUMDSimulationRun(data):
 
 @hp.given(st.data())
 def test_getUMDSimulationRun(data):
+    """
+    Test getUMDSimulationRun generator function.
+    
+    """
     run = data.draw(getUMDSimulationRun())
     assert isinstance(run, UMDSimulationRun)
+
+
+@hp.given(data=st.data(), n=st.integers(1, 100))
+def test_getUMDSimulationRun_list(data, n):
+    """
+    Test getUMDSimulationRun_listt generator function.
+    
+    """
+    runs = data.draw(getUMDSimulationRun_list(n))
+    assert len(runs) == n
+    for i in range(n):
+        assert isinstance(runs[i], UMDSimulationRun)
+        assert runs[i].cycle == i
+    

@@ -77,7 +77,8 @@ def getUMDAtom(draw):
 
 @st.composite
 def getUMDAtom_dictionary(draw, n=1):
-    atom_key = draw(st.lists(getUMDAtom(), min_size=n, max_size=n, unique=True))
+    atom_key = draw(st.lists(getUMDAtom(),
+                             min_size=n, max_size=n, unique=True))
     atom_val = draw(st.lists(st.integers(1), min_size=n, max_size=n))
     atom_dict = dict(zip(atom_key, atom_val))
     return atom_dict

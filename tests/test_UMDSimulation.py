@@ -9,6 +9,11 @@ from ..libs.UMDSimulationRun import UMDSimulationRun
 from ..libs.UMDLattice import UMDLattice
 
 import pytest
+import hypothesis as hp
+import hypothesis.strategies as st
+
+from .test_scenarios_UMDSimulation import dataUMDSimulation, getUMDSimulation
+from .test_scenarios_UMDSimulationRun import getUMDSimulationRun
 
 
 # %% UMDSimulation unit tests
@@ -43,8 +48,8 @@ class TestUMDSimulation:
         Test the __init__ constructor assignement operations.
 
         """
-        simulation = UMDSimulation(self.run0, self.run1,
-                                   name=self.name, lattice=self.lattice)
+        simulation = UMDSimulation(name=self.name, lattice=self.lattice,
+                                   runs=[self.run0, self.run1])
         assert simulation.name == self.name
         assert simulation.lattice == self.lattice
         assert simulation.runs[0] == self.run0
@@ -57,10 +62,10 @@ class TestUMDSimulation:
         to the same simulation. The value returned must be True.
 
         """
-        simulation1 = UMDSimulation(self.run0, self.run1,
-                                    name=self.name, lattice=self.lattice)
-        simulation2 = UMDSimulation(self.run0, self.run1,
-                                    name=self.name, lattice=self.lattice)
+        simulation1 = UMDSimulation(name=self.name, lattice=self.lattice,
+                                   runs=[self.run0, self.run1])
+        simulation2 = UMDSimulation(name=self.name, lattice=self.lattice,
+                                   runs=[self.run0, self.run1])
         assert simulation1 == simulation2
 
     def test_UMDSimulation_eq_false_lattice(self):
@@ -69,8 +74,8 @@ class TestUMDSimulation:
         to simulation on different lattices. The value returned must be False.
 
         """
-        simulation1 = UMDSimulation(self.run0, lattice=self.lattice)
-        simulation2 = UMDSimulation(self.run0, lattice=UMDLattice())
+        simulation1 = UMDSimulation(lattice=self.lattice, runs=[self.run0])
+        simulation2 = UMDSimulation(lattice=UMDLattice(), runs=[self.run0])
         assert not simulation1 == simulation2
 
     def test_UMDSimulation_eq_false_run_type(self):
@@ -79,8 +84,8 @@ class TestUMDSimulation:
         to simulation with different runs. The value returned must be False.
 
         """
-        simulation1 = UMDSimulation(self.run0)
-        simulation2 = UMDSimulation(self.run1)
+        simulation1 = UMDSimulation(runs=[self.run0])
+        simulation2 = UMDSimulation(runs=[self.run1])
         assert not simulation1 == simulation2
 
     def test_UMDSimulation_eq_false_run_number(self):
@@ -89,8 +94,8 @@ class TestUMDSimulation:
         to simulation with different cycles. The value returned must be False.
 
         """
-        simulation1 = UMDSimulation(self.run0, self.run1)
-        simulation2 = UMDSimulation(self.run1)
+        simulation1 = UMDSimulation(runs=[self.run0, self.run1])
+        simulation2 = UMDSimulation(runs=[self.run1])
         assert not simulation1 == simulation2
 
     # %% UMDSimulation __str__ function tests
@@ -104,8 +109,8 @@ class TestUMDSimulation:
         string += '  Total cycles =            2\n'
         string += '  Total steps  =         3000\n'
         string += '  Total time   =     1300.000 fs'
-        simulation = UMDSimulation(self.run0, self.run1,
-                                   name=self.name, lattice=self.lattice)
+        simulation = UMDSimulation(name=self.name, lattice=self.lattice,
+                                   runs=[self.run0, self.run1])
         assert str(simulation) == string
 
     def test_UMDSimulation_str_length(self):
@@ -114,8 +119,8 @@ class TestUMDSimulation:
 
         """
         stringlength = 43+30+30+32
-        simulation = UMDSimulation(self.run0, self.run1,
-                                   name=self.name, lattice=self.lattice)
+        simulation = UMDSimulation(name=self.name, lattice=self.lattice,
+                                   runs=[self.run0, self.run1])
         assert len(str(simulation)) == stringlength
 
     # %% UMDSimulation cycle function tests
@@ -125,7 +130,7 @@ class TestUMDSimulation:
         of runs concatenated.
 
         """
-        simulation = UMDSimulation(self.run0, self.run1)
+        simulation = UMDSimulation(runs=[self.run0, self.run1])
         assert simulation.cycle() == 2
 
     # %% UMDSimulation steps function tests
@@ -135,7 +140,7 @@ class TestUMDSimulation:
         all the number of iterations performed during each simulation run.
 
         """
-        simulation = UMDSimulation(self.run0, self.run1)
+        simulation = UMDSimulation(runs=[self.run0, self.run1])
         assert simulation.steps() == 3000
 
     # %% UMDSimulation time function tests
@@ -145,10 +150,10 @@ class TestUMDSimulation:
         all the amounts of time simulated during each simulation run.
 
         """
-        simulation = UMDSimulation(self.run0, self.run1)
+        simulation = UMDSimulation(runs=[self.run0, self.run1])
         assert simulation.time() == 1300.00
 
-    # %% UMDSimulation time function tests
+    # %% UMDSimulation add function tests
     def test_UMDSimulation_add(self):
         """
         Test the add function when a new good UMDSimulation run is added. The
@@ -157,7 +162,7 @@ class TestUMDSimulation:
         increased by one.
 
         """
-        simulation = UMDSimulation(self.run0, lattice=self.lattice)
+        simulation = UMDSimulation(lattice=self.lattice, runs=[self.run0])
         simulation.add(self.run1)
         assert simulation.cycle() == 2
         assert simulation.runs[-1] == self.run1
@@ -168,6 +173,101 @@ class TestUMDSimulation:
         add function must raise an AttributeError.
 
         """
-        simulation = UMDSimulation(self.run0, lattice=self.lattice)
+        simulation = UMDSimulation(lattice=self.lattice, runs=[self.run0])
         with pytest.raises(AttributeError):
             self.simulation.add(self.run0)
+
+
+# %% ===================================================================== %% #
+# %% UMDSimulation hypothesis tests
+@hp.given(data=st.data(), n=st.integers(0, 100))
+def test_UMDSimulation_init(data, n):
+    """
+    Test __init__ function assignement operations.
+
+    """
+    data = data.draw(dataUMDSimulation(n))
+    simulation = UMDSimulation(**data)
+    assert simulation.name == data['name']
+    assert simulation.lattice == data['lattice']
+    assert simulation.runs == data['runs']
+
+
+@hp.given(data1=st.data(), data2=st.data(),
+          n1=st.integers(0, 100), n2=st.integers(0, 100))
+def test_UMDSimulation_eq(data1, data2, n1, n2):
+    """
+    Test the __eq__ function.
+
+    """
+    data1 = data1.draw(dataUMDSimulation(n1))
+    data2 = data2.draw(dataUMDSimulation(n2))
+    equal = (data1['lattice'] == data2['lattice']
+             and data1['runs'] == data2['runs'])
+    simulation1 = UMDSimulation(**data1)
+    simulation2 = UMDSimulation(**data2)
+    assert (simulation1 == simulation2) == equal
+
+
+@hp.given(data=st.data(), n=st.integers(0, 100))
+def test_UMDSimulation_str_length(data, n):
+    """
+    Test the __str__ function. The length of the returned string is constant.
+
+    """
+    simulation = data.draw(getUMDSimulation(n))
+    assert len(str(simulation)) == 135
+
+
+@hp.given(data=st.data(), n=st.integers(0, 100))
+def test_UMDSimulation_cycle(data, n):
+    """
+    Test the cycle function.
+
+    """
+    simulation = data.draw(getUMDSimulation(n))
+    assert simulation.cycle() == n
+
+
+@hp.given(data=st.data(), n=st.integers(0, 100))
+def test_UMDSimulation_steps(data, n):
+    """
+    Test the steps function.
+
+    """
+    data = data.draw(dataUMDSimulation(n))
+    simulation = UMDSimulation(**data)
+    steps = 0
+    for run in data['runs']:
+        steps += run.steps
+    assert simulation.steps() == steps
+
+
+@hp.given(data=st.data(), n=st.integers(0, 100))
+def test_UMDSimulation_time(data, n):
+    """
+    Test the time function.
+
+    """
+    data = data.draw(dataUMDSimulation(n))
+    simulation = UMDSimulation(**data)
+    time = 0
+    for run in data['runs']:
+        time += run.time()
+    assert simulation.time() == time
+
+
+@hp.given(data=st.data(), n=st.integers(0, 100))
+def test_UMDSimulation_add(data, n):
+    """
+    Test the add function.
+
+    """
+    simulation = data.draw(getUMDSimulation(n))
+    run = data.draw(getUMDSimulationRun())
+    if run.cycle == n:
+        simulation.add(run)
+        assert simulation.runs[-1] == run
+    else:
+        with pytest.raises(AttributeError):
+            simulation.add(run)

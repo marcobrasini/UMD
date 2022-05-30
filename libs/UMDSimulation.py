@@ -61,7 +61,7 @@ class UMDSimulation:
 
     """
 
-    def __init__(self, *runs, name='', lattice=UMDLattice()):
+    def __init__(self, name='', lattice=UMDLattice(), runs=[]):
         """
         Construct a UMDSimulation object.
 
@@ -83,7 +83,7 @@ class UMDSimulation:
         """
         self.name = name
         self.lattice = lattice
-        self.runs = [*runs]
+        self.runs = runs
 
     def __eq__(self, other):
         eq = isinstance(other, UMDSimulation)
