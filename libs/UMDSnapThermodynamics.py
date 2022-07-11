@@ -1,6 +1,6 @@
 """
 ===============================================================================
-                    UMDSnapThermodynamics class
+                         UMDSnapThermodynamics class
 ===============================================================================
 
 This module provides the UMDSnapThermodynamcis class useful to collect the 
@@ -20,7 +20,7 @@ See Also
 
 class UMDSnapThermodynamics:
     """
-    UMDSnapThermodynamics class to collect the thermodynamic quantities of a 
+    UMDSnapThermodynamics class to collect the thermodynamic quantities of a
     single molecular dynamics simulation snapshot.
 
     Parameters
@@ -78,7 +78,6 @@ class UMDSnapThermodynamics:
         string += "  Temperature = {:12.4f} K\n" .format(self.temperature)
         string += "  Pressure    = {:12.4f} GPa\n".format(self.pressure)
         string += "  Energy      = {:12.4f} eV".format(self.energy)
-        print(string)
         return string
 
     def save(self, outfile):

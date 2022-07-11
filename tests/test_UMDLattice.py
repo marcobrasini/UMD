@@ -322,7 +322,7 @@ class Test_UMDLattice_unit:
 
 # %% ===================================================================== %% #
 # %% hypothesis tests
-@hp.given(data=st.data(), ntypes=st.integers(1, 100))
+@hp.given(data=st.data(), ntypes=st.integers(1, 50))
 def test_UMDLattice_init(data, ntypes):
     """
     Test the __init__ function assignement operations.

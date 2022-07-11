@@ -45,6 +45,10 @@ class UMDSimulation:
     *runs : UMDSimulationRun
         A list of UMDSimulationRun objcts each one containing the parameters of
         a single simulation run.
+    time : float
+        The total simulation time (in ps) when *runs is empty.
+    snaps : int
+        The total number of snapshots when *runs is empty.
 
     Methods
     -------
@@ -61,7 +65,8 @@ class UMDSimulation:
 
     """
 
-    def __init__(self, name='', lattice=UMDLattice(), runs=[]):
+    def __init__(self, name='', lattice=UMDLattice(), runs=[], 
+                 time=0.0, snaps=0):
         """
         Construct a UMDSimulation object.
 
@@ -75,6 +80,10 @@ class UMDSimulation:
         *runs : UMDSimulationRun
             A list of UMDSimulationRun objcts each one containing the
             parameters of a single simulation run.
+        time : float
+            The total simulation time (in ps) when *runs is empty.
+        snaps : int
+            The total number of snapshots when *runs is empty.
 
         Returns
         -------
@@ -84,11 +93,31 @@ class UMDSimulation:
         self.name = name
         self.lattice = lattice
         self.runs = runs
+        if not self.runs:
+            self.__time = time
+            self.__snaps = snaps
 
     def __eq__(self, other):
+        """
+        Compare two UMDSimulation objects.
+        
+        Parameters
+        ----------
+        other : UMDSimulation
+            The second term of the comparison.
+
+        Returns
+        -------
+        eq : bool
+            It returns True if the two simulations represented are identical,
+            otherwise False.
+
+        """
         eq = isinstance(other, UMDSimulation)
         eq *= (self.lattice == other.lattice)
         eq *= (self.runs == other.runs)
+        eq *= (self.time() == other.time())
+        eq *= (self.steps() == other.steps())
         return eq
 
     def __str__(self):
@@ -122,7 +151,6 @@ class UMDSimulation:
 
         """
         outfile.write(str(self)+'\n\n')
-        outfile.write(str(self.lattice)+'\n\n')
 
     def cycle(self):
         """
@@ -147,10 +175,13 @@ class UMDSimulation:
             The total number of iterations performed during the simulation.
 
         """
-        steps = 0
-        for run in self.runs:
-            steps += run.steps
-        return steps
+        if self.runs:
+            snaps = 0
+            for run in self.runs:
+                snaps += run.steps
+            return snaps
+        else:
+            return self.__snaps
 
     def time(self):
         """
@@ -162,10 +193,14 @@ class UMDSimulation:
             The total amount of time simulated during the simulation.
 
         """
-        time = 0
-        for run in self.runs:
-            time += run.time()
-        return time
+        if self.runs:
+            time = 0
+            for run in self.runs:
+                time += run.time()
+                print(run, time)
+            return time
+        else:
+            return self.__time
 
     def add(self, run):
         """

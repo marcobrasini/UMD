@@ -19,7 +19,7 @@ Functions
 See Also
 --------
     test_UMDSimulationRun
-    test_sceanrios_UMDSimulation
+    test_scenarios_UMDSimulation
 
 """
 

@@ -18,6 +18,7 @@ See Also
 """
 
 import numpy as np
+import itertools as it
 
 
 DEFAULT_basis = np.identity(3, dtype=float)
@@ -109,7 +110,7 @@ class UMDLattice:
         Returns
         -------
         equal : bool
-            It returns True if the two lattice represented are identical,
+            It returns True if the two lattices represented are identical,
             otherwise False.
 
         """
@@ -244,3 +245,28 @@ class UMDLattice:
         """
         cartesian = reduced @ self.dirBasis
         return cartesian
+
+    def bonds(self):
+        bonds = list(it.product(self.atoms.keys(), repeat=2))
+        return bonds
+    
+    def atomslice(self, atom):
+        offset = 0
+        for at,n in self.atoms.items():
+            if at == atom:
+                return slice(offset, offset+n)
+            offset += n
+
+    def periodic(self, variation, orthogonal=False):
+        if orthogonal:
+            norms = np.linalg.norm(self.dirBasis, axis=1)
+            reduced = variation / norms
+            reduced = np.where(reduced > +0.5, reduced-1, reduced)
+            reduced = np.where(reduced < -0.5, reduced+1, reduced)
+            variation = reduced * norms
+        else:
+            reduced = self.reduced(variation)
+            reduced = np.where(reduced > +0.5, reduced-1, reduced)
+            reduced = np.where(reduced < -0.5, reduced+1, reduced)
+            variation = self.cartesian(reduced)
+        return variation
