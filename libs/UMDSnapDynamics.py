@@ -1,36 +1,67 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue May 10 15:40:28 2022
+===============================================================================
+                              UMDSnapDynamics class
+===============================================================================
 
-@author: marco
+This module provides the UMDSnapDynamcis class useful to collect the dynamical
+quantities of each atoms in a molecular dynamics snapshot.
+The UMDSnapDynamics objects are mainly used in UMDSnapshot objects.
+
+Classes
+-------
+    UMDSnapDynamics
+
+See Also
+--------
+    UMDSnapshot
+
 """
+
 
 import numpy as np
 
-from UMDSnapshot import UMDSnapshot
+from .UMDSnapshot import UMDSnapshot
 
 
 class UMDSnapDynamics:
     """
-    Class UMDSnapDynamics to contain the dynamic data of a single molecular
-    dynamics simulation snapshot.
+    UMDSnapDynamics class to collect the thermodynamics quantities of each atom
+    in a molecular dynamics snapshot.
+    
+    Parameters
+    ----------
+    time : float
+        Time duration of the snapshot in fs.
+    position : array, optional
+        Array of all the atoms positions.
+    velocity : array, optional
+        Array of all the atoms velocities.
+    force : array, optional
+        Array of all the atoms forces. The default is [].
+
+    Methods
+    -------
+    __str__
+        Convert a UMDSnapDynamics objects into a string.
+    save
+        Print the UMDSnapDynamics information on an output stream.
+    displacement
+        Calculate the atomic displacement between two arrays of positions.
 
     """
 
-    def __init__(self, position=[], velocity=[], force=[]):
+    def __init__(self, time=0, position=[], velocity=[], force=[]):
         """
         Construct the UMDSnapDynamics object.
 
         Parameters
         ----------
-        snaptime : float, optional
+        time : float, optional
             Time duration of the snapshot. The default is 0.0.
         lattice : UMDLattice, optional
             Lattice reference of the snapshot. The default is UMDLattice().
         position : array, optional
             Array of all the atoms positions. The default is [].
-        displacement : array, optional
-            Array of all the atoms displacements. The default is [].
         velocity : array, optional
             Array of all the atoms velocities. The default is [].
         force : array, optional
@@ -41,6 +72,7 @@ class UMDSnapDynamics:
         UMDSnapDynamics object.
 
         """
+        self.time = time
         self.position = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
         self.velocity = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
         self.force = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
@@ -88,9 +120,10 @@ class UMDSnapDynamics:
             Report of the atoms dynamical vectors.
 
         """
+        string = 'Dynamics: {:12.3f} fs\n'.format(self.time)
         dynamics = np.hstack((self.position, self.velocity, self.force))
         headerstyle = '{:'+str(3*w)+'}{:'+str(3*w)+'}{:'+str(3*w)+'}'
-        string = headerstyle.format('Positions', 'Velocities', 'Forces')
+        string += headerstyle.format('Positions', 'Velocities', 'Forces')
         style = '{:'+str(w-1)+'.'+str(f)+'f}'
         for atom in dynamics:
             string += '\n ' + ' '.join([style.format(x) for x in atom])
@@ -110,10 +143,11 @@ class UMDSnapDynamics:
         None.
 
         """
+        header = 'Dynamics: {:12.3f} fs\n'.format(self.time)
         headerstyle = '{:16}{:16}{:16}'
-        header  = headerstyle.format('Position_x', 'Position_y', 'Postion_z')
+        header += headerstyle.format('Position_x', 'Position_y', 'Postion_z')
         header += headerstyle.format('Velocity_x', 'Velocity_y', 'Postion_z')
-        header += headerstyle.format('Force_x', 'Force_y', 'Force_z') + '\n'
-        outfile.write(header)
+        header += headerstyle.format('Force_x', 'Force_y', 'Force_z')
+        outfile.write(header+'\n')
         dynamics = np.hstack((self.position, self.velocity, self.force))
         np.savetxt(outfile, dynamics, fmt='%15.8f', delimiter=' ')

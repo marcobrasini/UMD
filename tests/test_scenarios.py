@@ -29,7 +29,8 @@ def getNumpyArray(draw, *dim, min_value=0, max_value=1):
     size = 1
     for n in dim:
         size *= n
-    data = draw(st.lists(st.floats(min_value=min_value, max_value=max_value),
+    data = draw(st.lists(st.floats(min_value=min_value, max_value=max_value,
+                                   exclude_max=True),
                          min_size=size, max_size=size))
     data = np.array(data).reshape(*dim)
     return data
