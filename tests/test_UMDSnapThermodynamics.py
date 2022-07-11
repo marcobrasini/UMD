@@ -9,7 +9,10 @@ from ..libs.UMDSnapThermodynamics import UMDSnapThermodynamics
 
 import hypothesis as hp
 import hypothesis.strategies as st
-from .generate_scenarios import generateUMDSnapThermodynamics
+
+from .test_scenarios_UMDSnapThermodynamics import dataUMDSnapThermodynamics
+from .test_scenarios_UMDSnapThermodynamics import getUMDSnapThermodynamics
+
 
 
 # %% UMDSnapThermodynamics unit tests
@@ -82,7 +85,7 @@ def test_UMDSnapThermodynamics_init(data):
     Test UMDSnapThermodynamics __init__ function assignement operations.
 
     """
-    data = data.draw(generateUMDSnapThermodynamics())
+    data = data.draw(dataUMDSnapThermodynamics())
     snapthermodynamics = UMDSnapThermodynamics(**data)
     assert snapthermodynamics.temperature == data['temperature']
     assert snapthermodynamics.pressure == data['pressure']
@@ -96,6 +99,7 @@ def test_UMDSnapThermodynamics_str_length(data):
     length of exactly 111 characters.
 
     """
-    data = data.draw(generateUMDSnapThermodynamics())
+    data = data.draw(dataUMDSnapThermodynamics())
     snapthermodynamics = UMDSnapThermodynamics(**data)
+    print(len(str(snapthermodynamics)))
     assert len(str(snapthermodynamics)) == 111

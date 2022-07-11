@@ -1,17 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  4 15:44:19 2022
-
-@author: marco
-"""
-
 """
 ===============================================================================
                       UMDSnapThermodynamics tests scenarios
 ===============================================================================
 
-This module provides usefule scenarios to test the UMDSimulationRun class and
-its derivatives, like UMDSimulation.
+This module provides usefule scenarios to test the UMDSnapThermodynamics class
+and its derivatives, like UMDSnapshot.
 
 Classes
 -------
@@ -46,11 +39,14 @@ class ScenariosUMDSnapThermodynamics:
 
 
 setUMDSnapThermodynamics = ScenariosUMDSnapThermodynamics(
-    temperature=st.floats(min_value=0.0, allow_nan=False,
+    temperature=st.floats(min_value=0.0, max_value=1e6, allow_nan=False,
                           allow_infinity=False),
-    pressure=st.floats(min_value=0.0, allow_nan=False, allow_infinity=False),
-    energy=st.floats(allow_nan=False, allow_infinity=False)    
+    pressure=st.floats(min_value=0.0, max_value=1e6, allow_nan=False,
+                       allow_infinity=False),
+    energy=st.floats(min_value=-1e6, max_value=1e6, allow_nan=False,
+                     allow_infinity=False)
     )
+
 
 # %% Strategies generator functions
 @st.composite
@@ -65,6 +61,7 @@ def dataUMDSnapThermodynamics(draw):
     data = {"temperature": temperature, "pressure": pressure, "energy": energy}
     return data
 
+
 @st.composite
 def getUMDSnapThermodynamics(draw):
     """
@@ -72,8 +69,9 @@ def getUMDSnapThermodynamics(draw):
 
     """
     data = draw(dataUMDSnapThermodynamics())
-    run = UMDSnapThermodynamics(**data)
-    return run
+    snapthermodynamics = UMDSnapThermodynamics(**data)
+    return snapthermodynamics
+
 
 # %% Strategies generator tests
 @hp.given(st.data())
@@ -96,5 +94,5 @@ def test_getUMDSnapThermodynamics(data):
     Test getUMDSnapThermodynamics generator function.
 
     """
-    run = data.draw(getUMDSnapThermodynamics())
-    assert isinstance(run, UMDSnapThermodynamics)
+    snapthermodynamics = data.draw(getUMDSnapThermodynamics())
+    assert isinstance(snapthermodynamics, UMDSnapThermodynamics)
