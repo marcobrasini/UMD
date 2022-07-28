@@ -396,9 +396,9 @@ def test_UMDLattice_reduced_basis(lattice):
 @hp.given(lattice=st.data())
 def test_UMDLattice_cartesian_basis(lattice):
     """
-    Test the cartesian function to convert vectors in cartesian coordiates
-    to reduced coordinates refered to the lattice vector system.
-    To test it, we assert that an identical matrix of in reduced coordinates
+    Test the cartesian function to convert vectors in reduced coordinates
+    refered to the lattice vector system to cartesian coordiates.
+    To test it, we assert that an identical matrix in reduced coordinates
     must be equal to the matrix of basis vectors in cartesian coordinates.
 
     """
@@ -440,3 +440,52 @@ def test_UMDLattice_cartesian_from_reduced(lattice, vectors, n):
     reduced = lattice.reduced(vectors)
     cartesian = lattice.cartesian(reduced)
     assert np.allclose(cartesian, vectors)
+
+
+@hp.given(lattice=st.data(), variations=st.data(), n=st.integers(1, 100))
+def test_UMDLattice_periodic_shape(lattice, variations, n):
+    """
+    Test the periodic function to modify vector values according to the
+    periodic boundary conditions.
+    The periodic function must conserve the vector's shape.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    variations = variations.draw(getNumpyArray(n, 3))
+    variations = lattice.periodic(variations)
+    assert variations.shape == (n, 3)
+
+
+@hp.given(lattice=st.data(), variations=st.data(), n=st.integers(1, 100))
+def test_UMDLattice_periodic_value_reduced(lattice, variations, n):
+    """
+    Test the periodic function to modify vector values according to the
+    periodic boundary conditions.
+    If the values of the input vector are expressed in reduced coordinates,
+    after the periodic function application, the array values must be all
+    smaller than 0.5.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    variations = variations.draw(getNumpyArray(n, 3))
+    variations = lattice.periodic(variations, False)
+    assert np.all(np.abs(variations) <= 0.5)
+
+
+@hp.given(lattice=st.data(), variations=st.data(), n=st.integers(1, 100))
+def test_UMDLattice_periodic_value_cartesian(lattice, variations, n):
+    """
+    Test the periodic function to modify vector values according to the
+    periodic boundary conditions.
+    If the values of the input vector are expressed in cartesian coordinates,
+    after the periodic function application, each array coordinate must be
+    smaller than half of the sum of the basis vectors coordinates.
+
+    """
+    lattice = lattice.draw(getUMDLattice())
+    variations = variations.draw(getNumpyArray(n, 3))
+    variations = lattice.cartesian(variations)
+    variations = lattice.periodic(variations, True)
+    variations_limit = np.abs(np.sum(lattice.dirBasis, axis=0))
+    for i in range(3):
+        assert np.all(np.abs(variations[:, i]) <= 0.5*variations_limit[i])

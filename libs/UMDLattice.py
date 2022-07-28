@@ -257,16 +257,11 @@ class UMDLattice:
                 return slice(offset, offset+n)
             offset += n
 
-    def periodic(self, variation, orthogonal=False):
-        if orthogonal:
-            norms = np.linalg.norm(self.dirBasis, axis=1)
-            reduced = variation / norms
-            reduced = np.where(reduced > +0.5, reduced-1, reduced)
-            reduced = np.where(reduced < -0.5, reduced+1, reduced)
-            variation = reduced * norms
-        else:
-            reduced = self.reduced(variation)
-            reduced = np.where(reduced > +0.5, reduced-1, reduced)
-            reduced = np.where(reduced < -0.5, reduced+1, reduced)
-            variation = self.cartesian(reduced)
+    def periodic(self, variation, cartesian=True):
+        if cartesian:
+            variation = self.reduced(variation)
+        variation = np.where(variation > +0.5, variation-1, variation)
+        variation = np.where(variation < -0.5, variation+1, variation)
+        if cartesian:
+            variation = self.cartesian(variation)
         return variation

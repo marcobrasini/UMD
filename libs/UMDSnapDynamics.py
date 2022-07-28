@@ -37,7 +37,7 @@ class UMDSnapDynamics:
     velocity : array, optional
         Array of all the atoms velocities.
     force : array, optional
-        Array of all the atoms forces. The default is [].
+        Array of all the atoms forces.
 
     Methods
     -------
@@ -84,31 +84,6 @@ class UMDSnapDynamics:
             self.velocity = velocity
         if len(force) == UMDSnapshot.natoms:
             self.force = force
-
-    @staticmethod
-    def displacement(position1, position0):
-        """
-        Calculate the atom displacement with respect to some initial positions.
-
-        Parameters
-        ----------
-        position1 : array
-            Final atoms positions.
-        position0 : array
-            Initial atoms positions took as reference.
-
-        Returns
-        -------
-        displacement : array
-            Array of all the atoms displacements.
-
-        """
-        displacement = position1 - position0
-        disp = UMDSnapshot.lattice.reduced(displacement)
-        disp = np.where(disp > +0.5, disp-1, disp)
-        disp = np.where(disp < -0.5, disp+1, disp)
-        displacement = UMDSnapshot.lattice.cartesian(disp)
-        return displacement
 
     def __str__(self, w=12, f=6):
         """
