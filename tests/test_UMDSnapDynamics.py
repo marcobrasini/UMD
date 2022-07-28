@@ -1,222 +1,120 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue May 10 16:15:55 2022
-
-@author: marco
+===============================================================================
+                         UMDSnapDynamics class tests
+===============================================================================
 """
 
 
-from UMDSnapDynamics import UMDSnapDynamics
+from ..libs.UMDSnapDynamics import UMDSnapDynamics
 
+import numpy as np
 import hypothesis as hp
 import hypothesis.strategies as st
 
-import numpy as np
-import numpy.random as rnd
-from UMDAtom import UMDAtom
-from UMDLattice import UMDLattice
-from UMDSnapshot import UMDSnapshot
+from .test_scenarios_UMDSnapDynamics import dataUMDSnapDynamics
 
 
-rnd.seed(62815741)
-
-at = UMDAtom()
-
-
-# %% UMDSnapDynamics __init__ function tests
-def test_UMDSnapDynamics_init_default():
+# %% UMDSnapThermodynamics unit tests
+class TestUMDSnapDynamics:
     """
-    Test the __init__ function defualt constructor.
+    The unit tests implemented test an instance of the UMDSnapDynamics class
+    representing a snapshot with the following atomic dynamic quantities:
+        - snap : natoms = 10
 
     """
-    UMDSnapshot.reset()
-    snapdynamics = UMDSnapDynamics()
-    assert snapdynamics.position == []
-    assert snapdynamics.velocity == []
-    assert snapdynamics.force == []
+    time = 0.5
+    position = np.array([[+0.47557534, +0.75247622, +0.26707477],
+                         [+0.65057722, +0.82406818, +0.51003144]])
+    velocity = np.array([[-0.96234100, +0.41585581, -0.33492285],
+                         [+0.29512520, +0.29288268, -0.75090549]])
+    force = np.array([[-0.80722157, -0.47571638, +0.23693435],
+                      [+0.37777898, -0.20037447, -0.03918817]])
+
+    # %% UMDSnapDynamics __init__ function tests
+    def test_UMDSnapDynamics_init_default(self):
+        """
+        Test the __init__ function defualt constructor.
+
+        """
+        snapdynamics = UMDSnapDynamics()
+        assert snapdynamics.time == 0.0
+        assert snapdynamics.position == []
+        assert snapdynamics.velocity == []
+        assert snapdynamics.force == []
+
+    def test_UMDSnapDynamics_init_assignement(self):
+        """
+        Test the __init__ function assignement operations.
+
+        """
+        snapdynamics = UMDSnapDynamics(self.time, self.position,
+                                       self.velocity, self.force)
+        assert snapdynamics.time == self.time
+        assert np.array_equal(snapdynamics.position, self.position)
+        assert np.array_equal(snapdynamics.velocity, self.velocity)
+        assert np.array_equal(snapdynamics.force, self.force)
+
+    # %% UMDSnapDynamics __str__ function tests
+    def test_UMDSnapDynamics_str(self):
+        """
+        Test the __str__ function to convert the UMDSnapDynamics data into a
+        descriptive and printable string object.
+
+        """
+        snapdynamics = UMDSnapDynamics(self.time, self.position,
+                                       self.velocity, self.force)
+        string  = "Dynamics:        0.500 fs\n"
+        string += "Position_x      Position_y      Position_z      "
+        string += "Velocity_x      Velocity_y      Velocity_z      "
+        string += "Force_x         Force_y         Force_z         \n"
+        string += "      0.47557534      0.75247622      0.26707477"
+        string += "     -0.96234100      0.41585581     -0.33492285"
+        string += "     -0.80722157     -0.47571638      0.23693435\n"
+        string += "      0.65057722      0.82406818      0.51003144"
+        string += "      0.29512520      0.29288268     -0.75090549"
+        string += "      0.37777898     -0.20037447     -0.03918817"
+        print(str(snapdynamics), len(str(snapdynamics)))
+        print(string, len(string))
+        assert str(snapdynamics) == string
+
+    def test_UMDSnapDynamics_str_length(self):
+        """
+        Test the __str__ function correct length of the string object returned.
+        The header lines length is 170 = (25+1) + (3*16)+(3*16)+(3*16), while
+        the dynamics line length for each atom is 145 = (9*16) + 1.
+        So for two atoms the total length is 460 = 170 + 2*145.
+
+        """
+        snapdynamics = UMDSnapDynamics(self.time, self.position,
+                                       self.velocity, self.force)
+        assert len(str(snapdynamics)) == 460
 
 
-@hp.given(snaptime=st.floats(allow_infinity=False, allow_nan=False),
-          natoms=st.integers(min_value=0, max_value=(1000)))
-def test_UMDSnapDynamics_init_assignement(snaptime, natoms):
+# %% ===================================================================== %% #
+# %% UMDSnapDynamics hypothesis tests
+@hp.given(data=st.data(), natoms=st.integers(1, 100))
+def test_UMDSnapDynamics_init(data, natoms):
     """
     Test the __init__ function assignement operations.
 
     """
-    lattice = UMDLattice('', np.identity(3), {at: natoms})
-    UMDSnapshot.reset(snaptime, lattice)
-
-    position = rnd.uniform(size=(natoms, 3))
-    velocity = rnd.uniform(size=(natoms, 3))
-    force = rnd.uniform(size=(natoms, 3))
-    snapdynamics = UMDSnapDynamics(position, velocity, force)
-    assert np.array_equal(snapdynamics.position, position)
-    assert np.array_equal(snapdynamics.velocity, velocity)
-    assert np.array_equal(snapdynamics.force, force)
+    data = data.draw(dataUMDSnapDynamics(natoms))
+    snapdynamics = UMDSnapDynamics(**data)
+    assert snapdynamics.time == data['time']
+    assert np.array_equal(snapdynamics.position, data['position'])
+    assert np.array_equal(snapdynamics.velocity, data['velocity'])
+    assert np.array_equal(snapdynamics.force, data['force'])
 
 
-test_UMDSnapDynamics_init_default()
-test_UMDSnapDynamics_init_assignement()
-
-
-# %% UMDSnapDynamics __str__ function tests
-def test_UMDSnapDynamics_str():
-    """
-    Test the __str__ function to convert the UMDSnapDynamics data into a
-    descriptive and printable string object.
-
-    """
-    UMDSnapshot.reset(lattice=UMDLattice(atoms={at: 2}))
-    position = np.array([[0.23, 0.17, -1.43], [-0.76, 1.02, -0.71]])
-    velocity = np.array([[0.42, -1.34, -0.22], [0.10, 0.49, 0.95]])
-    force = np.array([[-1.58, 0.82, 0.03], [0.22, -0.49, -1.73]])
-    snapdynamics = UMDSnapDynamics(position, velocity, force)
-    string  = "Positions                           "
-    string += "Velocities                          "
-    string += "Forces                              \n"
-    string += "    0.230000    0.170000   -1.430000"
-    string += "    0.420000   -1.340000   -0.220000"
-    string += "   -1.580000    0.820000    0.030000\n"
-    string += "   -0.760000    1.020000   -0.710000"
-    string += "    0.100000    0.490000    0.950000"
-    string += "    0.220000   -0.490000   -1.730000"
-    assert str(snapdynamics) == string
-
-
-@hp.given(N=st.integers(1, 500))
-def test_UMDSnapDynamics_str_legnth(N):
+@hp.given(data=st.data(), natoms=st.integers(1, 100))
+def test_UMDSnapDynamics_str_length(data, natoms):
     """
     Test the __str__ function correct length of the string object returned.
-    Its length depends on the number of atoms in the lattice.
-    Indeed, each line is made of 109 characters:
-        12 (the width for each numeber)
-        *3 (number of components: x, y, z)
-        *3 (number of quantities: position, velocity, force)
-        +1 (the '\n' character)
-    and there are N+1 lines, one for each atom plus the header line.
-    Moreover we must eliminate the last '\n' character.
-    
-    """
-    UMDSnapshot.reset(lattice=UMDLattice(atoms={at: N}))
-    snapdynamics = UMDSnapDynamics()
-    stringlenght = 109 * (N+1) - 1
-    assert len(str(snapdynamics)) == stringlenght
-
-
-test_UMDSnapDynamics_str()
-test_UMDSnapDynamics_str_legnth()
-
-# %% UMDSnapDynamics displacement function tests
-@hp.given(N=st.integers(1, 500))
-def test_UMDSnapDynamics_displacement_cubic_null(N):
-    """
-    Test the get_displacement function when the atoms displacement is zero.
+    The header lines length is 170 = (25+1) + (3*16)+(3*16)+(3*16), while
+    the dynamics line length for each atom is 145 = (9*16) + 1.
+    So for n atoms the total length is 170 + 145*n.
 
     """
-    basis = np.identity(3)
-    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
-    pos0 = rnd.uniform(size=(N, 3))
-    pos1 = np.copy(pos0)
-    displacement = UMDSnapDynamics.displacement(pos1, pos0)
-    assert np.array_equal(displacement, np.zeros((N, 3)))
-
-
-def test_UMDSnapDynamics_displacement_cubic():
-    """
-    Test the get_displacement function for the simple cubic structure.
-    In this case, it is very simple to determine the atoms displacement taking
-    into account the periodic boundary conditions.
-
-    """
-    basis = np.identity(3)
-    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: 3}))
-    pos0 = np.array([[0.1, 0.1, 0.1],
-                     [0.5, 0.5, 0.5],
-                     [0.9, 0.2, 0.8]])
-    pos1 = np.array([[0.8, 0.2, 0.9],
-                     [0.3, 0.6, 0.6],
-                     [0.1, 0.2, 0.9]])
-    disp = np.array([[-0.3, 0.1, -0.2],
-                     [-0.2, 0.1, 0.1],
-                     [0.2, 0.0, 0.1]])
-    displacement = UMDSnapDynamics.displacement(pos1, pos0)
-    assert np.allclose(displacement, disp)
-
-
-@hp.given(N=st.integers(1, 500))
-def test_UMDSnapDynamics_displacement_cubic_size(N):
-    """
-    Test the get_displacement function results. Independently on the position
-    the atoms position in the unit cell, the displacement returned must be
-    smaller then the half unit cell size.
-
-    """
-    basis = np.identity(3)
-    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
-    pos0 = rnd.uniform(size=(N, 3))
-    pos1 = rnd.uniform(size=(N, 3))
-    displacement = UMDSnapDynamics.displacement(pos1, pos0)
-    maxdisp = np.linalg.norm(np.array([0.5, 0.5, 0.5]))
-    assert (np.linalg.norm(displacement, axis=1) < maxdisp).all()
-
-
-@hp.given(N=st.integers(1, 500))
-def test_UMDSnapDynamics_displacement_cubic_small(N):
-    """
-    Test the get_displacement function when the atoms displacement is small.
-    A small displacement is a displacement whose reduced components are all
-    smaller than the half of the lattice basis vectors. In this case, no
-    periodic correction to the displacement is necessary.
-
-    """
-    basis = np.identity(3)
-    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
-    pos0 = rnd.uniform(size=(N, 3))
-    disp = rnd.uniform(-0.5, 0.5, size=(N, 3))
-    pos1 = pos0 + (disp @ basis)
-    displacement = UMDSnapDynamics.displacement(pos1, pos0)
-    assert np.allclose(displacement, disp @ basis)
-
-
-@hp.given(N=st.integers(1, 500))
-def test_UMDSnapDynamics_displacement_cubic_large_positive(N):
-    """
-    Test the get_displacement function when the atoms displacement is large.
-    A large displacement is a displacement whose some components are larger
-    than the half of the lattice basis vectors. In this case, a periodic
-    correction to the displacement is necessary.
-
-    """
-    basis = np.identity(3)
-    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
-    pos0 = rnd.uniform(size=(N, 3))
-    disp = rnd.uniform(0.5, 1, size=(N, 3))
-    pos1 = pos0 + (disp @ basis)
-    displacement = UMDSnapDynamics.displacement(pos1, pos0)
-    assert np.allclose(displacement, (disp - 1) @ basis)
-
-
-@hp.given(N=st.integers(1, 500))
-def test_UMDSnapDynamics_displacement_cubic_large_negative(N):
-    """
-    Test the get_displacement function when the atoms displacement is large.
-    A large displacement is a displacement whose some components are larger
-    than the half of the lattice basis vectors. In this case, a periodic
-    correction to the displacement is necessary.
-
-    """
-    basis = np.identity(3)
-    UMDSnapshot.reset(lattice=UMDLattice(basis=basis, atoms={at: N}))
-    pos0 = rnd.uniform(size=(N, 3))
-    disp = rnd.uniform(-1, -0.5, size=(N, 3))
-    pos1 = pos0 + (disp @ basis)
-    displacement = UMDSnapDynamics.displacement(pos1, pos0)
-    assert np.allclose(displacement, (disp + 1) @ basis)
-
-
-test_UMDSnapDynamics_displacement_cubic_null()
-test_UMDSnapDynamics_displacement_cubic()
-test_UMDSnapDynamics_displacement_cubic_size()
-test_UMDSnapDynamics_displacement_cubic_small()
-test_UMDSnapDynamics_displacement_cubic_large_positive()
-test_UMDSnapDynamics_displacement_cubic_large_negative()
+    data = data.draw(dataUMDSnapDynamics(natoms))
+    snapdynamics = UMDSnapDynamics(**data)
+    assert len(str(snapdynamics)) == 170 + 145*natoms

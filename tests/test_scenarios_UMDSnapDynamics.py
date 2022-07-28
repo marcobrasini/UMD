@@ -17,8 +17,7 @@ Functions
 
 See Also
 --------
-    test_dataUMDSnapDynamics
-    test_getUMDSnapDynamics
+    test_UMDSnapDynamics
 
 """
 
@@ -43,7 +42,7 @@ class ScenariosUMDSnapDynamics:
 
 setUMDSnapDynamics = ScenariosUMDSnapDynamics(
     time=st.floats(min_value=0.0, max_value=1000.0, allow_nan=False,
-                          allow_infinity=False),
+                   allow_infinity=False),
     position=getNumpyArray,
     velocity=getNumpyArray,
     force=getNumpyArray
@@ -82,7 +81,7 @@ def getUMDSnapDynamics(draw, natoms=1):
 def test_dataUMDSnapDynamics(data, natoms):
     """
     Test dataUMDSnapDynamics generator function.
-    
+
     """
     data = data.draw(dataUMDSnapDynamics(natoms))
     assert isinstance(data['time'], float)
@@ -99,7 +98,7 @@ def test_dataUMDSnapDynamics(data, natoms):
 def test_getUMDSnapDynamics(data, natoms):
     """
     Test getUMDSnapDynamics generator function.
-    
+
     """
     snapdynamics = data.draw(getUMDSnapDynamics(natoms))
     assert isinstance(snapdynamics, UMDSnapDynamics)
