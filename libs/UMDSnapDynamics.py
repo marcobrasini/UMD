@@ -20,8 +20,6 @@ See Also
 
 import numpy as np
 
-from .UMDSnapshot import UMDSnapshot
-
 
 class UMDSnapDynamics:
     """
@@ -45,8 +43,6 @@ class UMDSnapDynamics:
         Convert a UMDSnapDynamics objects into a string.
     save
         Print the UMDSnapDynamics information on an output stream.
-    displacement
-        Calculate the atomic displacement between two arrays of positions.
 
     """
 
@@ -58,8 +54,6 @@ class UMDSnapDynamics:
         ----------
         time : float, optional
             Time duration of the snapshot. The default is 0.0.
-        lattice : UMDLattice, optional
-            Lattice reference of the snapshot. The default is UMDLattice().
         position : array, optional
             Array of all the atoms positions. The default is [].
         velocity : array, optional
@@ -73,19 +67,11 @@ class UMDSnapDynamics:
 
         """
         self.time = time
-        self.position = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
-        self.velocity = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
-        self.force = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
-        # If position, velocity, force are given and have correct shape,
-        # then the corresponding attibutes are set equal to them.
-        if len(position) == UMDSnapshot.natoms:
-            self.position = position
-        if len(velocity) == UMDSnapshot.natoms:
-            self.velocity = velocity
-        if len(force) == UMDSnapshot.natoms:
-            self.force = force
+        self.position = position
+        self.velocity = velocity
+        self.force = force
 
-    def __str__(self, w=12, f=6):
+    def __str__(self):
         """
         Overload of the __str__ function.
 
@@ -97,11 +83,11 @@ class UMDSnapDynamics:
         """
         string = 'Dynamics: {:12.3f} fs\n'.format(self.time)
         dynamics = np.hstack((self.position, self.velocity, self.force))
-        headerstyle = '{:'+str(3*w)+'}{:'+str(3*w)+'}{:'+str(3*w)+'}'
-        string += headerstyle.format('Positions', 'Velocities', 'Forces')
-        style = '{:'+str(w-1)+'.'+str(f)+'f}'
+        string += '{:16}{:16}{:16}'.format('Position_x', 'Position_y', 'Position_z')
+        string += '{:16}{:16}{:16}'.format('Velocity_x', 'Velocity_y', 'Velocity_z')
+        string += '{:16}{:16}{:16}'.format('Force_x', 'Force_y', 'Force_z')
         for atom in dynamics:
-            string += '\n ' + ' '.join([style.format(x) for x in atom])
+            string += '\n ' + ' '.join(['{:15.8f}'.format(x) for x in atom])
         return string
 
     def save(self, outfile):

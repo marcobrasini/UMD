@@ -17,8 +17,7 @@ Functions
 
 See Also
 --------
-    test_dataUMDSnapThermodynamics
-    test_getUMDSnapThermodynamics
+    test_UMDSnapThermodynamics
 
 """
 

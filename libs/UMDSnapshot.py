@@ -6,10 +6,12 @@ Created on Thu May  5 19:28:41 2022
 """
 
 import numpy as np
-from UMDLattice import UMDLattice
+from .UMDLattice import UMDLattice
+from .UMDSnapDynamics import UMDSnapDynamics
+from .UMDSnapThermodynamics import UMDSnapThermodynamics
 
 
-class UMDSnapshot:
+class UMDSnapshot(SnapThermodynamics, SnapDynamics):
     """
     Class UMDSnapshot to contain the data of a single MD simulation snapshot.
 
@@ -18,32 +20,8 @@ class UMDSnapshot:
         - Dynamic data (like atoms position, velocity, force)
 
     """
-    snaptime = 0.0 
-    lattice = UMDLattice()
-    natoms = 0
 
-    @staticmethod
-    def reset(snaptime=0.0, lattice=UMDLattice()):
-        """
-        Reset the static commmon values of the UMDSnapshot class.
-
-        Parameters
-        ----------
-        snaptime : float, optional
-            Snapshot time duration. The default is 0.0.
-        lattice : UMDLattice, optional
-            UMDLattice object. The default is UMDLattice().
-
-        Returns
-        -------
-        None.
-
-        """
-        UMDSnapshot.snaptime = snaptime
-        UMDSnapshot.lattice = lattice
-        UMDSnapshot.natoms = lattice.natoms()
-
-    def __init__(self, snapstep, snapThermodynamics, snapDynamics):
+    def __init__(self, snap, lattice):
         """
         Construct the UMDSnapshot object.
 
@@ -61,9 +39,23 @@ class UMDSnapshot:
         UMDSnapshot object.
 
         """
-        self.snapStep = snapstep
-        self.snapThermodynamics = snapThermodynamics
-        self.snapDynamics = snapDynamics
+        self.snap = snap
+        self.lattice = lattice
+        self.natoms = lattice.natoms()
+        UMDSnapThermodynamics.__init__(self)
+        UMDSnapDynamics.__init__(self, self.natoms)
+
+    def setThermodynamics(self, temperature=0.0, pressure=0.0, energy=0.0):
+        UMDSnapThermodynamics.__init__(self, temperature, pressure, energy)
+
+    def setDynamics(self, time=0, position=[], velocity=[], force=[]):
+        if len(position) != self.natom:
+            position = np.zeros((self.natoms, 3), dtype=float)
+        if len(velocity) != self.natoms:
+            velocity = np.zeros((self.natoms, 3), dtype=float)
+        if len(force) != self.natoms:
+            force = np.zeros((self.natoms, 3), dtype=float)
+        UMDSnapDynamics.__init__(self, time, position, velocity, force)
 
     def __str__(self):
         """
@@ -75,9 +67,9 @@ class UMDSnapshot:
             Report of the UMDSnapshot information.
 
         """
-        string  = "Snapshot: {:10}\n".format(self.snapStep)
-        string += str(self.snapThermodynamics) + '\n'
-        string += str(self.snapDynamics)
+        string  = "Snapshot: {:10}\n".format(self.snap)
+        string += UMDSnapThermodynamics.__str__(self) + '\n'
+        string += UMDSnapDynamics.__str__(self)
         return string
 
     def save(self, outfile):
@@ -95,6 +87,6 @@ class UMDSnapshot:
 
         """
         outfile.write("Snapshot: " + str(self.snapStep) + '\n')
-        self.snapThermodynamics.save(outfile)
-        self.snapDynamics.save(outfile)
+        UMDSnapThermodynamics.save(self, outfile)
+        UMDSnapDynamics.save(self, outfile)
         outfile.write('\n')
