@@ -1,9 +1,21 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu May  5 19:28:41 2022
+===============================================================================
+                              UMDSnapshot class
+===============================================================================
 
-@author: marco
+This module provides the UMDSnapshot class to collect the thermodynamical and dynamical quantities of each atoms in a molecular dynamics snapshot.
+
+Classes
+-------
+    UMDSnapshot
+
+See Also
+--------
+    UMDSnapThermodynamics
+    UMDSnaoDynamics
+
 """
+
 
 import numpy as np
 from .UMDLattice import UMDLattice
@@ -13,11 +25,43 @@ from .UMDSnapThermodynamics import UMDSnapThermodynamics
 
 class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
     """
-    Class UMDSnapshot to contain the data of a single MD simulation snapshot.
-
-    The snapshot data are grouped in two categories:
+    Class UMDSnapshot to contain the data of a single molecular dynamics
+    simulation snapshot.
+    The snapshot data are grouped and stored in two categories:
         - Thermodynamic data (like volume, temperature, pressure, energy...)
         - Dynamic data (like atoms position, velocity, force)
+
+    Parameters
+    ----------
+    snap : int
+        The snapshot index.
+    lattice : UMDLattice
+        The lattice informations.
+    natoms : int
+        The number of atoms in the snapshot.
+    temperature: float
+        The snapshot temperature in K.
+    pressure: float
+        The snapshot pressure in GPa.
+    energy: float
+        The snapshot energy in eV.
+    time : float
+        Time duration of the snapshot in fs.
+    position : array, optional
+        Array of all the atoms positions.
+    velocity : array, optional
+        Array of all the atoms velocities.
+    force : array, optional
+        Array of all the atoms forces.
+
+    Methods
+    -------
+    __str__
+        Convert a UMDSnapshot objects into a string.
+    setThermodynamics
+        Initialize the thermodynamics parameters of the snapshot.
+    setDynamics
+        Initialize the dynamics parameters of the snapshot.
 
     """
 
@@ -120,7 +164,5 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         None.
 
         """
-        outfile.write("Snapshot: " + str(self.snapStep) + '\n')
-        UMDSnapThermodynamics.save(self, outfile)
-        UMDSnapDynamics.save(self, outfile)
-        outfile.write('\n')
+        string = UMDSnapshot.__str__(self)
+        outfile.write(string+'\n')

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu May 12 17:13:29 2022
-
-@author: marco
+===============================================================================
+                          UMDSnapshot class tests
+===============================================================================
 """
 
 from ..libs.UMDSnapshot import UMDSnapshot
@@ -134,6 +133,12 @@ def test_UMDSnapshot_setThermodynamics(data):
 
 @hp.given(data=st.data(), ntypes=st.integers(1, 10))
 def test_UMDSnapshot_str_length(data, ntypes):
+    """
+    Test the __str__ function correct length of the string object returned.
+    The header line length is 20+1, the UMDSnapThermodynamics string length is
+    111+1 and the UMDSnapDynamics string length for n atoms is 170+n*145.
+
+    """
     snap = data.draw(dataUMDSnapshot(ntypes))
     snapshot = UMDSnapshot(**snap)
     natoms = snapshot.natoms

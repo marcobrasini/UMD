@@ -25,7 +25,7 @@ class UMDSnapDynamics:
     """
     UMDSnapDynamics class to collect the thermodynamics quantities of each atom
     in a molecular dynamics snapshot.
-    
+
     Parameters
     ----------
     time : float
@@ -91,26 +91,3 @@ class UMDSnapDynamics:
         for atom in dynamics:
             string += '\n ' + ' '.join(['{:15.8f}'.format(x) for x in atom])
         return string
-
-    def save(self, outfile):
-        """
-        Print on file the UMDSnapDynamics data.
-
-        Parameters
-        ----------
-        outfile : output file
-            The output file where to print the UMDSnapDynamics.
-
-        Returns
-        -------
-        None.
-
-        """
-        header = 'Dynamics: {:12.3f} fs\n'.format(self.time)
-        headerstyle = '{:16}{:16}{:16}'
-        header += headerstyle.format('Position_x', 'Position_y', 'Postion_z')
-        header += headerstyle.format('Velocity_x', 'Velocity_y', 'Postion_z')
-        header += headerstyle.format('Force_x', 'Force_y', 'Force_z')
-        outfile.write(header+'\n')
-        dynamics = np.hstack((self.position, self.velocity, self.force))
-        np.savetxt(outfile, dynamics, fmt='%15.8f', delimiter=' ')
