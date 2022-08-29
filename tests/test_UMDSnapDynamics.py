@@ -100,6 +100,8 @@ def test_UMDSnapDynamics_init(data, natoms):
     """
     data = data.draw(dataUMDSnapDynamics(natoms))
     snapdynamics = UMDSnapDynamics(**data)
+    print(natoms)
+    print(snapdynamics)
     assert snapdynamics.time == data['time']
     assert np.array_equal(snapdynamics.position, data['position'])
     assert np.array_equal(snapdynamics.velocity, data['velocity'])

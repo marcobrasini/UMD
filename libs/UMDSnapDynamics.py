@@ -83,8 +83,10 @@ class UMDSnapDynamics:
         """
         string = 'Dynamics: {:12.3f} fs\n'.format(self.time)
         dynamics = np.hstack((self.position, self.velocity, self.force))
-        string += '{:16}{:16}{:16}'.format('Position_x', 'Position_y', 'Position_z')
-        string += '{:16}{:16}{:16}'.format('Velocity_x', 'Velocity_y', 'Velocity_z')
+        string += '{:16}{:16}{:16}'.format('Position_x', 'Position_y',
+                                           'Position_z')
+        string += '{:16}{:16}{:16}'.format('Velocity_x', 'Velocity_y',
+                                           'Velocity_z')
         string += '{:16}{:16}{:16}'.format('Force_x', 'Force_y', 'Force_z')
         for atom in dynamics:
             string += '\n ' + ' '.join(['{:15.8f}'.format(x) for x in atom])

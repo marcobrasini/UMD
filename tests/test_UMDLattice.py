@@ -351,8 +351,8 @@ def test_UMDLattice_eq(data1, data2):
     assert (lattice1 == lattice2) == equal
 
 
-@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
-def test_UMDLattice_reduced_shape(lattice, vectors, n):
+@hp.given(lattice=st.data(), vectors=st.data(), natoms=st.integers(1, 100))
+def test_UMDLattice_reduced_shape(lattice, vectors, natoms):
     """
     Test the reduced function to convert vectors in cartesian coordinates to
     reduced coordiates refered to the lattice vector system.
@@ -360,13 +360,13 @@ def test_UMDLattice_reduced_shape(lattice, vectors, n):
 
     """
     lattice = lattice.draw(getUMDLattice())
-    vectors = vectors.draw(getNumpyArray(n, 3))
+    vectors = vectors.draw(getNumpyArray(natoms, 3))
     reduced = lattice.reduced(vectors)
     assert reduced.shape == vectors.shape
 
 
-@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
-def test_UMDLattice_cartesian_shape(lattice, vectors, n):
+@hp.given(lattice=st.data(), vectors=st.data(), natoms=st.integers(1, 100))
+def test_UMDLattice_cartesian_shape(lattice, vectors, natoms):
     """
     Test the cartesian function to convert vectors in cartesian coordiates
     to reduced coordinates refered to the lattice vector system.
@@ -374,7 +374,7 @@ def test_UMDLattice_cartesian_shape(lattice, vectors, n):
 
     """
     lattice = lattice.draw(getUMDLattice())
-    vectors = vectors.draw(getNumpyArray(n, 3))
+    vectors = vectors.draw(getNumpyArray(natoms, 3))
     cartesian = lattice.cartesian(vectors)
     assert cartesian.shape == vectors.shape
 
@@ -407,8 +407,8 @@ def test_UMDLattice_cartesian_basis(lattice):
     assert np.allclose(cartesian, lattice.dirBasis)
 
 
-@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
-def test_UMDLattice_reduced_from_cartesian(lattice, vectors, n):
+@hp.given(lattice=st.data(), vectors=st.data(), natoms=st.integers(1, 100))
+def test_UMDLattice_reduced_from_cartesian(lattice, vectors, natoms):
     """
     Test the reduced function to convert a set of vectors in cartesian
     coordiates to reduced coordinates refered to the lattice vector system.
@@ -418,14 +418,14 @@ def test_UMDLattice_reduced_from_cartesian(lattice, vectors, n):
 
     """
     lattice = lattice.draw(getUMDLattice())
-    vectors = vectors.draw(getNumpyArray(n, 3))
+    vectors = vectors.draw(getNumpyArray(natoms, 3))
     cartesian = lattice.cartesian(vectors)
     reduced = lattice.reduced(cartesian)
     assert np.allclose(reduced, vectors)
 
 
-@hp.given(lattice=st.data(), vectors=st.data(), n=st.integers(1, 100))
-def test_UMDLattice_cartesian_from_reduced(lattice, vectors, n):
+@hp.given(lattice=st.data(), vectors=st.data(), natoms=st.integers(1, 100))
+def test_UMDLattice_cartesian_from_reduced(lattice, vectors, natoms):
     """
     Test the cartesian function to convert a set of vectors in reduced
     coordiates refered to the lattice vector system to cartesian
@@ -436,14 +436,14 @@ def test_UMDLattice_cartesian_from_reduced(lattice, vectors, n):
 
     """
     lattice = lattice.draw(getUMDLattice())
-    vectors = vectors.draw(getNumpyArray(n, 3))
+    vectors = vectors.draw(getNumpyArray(natoms, 3))
     reduced = lattice.reduced(vectors)
     cartesian = lattice.cartesian(reduced)
     assert np.allclose(cartesian, vectors)
 
 
-@hp.given(lattice=st.data(), variations=st.data(), n=st.integers(1, 100))
-def test_UMDLattice_periodic_shape(lattice, variations, n):
+@hp.given(lattice=st.data(), variations=st.data(), natoms=st.integers(1, 100))
+def test_UMDLattice_periodic_shape(lattice, variations, natoms):
     """
     Test the periodic function to modify vector values according to the
     periodic boundary conditions.
@@ -451,13 +451,13 @@ def test_UMDLattice_periodic_shape(lattice, variations, n):
 
     """
     lattice = lattice.draw(getUMDLattice())
-    variations = variations.draw(getNumpyArray(n, 3))
+    variations = variations.draw(getNumpyArray(natoms, 3))
     variations = lattice.periodic(variations)
-    assert variations.shape == (n, 3)
+    assert variations.shape == (natoms, 3)
 
 
-@hp.given(lattice=st.data(), variations=st.data(), n=st.integers(1, 100))
-def test_UMDLattice_periodic_value_reduced(lattice, variations, n):
+@hp.given(lattice=st.data(), variations=st.data(), natoms=st.integers(1, 100))
+def test_UMDLattice_periodic_value_reduced(lattice, variations, natoms):
     """
     Test the periodic function to modify vector values according to the
     periodic boundary conditions.
@@ -467,13 +467,13 @@ def test_UMDLattice_periodic_value_reduced(lattice, variations, n):
 
     """
     lattice = lattice.draw(getUMDLattice())
-    variations = variations.draw(getNumpyArray(n, 3))
+    variations = variations.draw(getNumpyArray(natoms, 3))
     variations = lattice.periodic(variations, False)
     assert np.all(np.abs(variations) <= 0.5)
 
 
-@hp.given(lattice=st.data(), variations=st.data(), n=st.integers(1, 100))
-def test_UMDLattice_periodic_value_cartesian(lattice, variations, n):
+@hp.given(lattice=st.data(), variations=st.data(), natoms=st.integers(1, 100))
+def test_UMDLattice_periodic_value_cartesian(lattice, variations, natoms):
     """
     Test the periodic function to modify vector values according to the
     periodic boundary conditions.
@@ -483,7 +483,7 @@ def test_UMDLattice_periodic_value_cartesian(lattice, variations, n):
 
     """
     lattice = lattice.draw(getUMDLattice())
-    variations = variations.draw(getNumpyArray(n, 3))
+    variations = variations.draw(getNumpyArray(natoms, 3))
     variations = lattice.cartesian(variations)
     variations = lattice.periodic(variations, True)
     variations_limit = np.abs(np.sum(lattice.dirBasis, axis=0))

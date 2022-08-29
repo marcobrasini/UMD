@@ -63,7 +63,7 @@ def getUMDSimulation(draw, n=1):
     return simulation
 
 
-# %% 
+# %% Strategies generator tests
 @hp.given(data=st.data(), n=st.integers(0, 100))
 def test_dataUMDSimulation(data, n):
     data = data.draw(dataUMDSimulation(n))

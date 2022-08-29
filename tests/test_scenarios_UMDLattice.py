@@ -52,37 +52,37 @@ setUMDLattice = ScenariosUMDLattice(
 
 # %% Strategies generator functions
 @st.composite
-def dataUMDLattice(draw, n=1):
+def dataUMDLattice(draw, ntypes=1):
     """
     Generate the input data for a UMDLattice.
 
     """
     name = draw(setUMDLattice.name)
     basis = draw(setUMDLattice.basis) + np.identity(3)
-    atoms = draw(setUMDLattice.atoms(n))
+    atoms = draw(setUMDLattice.atoms(ntypes))
     data = {"name": name, "basis": basis, "atoms": atoms}
     return data
 
 
 @st.composite
-def getUMDLattice(draw, n=1):
+def getUMDLattice(draw, ntypes=1):
     """
     Generate directly a UMDLattice object.
 
     """
-    data = draw(dataUMDLattice(n))
+    data = draw(dataUMDLattice(ntypes))
     lattice = UMDLattice(**data)
     return lattice
 
 
 # %% Strategies generator tests
-@hp.given(data=st.data(), n=st.integers(1, 10))
-def test_dataUMDLattice(data, n):
+@hp.given(data=st.data(), ntypes=st.integers(1, 10))
+def test_dataUMDLattice(data, ntypes):
     """
     Test dataUMDLattice generator function.
 
     """
-    data = data.draw(dataUMDLattice(n))
+    data = data.draw(dataUMDLattice(ntypes))
     assert isinstance(data["name"], str)
     assert len(data["name"]) <= 30
 
@@ -92,14 +92,14 @@ def test_dataUMDLattice(data, n):
     assert isinstance(data["atoms"], dict)
     assert isinstance(list(data["atoms"].keys())[0], type(UMDAtom()))
     assert isinstance(list(data["atoms"].values())[0], int)
-    assert len(data["atoms"]) == n
+    assert len(data["atoms"]) == ntypes
 
 
-@hp.given(data=st.data(), n=st.integers(1, 10))
-def test_getUMDLattice(data, n):
+@hp.given(data=st.data(), ntypes=st.integers(1, 10))
+def test_getUMDLattice(data, ntypes):
     """
     Test getUMDLattice generator function.
 
     """
-    lattice = data.draw(getUMDLattice(n))
+    lattice = data.draw(getUMDLattice(ntypes))
     assert isinstance(lattice, UMDLattice)

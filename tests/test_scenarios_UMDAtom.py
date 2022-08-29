@@ -76,10 +76,11 @@ def getUMDAtom(draw):
 
 
 @st.composite
-def getUMDAtom_dictionary(draw, n=1):
+def getUMDAtom_dictionary(draw, ntypes=1):
     atom_key = draw(st.lists(getUMDAtom(),
-                             min_size=n, max_size=n, unique=True))
-    atom_val = draw(st.lists(st.integers(1), min_size=n, max_size=n))
+                             min_size=ntypes, max_size=ntypes, unique=True))
+    atom_val = draw(st.lists(st.integers(1, 50),
+                             min_size=ntypes, max_size=ntypes))
     atom_dict = dict(zip(atom_key, atom_val))
     return atom_dict
 
@@ -108,7 +109,7 @@ def test_getUMDAtom(data):
     assert isinstance(atom, UMDAtom)
 
 
-@hp.given(data=st.data(), ntypes=st.integers(1, 20))
+@hp.given(data=st.data(), ntypes=st.integers(1, 10))
 def test_getUMDAtom_dictionary(data, ntypes):
     """
     Test getUMDAtom_dictionary generator function.
