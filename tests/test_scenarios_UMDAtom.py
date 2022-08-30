@@ -68,7 +68,7 @@ def dataUMDAtom(draw):
 def getUMDAtom(draw):
     """
     Generate directly a UMDAtom object.
-    
+
     """
     data = draw(dataUMDAtom())
     atom = UMDAtom(**data)

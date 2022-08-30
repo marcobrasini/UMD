@@ -92,10 +92,13 @@ class UMDSimulation:
         """
         self.name = name
         self.lattice = lattice
-        self.runs = runs
-        if not self.runs:
+        self.runs = []
+        if runs:
+            self.runs = runs
+        else:
             self.__time = time
             self.__snaps = snaps
+        
 
     def __eq__(self, other):
         """
