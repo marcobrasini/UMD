@@ -73,8 +73,6 @@ class TestUMDSnapDynamics:
         string += "      0.65057722      0.82406818      0.51003144"
         string += "      0.29512520      0.29288268     -0.75090549"
         string += "      0.37777898     -0.20037447     -0.03918817"
-        print(str(snapdynamics), len(str(snapdynamics)))
-        print(string, len(string))
         assert str(snapdynamics) == string
 
     def test_UMDSnapDynamics_str_length(self):
@@ -100,8 +98,6 @@ def test_UMDSnapDynamics_init(data, natoms):
     """
     data = data.draw(dataUMDSnapDynamics(natoms))
     snapdynamics = UMDSnapDynamics(**data)
-    print(natoms)
-    print(snapdynamics)
     assert snapdynamics.time == data['time']
     assert np.array_equal(snapdynamics.position, data['position'])
     assert np.array_equal(snapdynamics.velocity, data['velocity'])

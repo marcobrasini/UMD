@@ -79,7 +79,7 @@ def getUMDAtom(draw):
 def getUMDAtom_dictionary(draw, ntypes=1):
     atom_key = draw(st.lists(getUMDAtom(),
                              min_size=ntypes, max_size=ntypes, unique=True))
-    atom_val = draw(st.lists(st.integers(1, 50),
+    atom_val = draw(st.lists(st.integers(1, 30),
                              min_size=ntypes, max_size=ntypes))
     atom_dict = dict(zip(atom_key, atom_val))
     return atom_dict

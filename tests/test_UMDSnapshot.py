@@ -20,6 +20,7 @@ from .test_scenarios_UMDSnapThermodynamics import dataUMDSnapThermodynamics
 class Test_UMDSnapshot_unit:
 
     snap = 1129
+    time = 0.5
     natoms = 2
     lattice = UMDLattice(atoms={UMDAtom(): natoms})
 
@@ -42,8 +43,9 @@ class Test_UMDSnapshot_unit:
         Test UMDSnapshot __init__ function assignement operation.
 
         """
-        snapshot = UMDSnapshot(self.snap, self.lattice)
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
         assert snapshot.snap == self.snap
+        assert snapshot.time == self.time
         assert snapshot.natoms == self.natoms
         assert snapshot.lattice == self.lattice
 
@@ -52,7 +54,7 @@ class Test_UMDSnapshot_unit:
         Test UMDSnapsshot setThermodynamics function.
 
         """
-        snapshot = UMDSnapshot(self.snap, self.lattice)
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
         snapshot.setThermodynamics(self.temperature, self.pressure,
                                    self.energy)
         assert snapshot.temperature == self.temperature
@@ -64,9 +66,8 @@ class Test_UMDSnapshot_unit:
         Test UMDSnapshot setDynamics function.
 
         """
-        snapshot = UMDSnapshot(self.snap, self.lattice)
-        snapshot.setDynamics(self.time, self.position, self.velocity,
-                             self.force)
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        snapshot.setDynamics(self.position, self.velocity, self.force)
         assert snapshot.time == self.time
         assert np.array_equal(snapshot.position, self.position)
         assert np.array_equal(snapshot.velocity, self.velocity)
@@ -80,9 +81,8 @@ class Test_UMDSnapshot_unit:
             - 460, the the snapshot dynamics string length for 2 atoms.
 
         """
-        snapshot = UMDSnapshot(self.snap, self.lattice)
-        snapshot.setDynamics(self.time, self.position, self.velocity,
-                             self.force)
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        snapshot.setDynamics(self.position, self.velocity, self.force)
         assert len(str(snapshot)) == (20+1) + (111+1) + 460
 
 
@@ -97,6 +97,7 @@ def test_UMDSnapshot_init(data, natoms):
     data = data.draw(dataUMDSnapshot(natoms))
     snapshot = UMDSnapshot(**data)
     assert snapshot.snap == data['snap']
+    assert snapshot.time == data['time']
     assert snapshot.lattice == data['lattice']
 
 
@@ -108,9 +109,9 @@ def test_UMDSnapshot_setDynamics(data, ntypes):
     """
     snap = data.draw(dataUMDSnapshot(ntypes))
     snapshot = UMDSnapshot(**snap)
-    dynamics = data.draw(dataUMDSnapDynamics(snapshot.natoms))
+    dynamics = data.draw(dataUMDSnapDynamics(snapshot.natoms, time=0))
     snapshot.setDynamics(**dynamics)
-    assert snapshot.time == dynamics['time']
+    assert snapshot.time == snap['time']
     assert np.array_equal(snapshot.position, dynamics['position'])
     assert np.array_equal(snapshot.velocity, dynamics['velocity'])
     assert np.array_equal(snapshot.force, dynamics['force'])
@@ -142,7 +143,7 @@ def test_UMDSnapshot_str_length(data, ntypes):
     snap = data.draw(dataUMDSnapshot(ntypes))
     snapshot = UMDSnapshot(**snap)
     natoms = snapshot.natoms
-    dynamics = data.draw(dataUMDSnapDynamics(natoms))
+    dynamics = data.draw(dataUMDSnapDynamics(natoms, time=0))
     thermodynamics = data.draw(dataUMDSnapThermodynamics())
     snapshot.setDynamics(**dynamics)
     snapshot.setThermodynamics(**thermodynamics)

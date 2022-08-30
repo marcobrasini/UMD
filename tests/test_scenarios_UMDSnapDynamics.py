@@ -41,8 +41,7 @@ class ScenariosUMDSnapDynamics:
 
 
 setUMDSnapDynamics = ScenariosUMDSnapDynamics(
-    time=st.floats(min_value=0.0, max_value=1000.0, allow_nan=False,
-                   allow_infinity=False),
+    time=st.floats(0, 10, exclude_min=True),
     position=getNumpyArray,
     velocity=getNumpyArray,
     force=getNumpyArray
@@ -51,17 +50,18 @@ setUMDSnapDynamics = ScenariosUMDSnapDynamics(
 
 # %% Strategies generator functions
 @st.composite
-def dataUMDSnapDynamics(draw, natoms=1):
+def dataUMDSnapDynamics(draw, natoms=1, time=True):
     """
     Strategy to generate input data of a UMDSnapDynamics object.
 
     """
-    time = draw(setUMDSnapDynamics.time)
     position = draw(setUMDSnapDynamics.position(natoms, 3))
     velocity = draw(setUMDSnapDynamics.velocity(natoms, 3))
     force = draw(setUMDSnapDynamics.force(natoms, 3))
-    data = {"time": time, "position": position, "velocity": velocity,
-            "force": force}
+    data = {"position": position, "velocity": velocity, "force": force}
+    if time:
+        time = draw(setUMDSnapDynamics.time)
+        data['time'] = time
     return data
 
 

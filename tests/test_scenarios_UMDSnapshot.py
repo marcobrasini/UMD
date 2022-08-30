@@ -38,8 +38,9 @@ def dataUMDSnapshot(draw, ntypes=1):
 
     """
     snap = draw(st.integers(0, 100000000))
+    time = draw(st.floats(0, 10))
     lattice = draw(getUMDLattice(ntypes))
-    data = {"snap": snap, "lattice": lattice}
+    data = {"snap": snap, "time": time, "lattice": lattice}
     return data
 
 
@@ -51,8 +52,8 @@ def getUMDSnapshot(draw, ntypes=1):
     """
     data = draw(dataUMDSnapshot(ntypes))
     natoms = sum(data["lattice"].atoms.values())
-    dynamics = draw(dataUMDSnapDynamics(natoms))
     thermodynamics = draw(dataUMDSnapThermodynamics())
+    dynamics = draw(dataUMDSnapDynamics(natoms, time=0))
     snapshot = UMDSnapshot(**data)
     snapshot.setDynamics(**dynamics)
     snapshot.setThermodynamics(**thermodynamics)
@@ -69,6 +70,8 @@ def test_dataUMDSnapshot(data, natoms):
     data = data.draw(dataUMDSnapshot(natoms))
     assert isinstance(data['snap'], int)
     assert data['snap'] >= 0
+    assert isinstance(data['time'], float)
+    assert data['time'] >= 0
     assert isinstance(data['lattice'], UMDLattice)
 
 

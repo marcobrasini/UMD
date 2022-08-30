@@ -65,7 +65,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
 
     """
 
-    def __init__(self, snap, lattice):
+    def __init__(self, snap, time, lattice):
         """
         Construct a UMDSnapshot object.
 
@@ -85,7 +85,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         self.lattice = lattice
         self.natoms = lattice.natoms()
         UMDSnapThermodynamics.__init__(self)
-        UMDSnapDynamics.__init__(self)
+        UMDSnapDynamics.__init__(self, time)
 
     def setThermodynamics(self, temperature=0.0, pressure=0.0, energy=0.0):
         """
@@ -107,7 +107,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         """
         UMDSnapThermodynamics.__init__(self, temperature, pressure, energy)
 
-    def setDynamics(self, time=0, position=[], velocity=[], force=[]):
+    def setDynamics(self, position=[], velocity=[], force=[]):
         """
         Initialize the dynamics parameters of the snapshot.
 
@@ -133,7 +133,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
             velocity = np.zeros((self.natoms, 3), dtype=float)
         if len(force) != self.natoms:
             force = np.zeros((self.natoms, 3), dtype=float)
-        UMDSnapDynamics.__init__(self, time, position, velocity, force)
+        UMDSnapDynamics.__init__(self, self.time, position, velocity, force)
 
     def __str__(self):
         """
