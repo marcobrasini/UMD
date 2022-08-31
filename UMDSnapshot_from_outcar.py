@@ -117,10 +117,12 @@ loop and so on. The total number of iteration depends on the number of steps
 set among the molecular dynamics parameters (NSW).
 """
 
+
 import numpy as np
-from UMDSnapshot import UMDSnapshot
-from UMDSnapThermodynamics import UMDSnapThermodynamics
-from UMDSnapDynamics import UMDSnapDynamics
+
+from .libs.UMDSnapshot import UMDSnapshot
+from .libs.UMDSnapThermodynamics import UMDSnapThermodynamics
+from .libs.UMDSnapDynamics import UMDSnapDynamics
 
 
 def UMDSnapshot_from_outcar_null(outcar):
@@ -143,12 +145,13 @@ def UMDSnapshot_from_outcar_null(outcar):
     """
     line = outcar.readline()
     while line:
-        if "aborting loop because EDIFF is reached" in line:
+        if ("aborting loop because EDIFF is reached" in line
+            or "aborting loop EDIFF was not reached (unconverged)" in line):
             return
         line = outcar.readline()
 
 
-def UMDSnapshot_from_outcar(outcar, step):
+def UMDSnapshot_from_outcar(outcar, snapshot):
     """
     Look for the snapshot data and initialize a UMDSnapshot object.
 
@@ -177,13 +180,14 @@ def UMDSnapshot_from_outcar(outcar, step):
     """
     line = outcar.readline()
     while line:
-        if "aborting loop because EDIFF is reached" in line:
-            snapshot = load_UMDSnapshot(outcar, step)
+        if ("aborting loop because EDIFF is reached" in line
+            or "aborting loop EDIFF was not reached (unconverged)" in line):
+            snapshot = load_UMDSnapshot(outcar, snapshot)
             return snapshot
         line = outcar.readline()
 
 
-def load_UMDSnapshot(outcar, step):
+def load_UMDSnapshot(outcar, snapshot):
     """
     Read the data and initialize the UMDSnapshot object.
 
@@ -203,42 +207,39 @@ def load_UMDSnapshot(outcar, step):
         the atoms dynamics.
 
     """
+    natoms = snapshot.natoms
+    
     # Declare the thermodynamics quantities
     temperature = 0
     pressure = 0
     stress = 0
     energy = 0
-    # Declare the dynamics quantities
-    position0 = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
-    position = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
-    velocity = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
-    force = np.zeros((UMDSnapshot.natoms, 3), dtype=float)
-    charges = np.zeros(UMDSnapshot.natoms, dtype=float)
-    magnets = np.zeros(UMDSnapshot.natoms, dtype=float)
+
+    position = np.zeros((natoms, 3), dtype=float)
+    velocity = np.zeros((natoms, 3), dtype=float)
+    force = np.zeros((natoms, 3), dtype=float)
+    charges = np.zeros(natoms, dtype=float)
+    magnets = np.zeros(natoms, dtype=float)
 
     line = outcar.readline()
     while line:
         if "total charge" in line:
-            charges = load_charges(outcar, UMDSnapshot.natoms)
+            charges = load_charges(outcar, natoms)
         if "magnetization (x)" in line:
-            magnets = load_magnets(outcar, UMDSnapshot.natoms)
+            magnets = load_magnets(outcar, natoms)
         if "FORCE on cell =-STRESS" in line:
             stress = load_stress(outcar)
             pressure = np.mean(stress[:3])
         if "FORCES acting on ions" in line:
-            position, force = load_dynamics(outcar, UMDSnapshot.natoms)
+            position, force = load_dynamics(outcar, natoms)
         if "ENERGY OF THE ELECTRON-ION-THERMOSTAT SYSTEM (eV)" in line:
             energy, temperature = load_energy(outcar)
 
             # Since the energy is the last snapshot section, after that we
             # can initialize the UMDSnapDynamics and UMDSnapThermodynamics
             # objecta and return the UMDSnapshot.
-            displace = UMDSnapDynamics.displacement(position, position0)
-            velocity = displace/UMDSnapshot.snaptime
-            dynamics = UMDSnapDynamics(position, velocity, force)
-            thdynamics = UMDSnapThermodynamics(temperature, pressure, energy)
-            snapshot = UMDSnapshot(step, thdynamics, dynamics)
-            position0 = position
+            snapshot.setThermodynamics(temperature, pressure, energy)
+            snapshot.setDynamics(position, velocity, force)
             return snapshot
         line = outcar.readline()
 
@@ -321,7 +322,7 @@ def load_stress(outcar):
     """
     Load the stress tensor values on the cell.
 
-    The stress tensor section is analized and the Total+kin stress components 
+    The stress tensor section is analized and the Total+kin stress components
     are saved. It has the following and the first line is already read.
     "   FORCE on cell =-STRESS in cart. coord.  units (eV):
     -> Direction    XX        YY        ZZ        XY        YZ        ZX
@@ -360,10 +361,10 @@ def load_stress(outcar):
 def load_dynamics(outcar, natoms):
     """
     Load the position and the force acting on each atom.
-    
+
     The dynamics section is analized and and once at the beginning of the
     part with the data (starting with "POSITION [...] TOTAL-FORCE (eV/Angst)"),
-    a for loop over all the atoms available is performed to read position and 
+    a for loop over all the atoms available is performed to read position and
     force. It has the following structure and the first line is already read.
     " FORCES acting on ions
       electron-ion       ewald-force     non-local-force   conv-correction
@@ -372,7 +373,7 @@ def load_dynamics(outcar, natoms):
       ...
       -----------------------------------------------------------------------
        (tot_ele-ion)      (tot_ewald)      (tot_nonloc)     (tot_conv-corr)
-     
+
       POSITION                            TOTAL-FORCE (eV/Angst)
       ------------------------------------------------------------------------
       position_x  position_y  position_z  force_x     force_y     force_z
@@ -411,19 +412,19 @@ def load_dynamics(outcar, natoms):
 def load_energy(outcar):
     """
     Load the internal energy and the temperature of the electron-ion system.
-    
+
     From the enrgy section, different energy contributions are analyzed and the
     'ETOTAL' energy and the temperature reported in the 'kin. lattice  EKIN_LAT'
     parameter are returned. The section structure is the follwing and the first
-    line is already read.        
+    line is already read.
     " FREE ENERGIE OF THE ION-ELECTRON SYSTEM (eV)
     ->---------------------------------------------------
       free  energy   TOTEN  =          ... eV
       energy without entropy=          ...    energy(sigma->0) =          ...
-     
+
       (... electron-energy time convergence consideration)
       (... ion-step motion time and RANDOM_SEED value used)
-     
+
         ENERGY OF THE ELECTRON-ION-THERMOSTAT SYSTEM (eV)
         ---------------------------------------------------
       % ion-electron   TOTEN  =              ...  see above
