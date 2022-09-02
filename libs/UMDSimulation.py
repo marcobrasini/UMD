@@ -200,7 +200,6 @@ class UMDSimulation:
             time = 0
             for run in self.runs:
                 time += run.time()
-                print(run, time)
             return time
         else:
             return self.__time

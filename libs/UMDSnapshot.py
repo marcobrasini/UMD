@@ -165,4 +165,4 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
 
         """
         string = UMDSnapshot.__str__(self)
-        outfile.write(string+'\n')
+        outfile.write(string+'\n\n')

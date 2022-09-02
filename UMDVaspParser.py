@@ -1,3 +1,4 @@
+#
 # -*- coding: utf-8 -*-
 """
 Created on Thu May  5 17:55:14 2022
@@ -5,16 +6,20 @@ Created on Thu May  5 17:55:14 2022
 @author: marco
 """
 
+import os
+import sys
+import getopt
 import numpy as np
 
-from UMDSimulation_from_outcar import UMDSimulation_from_outcar
-from UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
-from UMDSnapshot_from_outcar import UMDSnapshot_from_outcar_null
-from UMDSimulation import UMDSimulation
-from UMDSnapshot import UMDSnapshot
+
+from .UMDSimulation_from_outcar import UMDSimulation_from_outcar
+from .UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
+from .UMDSnapshot_from_outcar import UMDSnapshot_from_outcar_null
+from .libs.UMDSimulation import UMDSimulation
+from .libs.UMDSnapshot import UMDSnapshot
 
 
-from decorator_ProgressBar import ProgressBar
+from .decorator_ProgressBar import ProgressBar
 
 loadedSteps = 0
 initialStep = 0
@@ -22,7 +27,7 @@ finalStep = 0
 nSteps = np.infty
 
 
-def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
+def UMDVaspParser(outcarfile, step0=0, nsteps=np.infty):
     """
     Generate the UMD file extracting information from a Vasp OUTCAR file.
 
@@ -43,23 +48,21 @@ def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
     finalStep = 0
     initialStep = step0
     nSteps = nsteps
+    
+    simulation_name = outcarfile.replace('.outcar', '').split('/')[-1]
+    simulation = UMDSimulation(name=simulation_name)
 
     # We open the output UMDfile
-    UMDfile = OUTCARfile.replace('outcar', 'umd')
+    UMDfile = outcarfile.replace('outcar', 'umd')
     with open(UMDfile, 'w') as umd:
         # Initialize and print a default UMDSimulation, totSimulation.
         # totSimulation records the real simulation information considered.
         # It is immediately printed in order to save the space that is
         # necessary to print the simulation total info at the end.
-        simulation_name = OUTCARfile.replace('.outcar', '').split('/')[-1]
-        totSimulation = UMDSimulation(name=simulation_name, cycle=0)
-        totSimulation.save(umd)
-        totSimulation.lattice.save(umd)
-        umd.write(' '*6*20+'\n')
-        umd.write(' '*6*20+'\n')
+        simulation.save(umd)
 
         # We open the input OUTCARfile
-        with open(OUTCARfile, 'r') as outcar:
+        with open(outcarfile, 'r') as outcar:
             # We read line by line untill the end of the OUTCAR file.
             # At each step of the loop, a complete simulation cycle is read
             # by the function load_SimulationCycle.
@@ -67,25 +70,23 @@ def UMDVaspParser(OUTCARfile, step0=0, nsteps=np.infty):
             while line:
                 # The function load_SimulationCycle() returns a UMDSimulation
                 # object or None, if all the OUTCAR file has been read.
-                simulation = load_SimulationCycle(outcar, umd,
-                                                  totSimulation.cycle)
-                if simulation is None:
+                cycle = simulation.cycle()
+                simulation = load_SimulationRun(outcar, umd, simulation)
+                if simulation.cycle() == cycle:
                     break
-                totSimulation.cycle += 1
-                totSimulation.steps += simulation.steps
-                totSimulation.time += simulation.simtime()
-                totSimulation.lattice = simulation.lattice
                 if loadedSteps >= initialStep + nSteps:
                     break
                 line = outcar.readline()
+            outcar.close()
 
         # Overwrite the defualt totSimulation initially printed in umd file,
         # with the updated and collective simulation info.
         umd.seek(0)
-        totSimulation.save(umd)
-        totSimulation.lattice.save(umd)
-        print(totSimulation)
-        return totSimulation
+        simulation.save(umd)
+        umd.close()
+        
+    print(simulation)
+    return simulation
 
 
 @ProgressBar(20)
@@ -108,11 +109,12 @@ def simulation_before_initialStep(outcar, simulation):
         Ratio of the snapshot read.
 
     """
-    simsteps = simulation.steps
-    for step in range(loadedSteps, loadedSteps + simsteps):
+    run = simulation.runs[-1]
+    steps = run.steps
+    for step in range(loadedSteps, loadedSteps + steps):
         UMDSnapshot_from_outcar_null(outcar)
-        yield float(step-loadedSteps)/simsteps
-    simulation.steps = 0
+        yield float(step-loadedSteps)/steps
+    simulation.runs[-1].steps = 0
 
 
 @ProgressBar(20)
@@ -139,15 +141,17 @@ def simulation_around_initialStep(outcar, umd, simulation):
         Ratio of the snapshot read.
 
     """
-    simsteps = simulation.steps
+    run = simulation.runs[-1]
+    steps = run.steps
     for step in range(loadedSteps, initialStep):
         UMDSnapshot_from_outcar_null(outcar)
-        yield float(step-loadedSteps)/simsteps
-    for step in range(initialStep, loadedSteps+simsteps):
-        snapshot = UMDSnapshot_from_outcar(outcar, step)
+        yield float(step-loadedSteps)/steps
+    for step in range(initialStep, loadedSteps+steps):
+        snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
+        snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
         snapshot.save(umd)
-        yield float(step-loadedSteps)/simsteps
-    simulation.steps = finalStep - initialStep
+        yield float(step-loadedSteps)/steps
+    simulation.runs[-1].steps = finalStep - initialStep
 
 
 @ProgressBar(20)
@@ -173,15 +177,17 @@ def simulation_after_initialStep(outcar, umd, simulation):
         Ratio of the snapshot read.
 
     """
-    simsteps = simulation.steps
-    for step in range(loadedSteps, loadedSteps + simsteps):
-        snapshot = UMDSnapshot_from_outcar(outcar, step)
+    run = simulation.runs[-1]
+    steps = run.steps
+    for step in range(loadedSteps, loadedSteps + steps):
+        snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
+        snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
         snapshot.save(umd)
-        yield float(step-loadedSteps)/simsteps
-    simulation.steps = finalStep - loadedSteps
+        yield float(step-loadedSteps)/steps
+    simulation.runs[-1].steps = finalStep - loadedSteps
 
 
-def load_SimulationCycle(outcar, umd, cycle):
+def load_SimulationRun(outcar, umd, simulation):
     """
     Read from OUTCAR file and print on UMD file the data of a simulation cycle.
 
@@ -218,25 +224,28 @@ def load_SimulationCycle(outcar, umd, cycle):
     """
     global loadedSteps, initialStep, finalStep, nSteps
 
-    simulation = UMDSimulation_from_outcar(outcar, cycle)
-    if simulation is None:
-        return
+    cycle = simulation.cycle()
+    simulation = UMDSimulation_from_outcar(outcar, simulation)
+    if simulation.cycle() == cycle:
+        return simulation
     else:
-        print('Loaded simulation ...')
-        print(simulation)
+        if cycle == 0:
+            simulation.lattice.save(umd)
+        run = simulation.runs[-1]
+        print('Loaded simulation run...')
+        print(run)
         print('Loading snapshots ...')
-        simsteps = simulation.steps
-        finalStep = min(initialStep+nSteps, loadedSteps+simsteps)
-        UMDSnapshot.reset(simulation.steptime, simulation.lattice)
-        if initialStep > loadedSteps + simsteps:
+        steps = run.steps
+        finalStep = min(initialStep+nSteps, loadedSteps+steps)
+        if initialStep > loadedSteps + steps:
             simulation_before_initialStep(outcar, simulation)
         elif initialStep > loadedSteps:
             simulation_around_initialStep(outcar, umd, simulation)
         else:
             simulation_after_initialStep(outcar, umd, simulation)
-        loadedSteps += simsteps
-        print(' ... {} snapshots saved.\n'.format(simulation.steps))
+        loadedSteps += steps
+        print(' ... {} snapshots saved.\n'.format(run.steps))
         return simulation
 
 
-UMDVaspParser('tests/mag5.70a1800T.outcar')
+#UMDVaspParser('./tests/examples/OUTCAR_single.outcar')
