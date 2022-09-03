@@ -19,10 +19,10 @@ from ..libs.UMDSimulationRun import UMDSimulationRun
 
 
 class TestUMDVaspParser:
-    
+
     file_single = './examples/OUTCAR_single'
     file_multiple = './examples/OUTCAR_multiple'
-    
+
     lattice_name = '2bccH2O+1Fe'
     H = UMDAtom(name='H', mass=1.00, valence=1.0)
     O = UMDAtom(name='O', mass=16.00, valence=6.0)

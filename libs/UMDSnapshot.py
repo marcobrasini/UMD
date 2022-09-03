@@ -22,7 +22,7 @@ from .UMDLattice import UMDLattice
 from .UMDSnapDynamics import UMDSnapDynamics
 from .UMDSnapThermodynamics import UMDSnapThermodynamics
 
-
+    
 class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
     """
     Class UMDSnapshot to contain the data of a single molecular dynamics
@@ -87,6 +87,34 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         UMDSnapThermodynamics.__init__(self)
         UMDSnapDynamics.__init__(self, time)
 
+    def isUMDSnapThermodynamics(func):
+        def wrap(cls, *args, **kwargs):
+            if args:
+                thermodynamics = args[0]
+                if isinstance(thermodynamics, UMDSnapThermodynamics):
+                    temperature = thermodynamics.temperature
+                    pressure = thermodynamics.pressure
+                    energy = thermodynamics.energy
+                    return func(cls, temperature=temperature, 
+                                pressure=pressure, energy=energy)
+            return func(cls, *args, **kwargs)
+        return wrap
+    
+    def isUMDSnapDynamics(func):
+        def wrap(cls, *args, **kwargs):
+            if args:
+                dynamics = args[0]
+                if isinstance(dynamics, UMDSnapDynamics):
+                    position = dynamics.position
+                    velocity = dynamics.velocity
+                    force = dynamics.force
+                    time = dynamics.time
+                    return func(cls, position=position, 
+                                velocity=velocity, force=force, time=time)
+            return func(cls, *args, **kwargs)
+        return wrap
+
+    @isUMDSnapThermodynamics
     def setThermodynamics(self, temperature=0.0, pressure=0.0, energy=0.0):
         """
         Initialize the thermodynamics parameters of the snapshot.
@@ -107,7 +135,8 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         """
         UMDSnapThermodynamics.__init__(self, temperature, pressure, energy)
 
-    def setDynamics(self, position=[], velocity=[], force=[]):
+    @isUMDSnapDynamics
+    def setDynamics(self, position=[], velocity=[], force=[], time=0.0):
         """
         Initialize the dynamics parameters of the snapshot.
 
@@ -127,13 +156,15 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         None.
 
         """
+        if not time:
+            time = self.time
         if len(position) != self.natoms:
             position = np.zeros((self.natoms, 3), dtype=float)
         if len(velocity) != self.natoms:
             velocity = np.zeros((self.natoms, 3), dtype=float)
         if len(force) != self.natoms:
             force = np.zeros((self.natoms, 3), dtype=float)
-        UMDSnapDynamics.__init__(self, self.time, position, velocity, force)
+        UMDSnapDynamics.__init__(self, time, position, velocity, force)
 
     def __str__(self):
         """

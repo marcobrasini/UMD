@@ -7,12 +7,12 @@
 
 from ..libs.UMDSnapThermodynamics import UMDSnapThermodynamics
 
+import pytest
 import hypothesis as hp
 import hypothesis.strategies as st
 
 from .test_scenarios_UMDSnapThermodynamics import dataUMDSnapThermodynamics
 from .test_scenarios_UMDSnapThermodynamics import getUMDSnapThermodynamics
-
 
 
 # %% UMDSnapThermodynamics unit tests

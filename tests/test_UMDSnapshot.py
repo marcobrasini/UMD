@@ -7,11 +7,14 @@
 from ..libs.UMDSnapshot import UMDSnapshot
 
 import numpy as np
+import pytest
 import hypothesis as hp
 import hypothesis.strategies as st
 
 from ..libs.UMDAtom import UMDAtom
 from ..libs.UMDLattice import UMDLattice
+from ..libs.UMDSnapDynamics import UMDSnapDynamics
+from ..libs.UMDSnapThermodynamics import UMDSnapThermodynamics
 from .test_scenarios_UMDSnapshot import dataUMDSnapshot
 from .test_scenarios_UMDSnapDynamics import dataUMDSnapDynamics
 from .test_scenarios_UMDSnapThermodynamics import dataUMDSnapThermodynamics
@@ -38,6 +41,7 @@ class Test_UMDSnapshot_unit:
     force = np.array([[-0.80722157, -0.47571638, +0.23693435],
                       [+0.37777898, -0.20037447, -0.03918817]])
 
+    # %% __init__ function tests
     def test_UMDSnapshot_init(self):
         """
         Test UMDSnapshot __init__ function assignement operation.
@@ -49,9 +53,11 @@ class Test_UMDSnapshot_unit:
         assert snapshot.natoms == self.natoms
         assert snapshot.lattice == self.lattice
 
+    # %% setThermodynamics and isUMDSnapThermodynamics function tests
     def test_UMDSnapshot_setThermodynamics(self):
         """
-        Test UMDSnapsshot setThermodynamics function.
+        Test UMDSnapshot setThermodynamics function from reference
+        thermodynamics data.
 
         """
         snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
@@ -61,9 +67,47 @@ class Test_UMDSnapshot_unit:
         assert snapshot.pressure == self.pressure
         assert snapshot.energy == self.energy
 
+    def test_UMDSnapshot_setThermodynamics_from_UMDSnapThermodynamics(self):
+        """
+        Test UMDSnapshot setThermodynamics function from UMDSnapThermodynamics
+        object with the reference thermodynamics data.
+
+        """
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        thermodynamics = UMDSnapThermodynamics(self.temperature, self.pressure,
+                                               self.energy)
+        snapshot.setThermodynamics(thermodynamics)
+        assert snapshot.temperature == self.temperature
+        assert snapshot.pressure == self.pressure
+        assert snapshot.energy == self.energy
+
+    def test_UMDSnapshot_setThermodynamics_from_UMDSnapThermodynamics_0(self):
+        """
+        Test UMDSnapshot setThermodynamics function from UMDSnapThermodynamics
+        default object.
+
+        """
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        thermodynamics = UMDSnapThermodynamics()
+        snapshot.setThermodynamics(thermodynamics)
+        assert snapshot.temperature == 0.0
+        assert snapshot.pressure == 0.0
+        assert snapshot.energy == 0.0
+
+    def test_UMDSnapshot_setThermodynamics_TypeError(self):
+        """
+        Test UMDSnapsshot setThermodynamics function with wrong attributes.
+        A TypeError is raised.
+
+        """
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        with pytest.raises(TypeError):
+            snapshot.setThermodynamics(keyword=1)
+
+    # %% setDynamics and isUMDSnapDynamics functions tests
     def test_UMDSnapshot_setDynamics(self):
         """
-        Test UMDSnapshot setDynamics function.
+        Test UMDSnapshot setDynamics function from reference dynamics data.
 
         """
         snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
@@ -73,6 +117,46 @@ class Test_UMDSnapshot_unit:
         assert np.array_equal(snapshot.velocity, self.velocity)
         assert np.array_equal(snapshot.force, self.force)
 
+    def test_UMDSnapshot_setDynamics_from_UMDSnapDynamics(self):
+        """
+        Test UMDSnapshot setDynamics function from UMDSnapDynamics object with
+        the reference dynamics data.
+
+        """
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        dynamics = UMDSnapDynamics(self.time, self.position, self.velocity,
+                                   self.force)
+        snapshot.setDynamics(dynamics)
+        assert snapshot.time == self.time
+        assert np.array_equal(snapshot.position, self.position)
+        assert np.array_equal(snapshot.velocity, self.velocity)
+        assert np.array_equal(snapshot.force, self.force)
+
+    def test_UMDSnapshot_setDynamics_from_UMDSnapDynamics_0(self):
+        """
+        Test UMDSnapshot setDynamics function from UMDSnapDynamics default
+        object.
+
+        """
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        dynamics = UMDSnapDynamics(time=1.0)
+        snapshot.setDynamics(dynamics)
+        assert snapshot.time == 1.0
+        assert np.array_equal(snapshot.position, np.zeros((2, 3), dtype=float))
+        assert np.array_equal(snapshot.velocity, np.zeros((2, 3), dtype=float))
+        assert np.array_equal(snapshot.force, np.zeros((2, 3), dtype=float))
+
+    def test_UMDSnapshot_setDynamics_TypeError(self):
+        """
+        Test UMDSnapshot setDynamics function with wrong attributes.
+        A TypeError is raised.
+
+        """
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        with pytest.raises(TypeError):
+            snapshot.setDynamics(keyword=1.0)
+
+    # %% __str__ function tests
     def test_UMDSnapshot_str_length(self):
         """
         Test UMDSnapshot __str__ function length:
