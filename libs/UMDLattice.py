@@ -133,10 +133,12 @@ class UMDLattice:
         string = 'Lattice: {:30}\n'.format(self.name)
         for vector in self.dirBasis:
             string += ' '.join(['{:15.6f}'.format(x) for x in vector])+'\n'
-        atoms_name = self.atoms.keys()
+        atoms = self.atoms.keys()
         atoms_val = self.atoms.values()
-        string += ' '.join(['{:5}'.format(str(n)) for n in atoms_name])+'\n'
-        string += ' '.join(['{:5}'.format(n) for n in atoms_val])
+        string += ' '.join(['{:9}'.format(str(n.name)) for n in atoms])+'\n'
+        string += ' '.join(['{:9}'.format(n.mass) for n in atoms])+'\n'
+        string += ' '.join(['{:9}'.format(n.valence) for n in atoms])+'\n'
+        string += ' '.join(['{:9}'.format(n) for n in atoms_val])
         return string
 
     def save(self, outfile):

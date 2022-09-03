@@ -52,26 +52,22 @@ def UMDVaspParser(outcarfile, step0=0, nsteps=np.infty):
     simulation_name = outcarfile.replace('.outcar', '').split('/')[-1]
     simulation = UMDSimulation(name=simulation_name)
 
-    # We open the output UMDfile
+    # We open a temporary UMD output file to store the UMDSnapshot information.
     UMDfile = outcarfile.replace('outcar', 'umd')
-    with open(UMDfile, 'w') as umd:
-        # Initialize and print a default UMDSimulation, totSimulation.
-        # totSimulation records the real simulation information considered.
-        # It is immediately printed in order to save the space that is
-        # necessary to print the simulation total info at the end.
-        simulation.save(umd)
-
-        # We open the input OUTCARfile
+    with open(UMDfile+'.temp', 'w+') as temp:
+        # We open the OUTCAR input file to read all the UMDSimulation and
+        # UMDSnapshot information.
         with open(outcarfile, 'r') as outcar:
-            # We read line by line untill the end of the OUTCAR file.
-            # At each step of the loop, a complete simulation cycle is read
-            # by the function load_SimulationCycle.
+            # The OUTCAR file is read line by line untill its end.
+            # At each simulation run is read by the load_SimulationRun function
+            # and added to the total simulation in the UMDSimulation object.
             line = outcar.readline()
             while line:
-                # The function load_SimulationCycle() returns a UMDSimulation
-                # object or None, if all the OUTCAR file has been read.
+                # The load_SimulationRun function returns the updated
+                # UMDSimulation object. If the UMDSimulationRun object is not 
+                # updated, then it has reached the end of the OUTCAR file.
                 cycle = simulation.cycle()
-                simulation = load_SimulationRun(outcar, umd, simulation)
+                simulation = load_SimulationRun(outcar, temp, simulation)
                 if simulation.cycle() == cycle:
                     break
                 if loadedSteps >= initialStep + nSteps:
@@ -79,12 +75,21 @@ def UMDVaspParser(outcarfile, step0=0, nsteps=np.infty):
                 line = outcar.readline()
             outcar.close()
 
-        # Overwrite the defualt totSimulation initially printed in umd file,
-        # with the updated and collective simulation info.
-        umd.seek(0)
-        simulation.save(umd)
-        umd.close()
-        
+        with open(UMDfile, 'w') as umd:
+            # We now create the real UMD file, with the UMDSimulation
+            # information in the header and then all the UMDSnapshot stored in
+            # the temporary UMD file.
+            simulation.save(umd, saveRuns=True)
+            umd.write(145*'-'+'\n\n')
+            simulation.lattice.save(umd)
+            umd.write(145*'-'+'\n\n')
+            temp.seek(0)
+            umd.write(temp.read())
+            umd.close()
+        # The temporary UMD file is removed.
+        temp.close()
+        os.remove(UMDfile+'.temp')
+
     print(simulation)
     return simulation
 
@@ -229,8 +234,6 @@ def load_SimulationRun(outcar, umd, simulation):
     if simulation.cycle() == cycle:
         return simulation
     else:
-        if cycle == 0:
-            simulation.lattice.save(umd)
         run = simulation.runs[-1]
         print('Loaded simulation run...')
         print(run)

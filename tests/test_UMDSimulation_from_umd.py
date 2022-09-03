@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Sep  2 22:50:14 2022
+
+@author: marco
+"""
+
+from ..UMDSimulation_from_umd import UMDSimulation_from_umd
+from ..UMDSimulation_from_umd import UMDLattice_from_umd
+
+import pytest
+import numpy as np
+
+from ..libs.UMDAtom import UMDAtom
+from ..libs.UMDLattice import UMDLattice
+from ..libs.UMDSimulation import UMDSimulation
+from ..libs.UMDSimulationRun import UMDSimulationRun
+
+
+class TestUMDSimulation_from_umd:
+
+    lattice_name = '2bccH2O+1Fe'
+    H = UMDAtom(name='H', mass=1.00, valence=1.0)
+    O = UMDAtom(name='O', mass=16.00, valence=6.0)
+    Fe = UMDAtom(name='Fe', mass=55.85, valence=8.0)
+    atoms = {O: 15, H: 28, Fe: 1}
+    basis = 5.7*np.identity(3)
+    lattice = UMDLattice(lattice_name, basis, atoms)
+
+    run0 = UMDSimulationRun(0, 300, 0.5)
+    run1 = UMDSimulationRun(1, 600, 0.5)
+    run2 = UMDSimulationRun(2, 1000, 0.4)
+
+    simulation_single = UMDSimulation('', lattice, [run0])
+    simulation_multiple = UMDSimulation('', lattice, [run0, run1, run2])
+
+    def test_UMDLattice_from_umd(self):
+        """
+        Test the UMDLattice_from_umd function.
+
+        """
+        with open('./examples/UMD_single.umd', 'r') as umd:
+            lattice = UMDLattice_from_umd(umd)
+            assert lattice == self.lattice
+
+    def test_UMDSimulation_from_umd_single(self):
+        """
+        Test the UMDSimulation_from_umd function for an OUTCAR file containing
+        a single simulation run.
+
+        """
+        with open('./examples/UMD_single.umd', 'r') as umd:
+            simulation = UMDSimulation_from_umd(umd)
+            assert simulation == self.simulation_single
+
+    def test_UMDSimulation_from_umd_multiple(self):
+        """
+        Test the UMDSimulation_from_umd function for an OUTCAR file containing
+        multiple simulation runs concatenated.
+
+        """
+        with open('./examples/UMD_multiple.umd', 'r') as umd:
+            simulation = UMDSimulation_from_umd(umd)
+            assert simulation == self.simulation_multiple

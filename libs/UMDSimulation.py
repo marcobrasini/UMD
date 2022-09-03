@@ -139,7 +139,7 @@ class UMDSimulation:
         string += '  Total time   = {:12.3f} fs'.format(self.time())
         return string
 
-    def save(self, outfile):
+    def save(self, outfile, saveRuns=False):
         """
         Print the UMDSimulation information on an output stream.
 
@@ -154,6 +154,10 @@ class UMDSimulation:
 
         """
         outfile.write(str(self)+'\n\n')
+        if saveRuns:
+            for run in self.runs:
+                outfile.write(str(run)+'\n')
+            outfile.write('\n')
 
     def cycle(self):
         """

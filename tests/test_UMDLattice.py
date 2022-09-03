@@ -30,8 +30,8 @@ class Test_UMDLattice_unit:
 
     """
 
-    X = UMDAtom(name='X', mass=3.00)
-    Y = UMDAtom(name='Y', mass=4.50)
+    X = UMDAtom(name='X', mass=3.00, valence=2.0)
+    Y = UMDAtom(name='Y', mass=4.50, valence=3.0)
     atoms = {X: 15, Y: 6}
 
     name = 'LatticeName'
@@ -146,8 +146,10 @@ class Test_UMDLattice_unit:
         string += '       2.000000        0.000000        0.000000\n'
         string += '       1.000000        2.000000        0.000000\n'
         string += '       1.000000        1.000000        1.000000\n'
-        string += 'X     Y    \n'
-        string += '   15     6'
+        string += 'X         Y        \n'
+        string += '      3.0       4.5\n'
+        string += '      2.0       3.0\n'
+        string += '       15         6'
         print(str(self.lattice))
         print(string)
         assert str(self.lattice) == string
@@ -160,12 +162,14 @@ class Test_UMDLattice_unit:
             + line2 = 15 + 1 + 15 + 1 + 15 + 1
             + line3 = 15 + 1 + 15 + 1 + 15 + 1
             + line4 = 15 + 1 + 15 + 1 + 15 + 1
-            + line5 = (5 + 1) * number of atom types
-            + line6 = (5 + 1) * number of atom types - 1(the last '\n')
+            + line5 = (9 + 1) * number of atom types
+            + line5 = (9 + 1) * number of atom types
+            + line5 = (9 + 1) * number of atom types
+            + line6 = (9 + 1) * number of atom types - 1(the last '\n')
                     = 40 + 3*48 + 12*(number of atom types) - 1
 
         """
-        stringlength = 184 + 2*6*len(self.atoms) - 1
+        stringlength = 184 + 4*10*len(self.atoms) - 1
         assert len(str(self.lattice)) == stringlength
 
     # %% UMDLattice natoms function tests
