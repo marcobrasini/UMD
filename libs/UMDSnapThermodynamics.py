@@ -34,6 +34,8 @@ class UMDSnapThermodynamics:
 
     Methods
     -------
+    __eq__
+        Compare two UMDSnapThermodynamics objects.
     __str__
         Convert a UMDSnapThermodynamics objects into a string.
     save
@@ -63,6 +65,28 @@ class UMDSnapThermodynamics:
         self.pressure = pressure
         self.energy = energy
 
+    def __eq__(self, other):
+        """
+        Compare two UMDSnapThermodynamics objects.
+
+        Parameters
+        ----------
+        other : UMDSnapshot
+            The second term of the comparison.
+
+        Returns
+        -------
+        equal : bool
+            It returns True if the two set of thermodynamics quantities saved
+            in the snapshots are identical, otherwise False.
+
+        """
+        equal  = isinstance(other, UMDSnapThermodynamics)
+        equal *= (self.temperature == other.temperature)
+        equal *= (self.pressure == other.pressure)
+        equal *= (self.energy == other.energy)
+        return equal
+
     def __str__(self):
         """
         Convert a UMDSnapThermodynamics objects into a string.
@@ -75,9 +99,9 @@ class UMDSnapThermodynamics:
 
         """
         string  = "Thermodynamics:\n"
-        string += "  Temperature = {:12.4f} K\n" .format(self.temperature)
-        string += "  Pressure    = {:12.4f} GPa\n".format(self.pressure)
-        string += "  Energy      = {:12.4f} eV".format(self.energy)
+        string += "  Temperature = {:14.6f} K\n" .format(self.temperature)
+        string += "  Pressure    = {:14.6f} GPa\n".format(self.pressure)
+        string += "  Energy      = {:14.6f} eV".format(self.energy)
         return string
 
     def save(self, outfile):
