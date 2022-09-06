@@ -71,7 +71,7 @@ class UMDSnapThermodynamics:
 
         Parameters
         ----------
-        other : UMDSnapshot
+        other : UMDSnapThermodynamics
             The second term of the comparison.
 
         Returns

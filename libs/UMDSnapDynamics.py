@@ -39,6 +39,8 @@ class UMDSnapDynamics:
 
     Methods
     -------
+    __eq__
+        Compare two UMDSnapDynamics objects.
     __str__
         Convert a UMDSnapDynamics objects into a string.
     save
@@ -70,6 +72,29 @@ class UMDSnapDynamics:
         self.position = position
         self.velocity = velocity
         self.force = force
+
+    def __eq__(self, other):
+        """
+        Compare two UMDSnapDynamics objects.
+
+        Parameters
+        ----------
+        other : UMDSnapDynamics
+            The second term of the comparison.
+
+        Returns
+        -------
+        equal : bool
+            It returns True if the two set of dynamics quantities saved
+            in the snapshots are identical, otherwise False.
+
+        """
+        equal  = isinstance(other, UMDSnapDynamics)
+        equal *= (self.time == other.time)
+        equal *= np.array_equal(self.position, other.position)
+        equal *= np.array_equal(self.velocity, other.velocity)
+        equal *= np.array_equal(self.force, other.force)
+        return equal
 
     def __str__(self):
         """
