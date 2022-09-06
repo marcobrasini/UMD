@@ -56,12 +56,16 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
 
     Methods
     -------
+    __eq__
+        Compare two UMDSnapshot objects.
     __str__
         Convert a UMDSnapshot objects into a string.
     setThermodynamics
         Initialize the thermodynamics parameters of the snapshot.
     setDynamics
         Initialize the dynamics parameters of the snapshot.
+    save
+        Print the UMDSnapshot data in an output file.
 
     """
 
@@ -88,6 +92,10 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         UMDSnapDynamics.__init__(self, time)
 
     def isUMDSnapThermodynamics(func):
+        """
+        Decorate a method casting the arguments with the UMDSnapThermodynamics.
+
+        """
         def wrap(cls, *args, **kwargs):
             if args:
                 thermodynamics = args[0]
@@ -99,8 +107,12 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
                                 pressure=pressure, energy=energy)
             return func(cls, *args, **kwargs)
         return wrap
-    
+
     def isUMDSnapDynamics(func):
+        """
+        Decorate a method casting the arguments with the UMDSnapDynamics.
+
+        """
         def wrap(cls, *args, **kwargs):
             if args:
                 dynamics = args[0]
@@ -109,8 +121,8 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
                     velocity = dynamics.velocity
                     force = dynamics.force
                     time = dynamics.time
-                    return func(cls, position=position, 
-                                velocity=velocity, force=force, time=time)
+                    return func(cls, position=position, velocity=velocity,
+                                force=force, time=time)
             return func(cls, *args, **kwargs)
         return wrap
 
@@ -166,6 +178,29 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
             force = np.zeros((self.natoms, 3), dtype=float)
         UMDSnapDynamics.__init__(self, time, position, velocity, force)
 
+    def __eq__(self, other):
+        """
+        Compare two UMDSnapshot objects.
+
+        Parameters
+        ----------
+        other : UMDSnapshot object
+            The second term of the comparison.
+
+        Returns
+        -------
+        equal : bool
+            It returns True if the two snapshot represented are identical,
+            otherwise False.
+
+        """
+        equal  = isinstance(other, UMDSnapshot)
+        equal *= (self.snap == other.snap)
+        equal *= (self.lattice == other.lattice)
+        equal *= UMDSnapThermodynamics.__eq__(self, other)
+        equal *= UMDSnapDynamics.__eq__(self, other)
+        return bool(equal)
+
     def __str__(self):
         """
         Overload of the __str__ function.
@@ -183,7 +218,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
 
     def save(self, outfile):
         """
-        Print on file the UMDSnapshot data.
+        Print the UMDSnapshot data in an output file.
 
         Parameters
         ----------

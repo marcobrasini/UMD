@@ -40,6 +40,10 @@ class Test_UMDSnapshot_unit:
                          [+0.29512520, +0.29288268, -0.75090549]])
     force = np.array([[-0.80722157, -0.47571638, +0.23693435],
                       [+0.37777898, -0.20037447, -0.03918817]])
+    snapshot = UMDSnapshot(snap, time, lattice)
+    snapshot.setThermodynamics(temperature=temperature, pressure=pressure,
+                               energy=energy)
+    snapshot.setDynamics(position=position, velocity=velocity, force=force)
 
     # %% __init__ function tests
     def test_UMDSnapshot_init(self):
@@ -156,6 +160,60 @@ class Test_UMDSnapshot_unit:
         with pytest.raises(TypeError):
             snapshot.setDynamics(keyword=1.0)
 
+    # %% __eq__ function tests
+    def test_UMDSnapshot_eq_true(self):
+        """
+        Test the __eq__ function to compare two UMDSnapshot objects 
+        representing two identical snapshots.
+        The value returned must be True.
+
+        """
+        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
+        snapshot.setDynamics(self.position, self.velocity, self.force)
+        snapshot.setThermodynamics(self.temperature, self.pressure,
+                                   self.energy)
+        assert snapshot == self.snapshot
+    
+    def test_UMDSnapshot_eq_false_snap(self):
+        """
+        Test the __eq__ function to compare two UMDSnapshot objects 
+        representing two different snapshots, with different snapshot index.
+        The value returned must be False.
+
+        """
+        snapshot = UMDSnapshot(snap=0, time=self.time, lattice=self.lattice)
+        snapshot.setDynamics(self.position, self.velocity, self.force)
+        snapshot.setThermodynamics(self.temperature, self.pressure,
+                                   self.energy)
+        assert not snapshot == self.snapshot
+    
+    def test_UMDSnapshot_eq_false_time(self):
+        """
+        Test the __eq__ function to compare two UMDSnapshot objects 
+        representing two different snapshots, with different time duration.
+        The value returned must be False.
+
+        """
+        snapshot = UMDSnapshot(snap=self.snap, time=0.0, lattice=self.lattice)
+        snapshot.setDynamics(self.position, self.velocity, self.force)
+        snapshot.setThermodynamics(self.temperature, self.pressure,
+                                   self.energy)
+        assert not snapshot == self.snapshot
+    
+    def test_UMDSnapshot_eq_false_lattice(self):
+        """
+        Test the __eq__ function to compare two UMDSnapshot objects 
+        representing two different snapshots, with different lattice.
+        The value returned must be False.
+
+        """
+        snapshot = UMDSnapshot(snap=self.snap, time=self.time,
+                               lattice=UMDLattice())
+        snapshot.setDynamics(self.position, self.velocity, self.force)
+        snapshot.setThermodynamics(self.temperature, self.pressure,
+                                   self.energy)
+        assert not snapshot == self.snapshot
+
     # %% __str__ function tests
     def test_UMDSnapshot_str_length(self):
         """
@@ -167,7 +225,7 @@ class Test_UMDSnapshot_unit:
         """
         snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
         snapshot.setDynamics(self.position, self.velocity, self.force)
-        assert len(str(snapshot)) == (20+1) + (111+1) + 460
+        assert len(str(snapshot)) == (20+1) + (117+1) + 460
 
 
 # %% ===================================================================== %% #
@@ -231,4 +289,4 @@ def test_UMDSnapshot_str_length(data, ntypes):
     thermodynamics = data.draw(dataUMDSnapThermodynamics())
     snapshot.setDynamics(**dynamics)
     snapshot.setThermodynamics(**thermodynamics)
-    assert len(str(snapshot)) == (20+1) + (111+1) + (170 + natoms*145)
+    assert len(str(snapshot)) == (20+1) + (117+1) + (170 + natoms*145)
