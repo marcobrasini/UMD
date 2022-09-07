@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon May  9 19:33:35 2022
+===============================================================================
+                            UMDSnapshot_from_outcar
+===============================================================================
 
-@author: marco
-"""
-"""
+This module provides the UMDSnapshot_from_outcar function implementation. The
+UMDSnapshot_from_outcar function is necessary to extract the snapshot data from
+a Vasp OUTCAR file.
 Snapshot informations are reported at the end of a convergence loop executed
 at each Iteration in the OUTCAR file.
 

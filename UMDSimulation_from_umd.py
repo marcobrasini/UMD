@@ -1,8 +1,40 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed May 18 15:33:58 2022
+===============================================================================
+                            UMDSimulation_from_umd
+===============================================================================
 
-@author: marco
+This module provides the UMDSimulation_from_umd function implementation. The
+UMDSimulation_from_umd function is necessary to extract the simulation
+parameters from a UMD file.
+Simulation informations are reported at the beginning of the UMD file. From the
+initial part of the UMD file, we get the informations to initialize both
+UMDLattice (atom types, number of atoms and basis vectors), the UMDSimulation
+and the UMDSimulationRun (number of iteration and snapshot time duration).
+
+UMD HEADER
+The header is divided in three different sections.
+ + the simulation section summarizing the total simulation parameters.
+   The simulation section has the following structure:
+       Simulation: ""
+       Total cycles = xxxxxxxxxxxx
+       Total steps  = xxxxxxxxxxxx
+       Total time   = xxxxxxxxxxxx fs
+ + the simulation run section where there are listed the parameters for each
+   simulation run.
+   Each simulation run section has the following structure:
+       Run        x:
+       Steps     = xxxxxxxx
+       Step time = xxxxxxxx (fs)
+ + the lattice section where it is described the cell structure and the atoms.
+   The lattice section has the following structure:
+       Lattice: ""
+              a_x             a_y             a_z
+              b_x             b_y             b_z
+              c_x             c_y             c_z
+       [atom1]       [atom2]       ...
+           [mass1]      [mass2]    ...
+        [valence1]   [valence2]    ...
+         [number1]    [number2]    ...
 """
 
 

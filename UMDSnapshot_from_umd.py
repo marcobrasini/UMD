@@ -1,8 +1,32 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed May 18 17:09:04 2022
+===============================================================================
+                            UMDSnapshot_from_umd
+===============================================================================
 
-@author: marco
+This module provides the UMDSnapshot_from_umd function implementation. The
+UMDSnapshot_from_umd function is necessary to extract the snapshot data from
+a UMD file.
+All snapshot informations are reported after the header of the UMD file and
+are grouped into a single snapshot section.
+
+The snapshot section starts with the string "Snapshot:          x", where x is
+the snapshot index. Then it is subdevided into two subsections:
+ + the thermodynamics section
+       Thermodynamics:
+       Temperature = xxxxx.xxxxxx K
+       Pressure    = xxxxx.xxxxxx GPa
+       Energy      = xxxxx.xxxxxx eV
+ + the dynamics section containing the snapshot duration
+       Dynamics: xxxxxxxx.xxx fs
+   and a list of all the N atoms dynamic informations. Each line contains the
+   cartesian coordinates of the single atom position, velocity and force.
+       "Position_x      Position_y      Position_z      "
+       +"Velocity_x      Velocity_y      Velocity_z      "
+       +"Force_x         Force_y         Force_z         \n"
+         r1_x    r1_y    r1_z    v1_x    v1_y    v1_z    F1_x    F1_y    F1_z
+         r2_x    r2_y    r2_z    v2_x    v2_y    v2_z    F2_x    F2_y    F2_z
+         ...     ...     ...     ...     ...     ...     ...     ...     ...
+         rN_x    rN_y    rN_z    vN_x    vN_y    vN_z    FN_x    FN_y    FN_z
 """
 
 import numpy as np
@@ -47,6 +71,8 @@ def UMDSnapDynamics_from_umd(umd, natoms):
     ----------
     umd : input file
         The UMD input file.
+    natoms : int
+        The number of atoms in the snapshot.
 
     Returns
     -------
@@ -80,6 +106,8 @@ def UMDSnapshot_from_umd(umd, simulation):
     ----------
     umd : input file
         The UMD input file.
+    simualtion : UMDSimulation
+        The UMDSimulation object with the simulation information.
 
     Returns
     -------

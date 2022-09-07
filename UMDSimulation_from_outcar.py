@@ -4,7 +4,7 @@
 ===============================================================================
 
 This module provides the UMDSimulation_from_outcar function implementation. The
-the UMDSimulation_from_outcar function is necessary to extract the simulation
+UMDSimulation_from_outcar function is necessary to extract the simulation
 parameters from a Vasp OUTCAR file. 
 Simulation informations are reported at the beginning of the OUTCAR file.
 From the initial part of the OUTCAR file, we get the informations to initialize
