@@ -5,38 +5,29 @@
 
 This module provides the UMDVaspParser function necessary to generate the UMD
 file starting from a Vasp OUTCAR file.
-The Vasp OUTCAR file can also contain multiple simulations run concatenated.
+The Vasp OUTCAR file can contain a single simulation run or aslo multiple
+simulation runs concatenated. The UMDVaspParser function allows to set the
+index of the initial snapshot and the total number of snapshots to consider
+thanks to the initialStep and the nSteps arguments respectively.
 
 Functions
 ---------
     UMDVaspParser
-    load_UMDSimulationRun
 
 See Also
 --------
-    UMDSimulation_from_outcar
-    UMDSnapshot_from_outcar
+    UMDSimulation
+    load_UMDSimulationRun
+
 """
 
+
 import os
-import sys
-import getopt
 import numpy as np
 
-
-from .UMDSimulation_from_outcar import UMDSimulation_from_outcar
-from .UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
-from .UMDSnapshot_from_outcar import UMDSnapshot_from_outcar_null
 from .libs.UMDSimulation import UMDSimulation
-from .libs.UMDSnapshot import UMDSnapshot
-
-
-from .decorator_ProgressBar import ProgressBar
-
-_loadedSteps = 0
-_initialStep = 0
-_finalStep = 0
-_nSteps = np.infty
+from .load_UMDSimulationRun import load_UMDSimulationRun
+from .load_UMDSimulationRun import _param_
 
 
 def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
@@ -67,12 +58,11 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
         raise(ValueError('invalid initialStep value: it must be positive.'))
     if nSteps < 0:
         raise(ValueError('invalid nStep value: it must be positive.'))
-    
-    global _initialStep, _finalStep, _nSteps, _loadedSteps
-    _loadedSteps = 0
-    _finalStep = 0
-    _initialStep = initialStep
-    _nSteps = nSteps
+
+    _param_._loadedSteps = 0
+    _param_._finalStep = 0
+    _param_._initialStep = initialStep
+    _param_._nSteps = nSteps
 
     simulation_name = outcarfile.replace('.outcar', '').split('/')[-1]
     simulation = UMDSimulation(name=simulation_name)
@@ -95,7 +85,7 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
                 simulation = load_UMDSimulationRun(outcar, temp, simulation)
                 if simulation.cycle() == cycle:
                     break
-                if _loadedSteps >= _initialStep + _nSteps:
+                if _param_._loadedSteps >= initialStep + nSteps:
                     break
                 line = outcar.readline()
             outcar.close()
@@ -117,160 +107,3 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
 
     print(simulation)
     return simulation
-
-
-def load_UMDSimulationRun(outcar, umd, simulation):
-    """
-    Read from OUTCAR file and print on UMD file the data of a simulation cycle.
-
-    The function is implemented in two functions:
-        - UMDSimulation_from_outcar,
-          to read the lattice structure and the simulation parameters which
-          are fixed for every snapshot of the simulation.
-          If no UMDSimulation is initialized, then None is returned.
-        - UMDSnapshot_from_outcar,
-          to read each individual snapshots in the simulation.
-          The number of snapshots read depends on the number of iterations set
-          among the simulation parameters.
-          According to the current simulation cycle and the initialStep, the
-          snapshots are managed by one of the following functions:
-              - simulation_before_initialStep
-              - simulation_around_initialStep
-              - simulation_after_initialStep
-
-    Parameters
-    ----------
-    outcar : input file
-        The OUTCAR file.
-    umd : output file
-        The UMD file.
-    cycle : int
-        The cycle number of the simulation.
-
-    Returns
-    -------
-    simulation : UMDsimulation
-        The UMDSimulation object initialized by the UMDSimulation_from_outcar
-        function. It is None when the OUTCAR file is finished.
-
-    """
-    global _loadedSteps, _initialStep, _finalStep, _nSteps
-
-    cycle = simulation.cycle()
-    simulation = UMDSimulation_from_outcar(outcar, simulation)
-    if simulation.cycle() == cycle:
-        return simulation
-    else:
-        run = simulation.runs[-1]
-        print('Loaded simulation run...')
-        print(run)
-        print('Loading snapshots ...')
-        steps = run.steps
-        _finalStep = min(_initialStep+_nSteps, _loadedSteps+steps)
-        if _initialStep > _loadedSteps + steps:
-            _simulation_before_initialStep(outcar, simulation)
-        elif _initialStep > _loadedSteps:
-            _simulation_around_initialStep(outcar, umd, simulation)
-        else:
-            _simulation_after_initialStep(outcar, umd, simulation)
-        _loadedSteps += steps
-        print(' ... {} snapshots saved.\n'.format(run.steps))
-        return simulation
-
-
-@ProgressBar(20)
-def _simulation_before_initialStep(outcar, simulation):
-    """
-    Read the snapshots before the initialStep.
-
-    The snapshots are read, but no UMDSnapshot object is built and saved.
-
-    Parameters
-    ----------
-    outcar : input file
-        The outcar file.
-    simulation : UMDSimulation
-        The current UMDSimulation.
-
-    Yields
-    ------
-    float
-        Ratio of the snapshot read.
-
-    """
-    run = simulation.runs[-1]
-    steps = run.steps
-    for step in range(_loadedSteps, _loadedSteps + steps):
-        UMDSnapshot_from_outcar_null(outcar)
-        yield float(step-_loadedSteps)/steps
-    simulation.runs[-1].steps = 0
-
-
-@ProgressBar(20)
-def _simulation_around_initialStep(outcar, umd, simulation):
-    """
-    Read and load the snapshots when initialStep is in the current simulation.
-
-    The snapshots before initialSteps are read, but no UMDSnapshot object is
-    built and saved. The snapshots after initialSteps are read and for each a
-    UMDSnapshot object is built and saved in the umd file.
-
-    Parameters
-    ----------
-    outcar : input file
-        The outcar file.
-    umd : output file
-        The umd file.
-    simulation : UMDSimulation
-        The current UMDSimulation.
-
-    Yields
-    ------
-    float
-        Ratio of the snapshot read.
-
-    """
-    run = simulation.runs[-1]
-    steps = run.steps
-    for step in range(_loadedSteps, _initialStep):
-        UMDSnapshot_from_outcar_null(outcar)
-        yield float(step-_loadedSteps)/steps
-    for step in range(_initialStep, _loadedSteps+steps):
-        snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
-        snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
-        snapshot.save(umd)
-        yield float(step-_loadedSteps)/steps
-    simulation.runs[-1].steps = _finalStep - _initialStep
-
-
-@ProgressBar(20)
-def _simulation_after_initialStep(outcar, umd, simulation):
-    """
-    Read and load the snapshots after initialStep.
-
-    All the snapshots after initialSteps in the simulation are read and for
-    each a UMDSnapshot object is built and saved in the umd file.
-
-    Parameters
-    ----------
-    outcar : input file
-        The outcar file.
-    umd : output file
-        The umd file.
-    simulation : UMDSimulation
-        The current UMDSimulation.
-
-    Yields
-    ------
-    float
-        Ratio of the snapshot read.
-
-    """
-    run = simulation.runs[-1]
-    steps = run.steps
-    for step in range(_loadedSteps, _loadedSteps + steps):
-        snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
-        snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
-        snapshot.save(umd)
-        yield float(step-_loadedSteps)/steps
-    simulation.runs[-1].steps = _finalStep - _loadedSteps

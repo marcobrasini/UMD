@@ -229,3 +229,4 @@ class TestUMDVaspParser_single:
         assert simulation.cycle() == 1
         assert simulation.steps() == nSteps
         assert simulation.time() == nSteps*snapTime
+        os.remove(self.file_single+'.umd')
