@@ -1,8 +1,28 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sun Sep  4 01:47:36 2022
+==============================================================================
+                         UMDSnapshot_from_umd tests
+==============================================================================
 
-@author: marco
+To test UMDSnapshot_from_umd we use three examples of UMD files
+ - the example/UMD_single.umd:
+   It contains a single simulation run with 300 snapshots of 0.5 fs duration.
+ - the example/UMD_multiple.umd:
+   It containes three concatenated runs:
+       - run0 with 300 snapshots of 0.5 fs duration.
+       - run1 with 600 snapshots of 0.5 fs duration.
+       - run2 with 1000 snapshots of 0.4 fs duration.
+ - the examples/UMD_snapshot.umd:
+   It contains a single snapshot (the 1044-th of the example/UMD_multiple.umd)
+
+Both simulations are performed on the same lattice structure:
+ - the matrix of basis vectors is:
+       5.70     0.00     0.00
+       0.00     5.70     0.00
+       0.00     0.00     5.70
+ - the contained atoms are:
+     - O: 15 atoms,
+     - H: 28 atoms,
+     - Fe: 1 atom.
 """
 
 from ..UMDSnapshot_from_umd import UMDSnapshot_from_umd

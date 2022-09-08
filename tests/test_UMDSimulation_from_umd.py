@@ -1,9 +1,28 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri Sep  2 22:50:14 2022
+==============================================================================
+                      UMDSimulation_from_outcar tests
+==============================================================================
 
-@author: marco
+To test UMDSimulation_from_umd we use two examples of UMD files:
+ - the example/UMD_single.umd:
+   It contains a single simulation run with 300 snapshots of 0.5 fs duration.
+ - the example/UMD_multiple.umd:
+   It containes three concatenated runs:
+       - run0 with 300 snapshots of 0.5 fs duration.
+       - run1 with 600 snapshots of 0.5 fs duration.
+       - run2 with 1000 snapshots of 0.4 fs duration.
+
+Both simulations are performed on the same lattice structure:
+ - the matrix of basis vectors is:
+       5.70     0.00     0.00
+       0.00     5.70     0.00
+       0.00     0.00     5.70
+ - the contained atoms are:
+     - O: 15 atoms,
+     - H: 28 atoms,
+     - Fe: 1 atom.
 """
+
 
 from ..UMDSimulation_from_umd import UMDSimulation_from_umd
 from ..UMDSimulation_from_umd import UMDLattice_from_umd
@@ -36,7 +55,8 @@ class TestUMDSimulation_from_umd:
 
     def test_UMDLattice_from_umd(self):
         """
-        Test the UMDLattice_from_umd function.
+        Test the UMDLattice_from_umd function reading the lattice informations
+        from a UMD file.
 
         """
         with open('./examples/UMD_single.umd', 'r') as umd:
@@ -45,7 +65,7 @@ class TestUMDSimulation_from_umd:
 
     def test_UMDSimulation_from_umd_single(self):
         """
-        Test the UMDSimulation_from_umd function for an OUTCAR file containing
+        Test the UMDSimulation_from_umd function for an UMD file containing
         a single simulation run.
 
         """
@@ -55,7 +75,7 @@ class TestUMDSimulation_from_umd:
 
     def test_UMDSimulation_from_umd_multiple(self):
         """
-        Test the UMDSimulation_from_umd function for an OUTCAR file containing
+        Test the UMDSimulation_from_umd function for an UMD file containing
         multiple simulation runs concatenated.
 
         """

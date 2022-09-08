@@ -2,7 +2,8 @@
 ==============================================================================
                       UMDSimulation_from_outcar tests
 ==============================================================================
-To test UMDSimulation_from_outcar we use two examples of OUTCAR file:
+
+To test UMDSimulation_from_outcar we use two examples of OUTCAR files:
  - the example/OUTCAR_single.outcar:
    It contains a single simulation run with 300 snapshots of 0.5 fs duration.
  - the example/OUTCAR_multiple.outcar:
@@ -11,7 +12,7 @@ To test UMDSimulation_from_outcar we use two examples of OUTCAR file:
        - run1 with 600 snapshots of 0.5 fs duration.
        - run2 with 1000 snapshots of 0.4 fs duration.
 
-Both simulation is performed on the same lattice structure:
+Both simulations are performed on the same lattice structure:
  - the matrix of basis vectors is:
        5.70     0.00     0.00
        0.00     5.70     0.00
@@ -20,7 +21,6 @@ Both simulation is performed on the same lattice structure:
      - O: 15 atoms,
      - H: 28 atoms,
      - Fe: 1 atom.
-
 """
 
 
