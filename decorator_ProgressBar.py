@@ -1,4 +1,15 @@
 """
+===============================================================================
+                                  ProgressBar
+===============================================================================
+
+This module provide the ProgressBar decorator class to display the progress of
+an iterative function. The function to be decorated must yield a float value
+in the range between 0 (included) and 1 (excluded).
+
+Classes
+-------
+    ProgressBar 
 
 """
 
@@ -12,7 +23,23 @@ class ProgressBar:
     """
     Class decorator to display the progress bar of a iterative process.
 
-    The object can decorate iterative functions yelding an iterator.
+    The object can decorate iterative functions yelding an iterator with a
+    float value between 0 (included) and 1 (excluded).
+    
+    Parameters
+    ----------
+    length : int
+        The length of the bar.
+    stream : output stream, optional
+        The output stream where to display the progress bar.
+    msg : string, optional
+        A message string to display before the progress bar.
+
+    Methods
+    -------
+    __call__
+        Execute the decorated function while displaying its progress bar.
+
     """
 
     def __init__(self, length, stream=sys.stdout, msg=''):
@@ -43,7 +70,7 @@ class ProgressBar:
 
     def __call__(self, func):
         """
-        Overload of the __call__ function.
+        Execute the decorated function while displaying its progress bar.
 
         Parameters
         ----------
@@ -63,6 +90,7 @@ class ProgressBar:
         @ft.wraps(func)
         def wrapper(*args, **kwargs):
             # Print the initial empty bar.
+            self.barLoaded = 0
             self.printbeg()
             # Define the iterator through the function yielding
             progress_generator = func(*args, **kwargs)

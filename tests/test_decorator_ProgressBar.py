@@ -141,7 +141,7 @@ class TestProgressBar_wrap:
 
         """
         for i in range(n):
-            yield i/n
+            yield float(i/n)
 
     @mock.patch.object(ProgressBar, 'update')
     def test_ProgressBar_update_call_count(self, mock):
@@ -154,36 +154,46 @@ class TestProgressBar_wrap:
         assert mock.call_count == 1044
 
     @mock.patch.object(ProgressBar, 'printbar')
-    def test_ProgressBar_printbar_call_count(self, mock):
+    @hp.given(niter=st.integers(0, 10000))
+    def test_ProgressBar_printbar_call_count(self, niter, mock):
         """
         Test the number of times the printbar method is called. The total
         number of calls must be equal to the length of the progress bar.
 
         """
-        self.yielding(1044)
-        assert mock.call_count == self.length
+        self.yielding(niter)
+        if niter < 2:
+            assert mock.call_count == 0
+        else:
+            assert mock.call_count == min(niter-1, self.length)
+        mock.reset_mock()
 
     @mock.patch.object(ProgressBar, 'printbeg')
-    def test_ProgressBar_printbeg_call_count(self, mock):
+    @hp.given(niter=st.integers(0, 10000))
+    def test_ProgressBar_printbeg_call_count(self, niter, mock):
         """
         Test the number of times the printbeg method is called. It must be
         called just once at the beginning of the function.
 
         """
-        self.yielding(1044)
+        self.yielding(niter)
         mock.assert_called_once()
+        mock.reset_mock()
 
     @mock.patch.object(ProgressBar, 'printend')
-    def test_ProgressBar_printend_call_count(self, mock):
+    @hp.given(niter=st.integers(0, 10000))
+    def test_ProgressBar_printend_call_count(self, niter, mock):
         """
         Test the number of times the printend method is called. It must be
         called just once at the end of the function.
 
         """
-        self.yielding(1044)
+        self.yielding(niter)
         mock.assert_called_once()
+        mock.reset_mock()
 
-    def test_ProgressBar_progress_error_negative(self):
+    @hp.given(yielded=st.floats(max_value=0, exclude_max=True))
+    def test_ProgressBar_progress_error_negative(self, yielded):
         """
         Test the function decoration for an uncorrect progress value yielded.
         If the progress value is negative an AttributeError is raised.
@@ -191,11 +201,12 @@ class TestProgressBar_wrap:
         """
         @ProgressBar(length=self.length, stream=self.stream, msg=self.msg)
         def yielding_error_negative(n):
-            yield -0.1
+            yield yielded
         with pytest.raises(ValueError):
             yielding_error_negative(1044)
 
-    def test_ProgressBar_progress_error_too_large(self):
+    @hp.given(yielded=st.floats(min_value=1, exclude_min=True))
+    def test_ProgressBar_progress_error_too_large(self, yielded):
         """
         Test the function decoration for an uncorrect progress value yielded.
         If the progress value is larger or equal to 1.0 an AttributeError is
@@ -204,6 +215,6 @@ class TestProgressBar_wrap:
         """
         @ProgressBar(length=self.length, stream=self.stream, msg=self.msg)
         def yielding_error_too_large(n):
-            yield 1.0
+            yield yielded
         with pytest.raises(ValueError):
             yielding_error_too_large(1044)
