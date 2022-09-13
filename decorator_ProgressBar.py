@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon May 16 17:45:26 2022
 
-@author: marco
 """
 
 
 import sys
+import math
 import functools as ft
 
 
@@ -42,7 +40,6 @@ class ProgressBar:
         self.barStream = stream
         self.barStep = 1/self.barLength
         self.barLoaded = 0
-        self.barStepLoaded = 0
 
     def __call__(self, func):
         """
@@ -74,8 +71,11 @@ class ProgressBar:
                     # Execute the iterator in the function.
                     # If a good value is yield, it updates the progress bar.
                     progress = next(progress_generator)
-                    assert progress < 1, "wrapped function must yield <1."
-                    self.update(progress)
+                    if progress >= 0 and progress < 1:
+                        self.update(progress)
+                    else:
+                        error_msg = "wrapped function must yield 0 <= i < 1."
+                        raise(ValueError(error_msg))
             # If the StopIteration is yield, print the completly full bar.
             except StopIteration as result:
                 self.printend()
@@ -97,7 +97,7 @@ class ProgressBar:
 
         """
         if progress > self.barLoaded*self.barStep:
-            self.barLoaded += 1
+            self.barLoaded = math.ceil(progress/self.barStep)
             self.printbar(progress)
 
     def printbeg(self):
