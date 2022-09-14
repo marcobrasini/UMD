@@ -24,9 +24,8 @@ Both simulations are performed on the same lattice structure:
 """
 
 
-from ..UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
-
 import numpy as np
+import hypothesis as hp
 
 from ..libs.UMDAtom import UMDAtom
 from ..libs.UMDLattice import UMDLattice
@@ -49,7 +48,8 @@ class TestUMDSnapshot_from_outcar:
         with open('examples/OUTCAR_single.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.5, self.lattice)
             while True:
-                snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
+                snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
+                print(snapshot)
                 if snapshot is None:
                     break
                 nsnapshot += 1
@@ -61,7 +61,7 @@ class TestUMDSnapshot_from_outcar:
         with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.5, self.lattice)
             while True:
-                snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
+                snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
                 if snapshot is None:
                     break
                 nsnapshot += 1

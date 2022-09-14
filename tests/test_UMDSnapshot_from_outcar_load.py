@@ -32,7 +32,7 @@ time duration of 0.4 fs. The reference values to compare the snapshot are:
 
 """
 
-from ..UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
+
 from ..UMDSnapshot_from_outcar import load_UMDSnapshot
 
 import numpy as np
@@ -175,7 +175,7 @@ class Test_load_UMDSnapshot:
         with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(snap, 0.4, self.lattice)
             while True:
-                snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
+                snapshot.UMDSnapshot_from_outcar(outcar)
                 if snap == self.reference_snap-1:
                     break
                 snap += 1

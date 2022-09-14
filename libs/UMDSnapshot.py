@@ -21,6 +21,7 @@ import numpy as np
 from .UMDLattice import UMDLattice
 from .UMDSnapDynamics import UMDSnapDynamics
 from .UMDSnapThermodynamics import UMDSnapThermodynamics
+from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot
 
     
 class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
@@ -103,7 +104,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
                     temperature = thermodynamics.temperature
                     pressure = thermodynamics.pressure
                     energy = thermodynamics.energy
-                    return func(cls, temperature=temperature, 
+                    return func(cls, temperature=temperature,
                                 pressure=pressure, energy=energy)
             return func(cls, *args, **kwargs)
         return wrap
@@ -232,3 +233,66 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         """
         string = UMDSnapshot.__str__(self)
         outfile.write(string+'\n\n')
+
+    def UMDSnapshot_from_outcar(self, outcar, load=True):
+        """
+        Initialize a UMDSnapshot object from an OUTCAR file.
+
+        It reads the OUTCAR file looking for the data to initialize the X
+        snapshot. The data are reported after reaching the convergence.
+        It scroll all the lines group related to the convergence of the X step
+        (-------------------------- Iteration X( y) --------------------------)
+        to arrive to the final section where the all the step information are
+        collected. The final section start is marked by the header line:
+        ---------------- aborting loop because EDIFF is reached ---------------
+
+        Parameters
+        ----------
+        outcar : input file
+            The OUTCAR file.
+        simulation : simulation object
+            A simulation object with information about the lattice.
+        step : int
+            The identificative step number.
+
+        Returns
+        -------
+        snapshot : UMDSnapshot object
+            A snapshot object with information about the TD qunatities and
+            the atoms dynamics.
+
+        """
+        line = outcar.readline()
+        while line:
+            if ("aborting loop because EDIFF is reached" in line or
+                "aborting loop EDIFF was not reached (unconverged)" in line):
+                snapshot = load_UMDSnapshot(outcar, self)
+                return snapshot
+            line = outcar.readline()
+        return
+
+    @staticmethod
+    def UMDSnapshot_from_outcar_null(outcar):
+        """
+        Scroll an OUTCAR file without initializing any UMDSnapshot object.
+
+        It work like UMDSnapshot_from_outcar function but it doesn not read any
+        data and return None. It is used to accelerate the scrolling of the
+        OUTCAR file for useless snapshots.
+
+        Parameters
+        ----------
+        outcar : input file
+            The OUTCAR file.
+
+        Returns
+        -------
+        None.
+
+        """
+        line = outcar.readline()
+        while line:
+            if ("aborting loop because EDIFF is reached" in line or
+                "aborting loop EDIFF was not reached (unconverged)" in line):
+                return
+            line = outcar.readline()

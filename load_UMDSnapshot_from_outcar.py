@@ -121,72 +121,6 @@ set among the molecular dynamics parameters (NSW).
 
 import numpy as np
 
-from .libs.UMDSnapshot import UMDSnapshot
-from .libs.UMDSnapThermodynamics import UMDSnapThermodynamics
-from .libs.UMDSnapDynamics import UMDSnapDynamics
-
-
-def UMDSnapshot_from_outcar_null(outcar):
-    """
-    Look for the snapshot data but does not initialize any UMDSnapshot object.
-
-    It work like UMDSnapshot_from_outcar function but it doesn not read any
-    data and return None. It is used to accelerate the scrolling of the OUTCAR
-    file for useless snapshots.
-
-    Parameters
-    ----------
-    outcar : input file
-        The OUTCAR file.
-
-    Returns
-    -------
-    None.
-
-    """
-    line = outcar.readline()
-    while line:
-        if ("aborting loop because EDIFF is reached" in line
-            or "aborting loop EDIFF was not reached (unconverged)" in line):
-            return
-        line = outcar.readline()
-
-
-def UMDSnapshot_from_outcar(outcar, snapshot):
-    """
-    Look for the snapshot data and initialize a UMDSnapshot object.
-
-    Iterate the single outcar X step untill reaching the convergence.
-    It scroll all the Y line groups related to the convergence of the X step
-    (--------------------------- Iteration X( y) ---------------------------)
-    to arrive to the final section where the all the step information are
-    collected. The final section beginnig is marked by with the header line:
-    ---------------- aborting loop because EDIFF is reached ----------------
-
-    Parameters
-    ----------
-    outcar : input file
-        The OUTCAR file.
-    simulation : simulation object
-        A simulation object with information about the lattice.
-    step : int
-        The identificative step number.
-
-    Returns
-    -------
-    snapshot : UMDSnapshot object
-        A snapshot object with information about the TD qunatities and
-        the atoms dynamics.
-
-    """
-    line = outcar.readline()
-    while line:
-        if ("aborting loop because EDIFF is reached" in line
-            or "aborting loop EDIFF was not reached (unconverged)" in line):
-            snapshot = load_UMDSnapshot(outcar, snapshot)
-            return snapshot
-        line = outcar.readline()
-
 
 def load_UMDSnapshot(outcar, snapshot):
     """
@@ -243,6 +177,7 @@ def load_UMDSnapshot(outcar, snapshot):
             snapshot.setDynamics(position, velocity, force)
             return snapshot
         line = outcar.readline()
+    return
 
 
 def load_charges(outcar, natoms):

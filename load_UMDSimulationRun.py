@@ -10,8 +10,6 @@ import numpy as np
 
 from .libs.UMDSnapshot import UMDSnapshot
 from .UMDSimulation_from_outcar import UMDSimulation_from_outcar
-from .UMDSnapshot_from_outcar import UMDSnapshot_from_outcar
-from .UMDSnapshot_from_outcar import UMDSnapshot_from_outcar_null
 
 from .decorator_ProgressBar import ProgressBar
 
@@ -113,9 +111,10 @@ def _simulation_before_initialStep(outcar, simulation):
 
     """
     run = simulation.runs[-1]
+    loadedSteps = _param_._loadedSteps
     steps = run.steps
     for step in range(loadedSteps, loadedSteps + steps):
-        UMDSnapshot_from_outcar_null(outcar)
+        UMDSnapshot.UMDSnapshot_from_outcar_null(outcar)
         yield float(step-loadedSteps)/steps
     simulation.runs[-1].steps = 0
 
@@ -146,12 +145,14 @@ def _simulation_around_initialStep(outcar, umd, simulation):
     """
     run = simulation.runs[-1]
     steps = run.steps
+    loadedSteps = _param_._loadedSteps
+    initialStep = _param_._initialStep
     for step in range(loadedSteps, initialStep):
-        UMDSnapshot_from_outcar_null(outcar)
+        UMDSnapshot.UMDSnapshot_from_outcar_null(outcar)
         yield float(step-loadedSteps)/steps
     for step in range(initialStep, loadedSteps+steps):
         snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
-        snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
+        snapshot.UMDSnapshot_from_outcar(outcar)
         snapshot.save(umd)
         yield float(step-loadedSteps)/steps
     simulation.runs[-1].steps = finalStep - initialStep
@@ -182,9 +183,11 @@ def _simulation_after_initialStep(outcar, umd, simulation):
     """
     run = simulation.runs[-1]
     steps = run.steps
+    loadedSteps = _param_._loadedSteps
+    initialStep = _param_._initialStep
     for step in range(loadedSteps, loadedSteps + steps):
         snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
-        snapshot = UMDSnapshot_from_outcar(outcar, snapshot)
+        snapshot.UMDSnapshot_from_outcar(outcar)
         snapshot.save(umd)
         yield float(step-loadedSteps)/steps
     simulation.runs[-1].steps = finalStep - loadedSteps
