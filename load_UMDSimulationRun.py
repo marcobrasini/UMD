@@ -15,9 +15,9 @@ from .decorator_ProgressBar import ProgressBar
 
 
 class _param_:
-    _loadedSteps = 0
     _initialStep = 0
     _finalStep = 0
+    _loadedSteps = 0
     _nSteps = np.infty
 
 
@@ -147,6 +147,7 @@ def _simulation_around_initialStep(outcar, umd, simulation):
     steps = run.steps
     loadedSteps = _param_._loadedSteps
     initialStep = _param_._initialStep
+    finalStep = _param_._finalStep
     for step in range(loadedSteps, initialStep):
         UMDSnapshot.UMDSnapshot_from_outcar_null(outcar)
         yield float(step-loadedSteps)/steps
@@ -185,6 +186,7 @@ def _simulation_after_initialStep(outcar, umd, simulation):
     steps = run.steps
     loadedSteps = _param_._loadedSteps
     initialStep = _param_._initialStep
+    finalStep = _param_._finalStep
     for step in range(loadedSteps, loadedSteps + steps):
         snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
         snapshot.UMDSnapshot_from_outcar(outcar)
