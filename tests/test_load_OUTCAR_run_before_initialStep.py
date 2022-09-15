@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Sep 14 17:19:32 2022
-
-@author: marco
+===============================================================================    
+                   Load_OUTCAR._run_before_initialStep tests
+===============================================================================
 """
 
 
@@ -44,6 +43,7 @@ class TestLoad_OUTCAR_run_before_initialStep:
 
         """
         Load_OUTCAR.reset()
+        Load_OUTCAR.finalStep = 300
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open('./examples/OUTCAR_single.outcar', 'r') as outcar:
@@ -73,19 +73,24 @@ class TestLoad_OUTCAR_run_before_initialStep:
         run2 = UMDSimulationRun(2, 1000, 0.4)
         simulation = UMDSimulation('', self.lattice)
         with open('./examples/OUTCAR_multiple.outcar', 'r') as outcar:
-            # apply the _simulation_before_initialStep to load the run 0
+            # apply the _simulation_before_initialStep to load the run 0    
+            Load_OUTCAR.finalStep = 300
             simulation.runs.append(run0)
             Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 300
             assert mock_load.call_count == 0
             assert simulation.runs[0].steps == 0
             # apply the _simulation_before_initialStep to load the run 1
+            Load_OUTCAR.loadedSteps = 300
+            Load_OUTCAR.finalStep = 900
             simulation.runs.append(run1)
             Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 900
             assert mock_load.call_count == 0
             assert simulation.runs[1].steps == 0
             # apply the _simulation_before_initialStep to load the run 2
+            Load_OUTCAR.loadedSteps = 900
+            Load_OUTCAR.finalStep = 1900
             simulation.runs.append(run2)
             Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 1900

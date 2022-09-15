@@ -5,7 +5,7 @@
 
 This module provides the UMDSimulation_from_outcar function implementation. The
 UMDSimulation_from_outcar function is necessary to extract the simulation
-parameters from a Vasp OUTCAR file. 
+parameters from a Vasp OUTCAR file.
 Simulation informations are reported at the beginning of the OUTCAR file.
 From the initial part of the OUTCAR file, we get the informations to initialize
 both UMDLattice (atom types, number of atoms and basis vectors) and the
@@ -14,7 +14,7 @@ UMDSimulationRun (number of iteration and snapshot time duration).
 
 OUTCAR HEADER
 The header is divided in many different sections. In the following we list them
-and we mark with a '#' the lines containing the informations that we need to 
+and we mark with a '#' the lines containing the informations that we need to
 catch in the UMDSimulation_from_outcar function to update the UMDSimulation.
 
 OUTCAR header structure:

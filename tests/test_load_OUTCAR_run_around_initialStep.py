@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Sep 14 18:29:39 2022
-
-@author: marco
+===============================================================================
+                    Load_OUTCAR._run_around_initialStep tests
+===============================================================================
 """
 
 
@@ -61,7 +60,6 @@ class TestLoad_OUTCAR_run_around_initialStep:
             outcar.close()
         # After the _simulation_before_initialStep call the number of steps
         # in the last UMDSimulationRun must be 0.
-        print(simulation)
         assert simulation.steps() == 200
         os.remove('./examples/OUTCAR_single.umd')
 
