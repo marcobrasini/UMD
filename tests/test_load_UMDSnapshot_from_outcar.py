@@ -33,7 +33,7 @@ time duration of 0.4 fs. The reference values to compare the snapshot are:
 """
 
 
-from ..UMDSnapshot_from_outcar import load_UMDSnapshot
+from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot_from_outcar
 
 import numpy as np
 
@@ -99,6 +99,7 @@ class Test_load_UMDSnapshot:
                          [2.93729,      5.32423,      2.47768],
                          [2.07799,      4.88050,      3.72449],
                          [1.14056,      1.30966,      1.87068]])
+    velocity = np.zeros((44, 3), dtype=float)
     force = np.array([[ 4.346583,      1.975307,      2.707162],
                       [ 0.068890,      2.020951,      0.599096],
                       [ 0.646264,     -0.591564,     -0.960353],
@@ -143,6 +144,11 @@ class Test_load_UMDSnapshot:
                       [ 1.453374,     -1.296291,     -1.659476],
                       [-0.280773,      0.605878,     -0.507692],
                       [ 1.387906,     -0.202300,      0.976311]])
+    
+    snapshot = UMDSnapshot(1044, 0.4, lattice)
+    snapshot.setDynamics(position=position, velocity=velocity, force=force)
+    snapshot.setThermodynamics(temperature=temperature, pressure=pressure,
+                               energy=energy)
 
     def test_load_UMDSnapshot_from_snapshot(self):
         """
@@ -154,12 +160,13 @@ class Test_load_UMDSnapshot:
         """
         with open('examples/OUTCAR_snapshot.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(1044, 0.4, self.lattice)
-            snapshot = load_UMDSnapshot(outcar, snapshot)
+            snapshot = load_UMDSnapshot_from_outcar(outcar, snapshot)
             assert snapshot.energy == self.energy
             assert snapshot.temperature == self.temperature
             assert np.isclose(snapshot.pressure, self.pressure)
             assert np.array_equal(snapshot.position, self.position)
             assert np.array_equal(snapshot.force, self.force)
+            outcar.close()
 
     def test_load_UMDSnapshot_from_outcar(self):
         """
@@ -184,3 +191,4 @@ class Test_load_UMDSnapshot:
             assert np.isclose(snapshot.pressure, self.pressure)
             assert np.array_equal(snapshot.position, self.position)
             assert np.array_equal(snapshot.force, self.force)
+            outcar.close()

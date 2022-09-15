@@ -122,7 +122,7 @@ set among the molecular dynamics parameters (NSW).
 import numpy as np
 
 
-def load_UMDSnapshot(outcar, snapshot):
+def load_UMDSnapshot_from_outcar(outcar, snapshot):
     """
     Read the data and initialize the UMDSnapshot object.
 
@@ -143,7 +143,7 @@ def load_UMDSnapshot(outcar, snapshot):
 
     """
     natoms = snapshot.natoms
-    
+
     # Declare the thermodynamics quantities
     temperature = 0
     pressure = 0
@@ -177,7 +177,7 @@ def load_UMDSnapshot(outcar, snapshot):
             snapshot.setDynamics(position, velocity, force)
             return snapshot
         line = outcar.readline()
-    return
+    raise(EOFError('OUTCAR file ended but the last snapshot is uncomplete.'))
 
 
 def load_charges(outcar, natoms):
@@ -349,10 +349,10 @@ def load_energy(outcar):
     """
     Load the internal energy and the temperature of the electron-ion system.
 
-    From the enrgy section, different energy contributions are analyzed and the
-    'ETOTAL' energy and the temperature reported in the 'kin. lattice  EKIN_LAT'
-    parameter are returned. The section structure is the follwing and the first
-    line is already read.
+    From the energy section, different energy contributions are analyzed and
+    the 'ETOTAL' energy and the temperature reported in the 'kin. lattice
+    EKIN_LAT' parameter are returned.
+    The section structure is the following and the first line is already read.
     " FREE ENERGIE OF THE ION-ELECTRON SYSTEM (eV)
     ->---------------------------------------------------
       free  energy   TOTEN  =          ... eV
