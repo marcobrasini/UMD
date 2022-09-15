@@ -26,8 +26,7 @@ import os
 import numpy as np
 
 from .libs.UMDSimulation import UMDSimulation
-from .load_UMDSimulationRun import load_UMDSimulationRun
-from .load_UMDSimulationRun import _param_
+from .load_UMDSimulationRun import Load_OUTCAR
 
 
 def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
@@ -59,10 +58,10 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
     if nSteps < 0:
         raise(ValueError('invalid nStep value: it must be positive.'))
 
-    _param_._loadedSteps = 0
-    _param_._finalStep = 0
-    _param_._initialStep = initialStep
-    _param_._nSteps = nSteps
+    Load_OUTCAR.loadedSteps = 0
+    Load_OUTCAR.finalStep = 0
+    Load_OUTCAR.initialStep = initialStep
+    Load_OUTCAR.nSteps = nSteps
 
     simulation_name = outcarfile.replace('.outcar', '').split('/')[-1]
     simulation = UMDSimulation(name=simulation_name)
@@ -82,10 +81,11 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
                 # UMDSimulation object. If the UMDSimulationRun object is not
                 # updated, then it has reached the end of the OUTCAR file.
                 cycle = simulation.cycle()
-                simulation = load_UMDSimulationRun(outcar, temp, simulation)
+                simulation = Load_OUTCAR.load_UMDSimulationRun(outcar, temp,
+                                                               simulation)
                 if simulation.cycle() == cycle:
                     break
-                if _param_._loadedSteps >= initialStep + nSteps:
+                if Load_OUTCAR.loadedSteps >= initialStep + nSteps:
                     break
                 line = outcar.readline()
             outcar.close()

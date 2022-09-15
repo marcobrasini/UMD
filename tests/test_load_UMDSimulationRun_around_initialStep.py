@@ -6,8 +6,7 @@ Created on Wed Sep 14 18:29:39 2022
 """
 
 
-from ..load_UMDSimulationRun import _simulation_around_initialStep
-from ..load_UMDSimulationRun import _param_
+from ..load_UMDSimulationRun import Load_OUTCAR
 
 import os
 import numpy as np
@@ -44,13 +43,14 @@ class Test_simulation_around_initialStep:
         call operates over all the simulation steps.
 
         """
-        _param_._initialStep = 100
-        _param_._finalStep = 300
+        Load_OUTCAR.reset_parameters()
+        Load_OUTCAR.initialStep = 100
+        Load_OUTCAR.finalStep = 300
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open('./examples/OUTCAR_single.outcar', 'r') as outcar:
             with open('./examples/OUTCAR_single.umd', 'w') as umd:
-                _simulation_around_initialStep(outcar, umd, simulation)
+                Load_OUTCAR._run_around_initialStep(outcar, umd, simulation)
                 assert mock_save.call_count == 200
                 assert mock_load.call_count == 200
                 assert mock_null.call_count == 100

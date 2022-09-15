@@ -6,7 +6,7 @@ Created on Wed Sep 14 17:19:32 2022
 """
 
 
-from ..load_UMDSimulationRun import _simulation_before_initialStep
+from ..load_UMDSimulationRun import Load_OUTCAR 
 
 import os
 import numpy as np
@@ -41,10 +41,11 @@ class Test_simulation_before_initialStep:
         call operates over all the simulation steps.
 
         """
+        Load_OUTCAR.reset_parameters()
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open('./examples/OUTCAR_single.outcar') as outcar:
-            _simulation_before_initialStep(outcar, simulation)
+            Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock.call_count == 0
             assert mock_null.call_count == 300
             outcar.close()
@@ -64,6 +65,7 @@ class Test_simulation_before_initialStep:
         the function call operates only over the last simulation run.
 
         """
+        Load_OUTCAR.reset_parameters()
         run0 = UMDSimulationRun(0, 300, 0.5)
         run1 = UMDSimulationRun(1, 600, 0.5)
         run2 = UMDSimulationRun(2, 1000, 0.4)
@@ -71,19 +73,19 @@ class Test_simulation_before_initialStep:
         with open('./examples/OUTCAR_multiple.outcar') as outcar:
             # apply the _simulation_before_initialStep to load the run 0
             simulation.runs.append(run0)
-            _simulation_before_initialStep(outcar, simulation)
+            Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock.call_count == 0
             assert mock_null.call_count == 300
             assert simulation.runs[0].steps == 0
             # apply the _simulation_before_initialStep to load the run 1
             simulation.runs.append(run1)
-            _simulation_before_initialStep(outcar, simulation)
+            Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock.call_count == 0
             assert mock_null.call_count == 900
             assert simulation.runs[1].steps == 0
             # apply the _simulation_before_initialStep to load the run 2
             simulation.runs.append(run2)
-            _simulation_before_initialStep(outcar, simulation)
+            Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock.call_count == 0
             assert mock_null.call_count == 1900
             assert simulation.runs[2].steps == 0
@@ -91,5 +93,3 @@ class Test_simulation_before_initialStep:
         # After the multiple _simulation_before_initialStep calls the total
         # number of steps in the total UMDSimulation must be 0.
         assert simulation.steps() == 0
-
-
