@@ -16,8 +16,8 @@ Functions
 
 See Also
 --------
-    UMDSimulation
     Load_OUTCAR
+    UMDSimulation
 
 """
 
@@ -25,18 +25,18 @@ See Also
 import os
 import numpy as np
 
+from .load_OUTCAR import Load_OUTCAR
 from .libs.UMDSimulation import UMDSimulation
-from .load_UMDSimulationRun import Load_OUTCAR
 
 
-def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
+def UMDVaspParser(outcarfile_name, initialStep=0, nSteps=np.infty):
     """
     Generate the UMD file extracting information from a Vasp OUTCAR file.
 
     Parameters
     ----------
-    outcarfile : input file
-        The OUTCAR file.
+    outcarfile : string
+        The name of the input OUTCAR file.
     initialStep : int
         The initial snapshot index from which it starts to convert data. If the
         initial snapshot exceeds the number of snapshots available, no
@@ -64,27 +64,25 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
     Load_OUTCAR.initialStep = initialStep
     Load_OUTCAR.nSteps = nSteps
 
-    simulation_name = outcarfile.replace('.outcar', '').split('/')[-1]
+    simulation_name = outcarfile_name.replace('.outcar', '').split('/')[-1]
     simulation = UMDSimulation(name=simulation_name)
 
     # We open a temporary UMD output file to store the UMDSnapshot information.
-    UMDfile = outcarfile.replace('outcar', 'umd')
+    UMDfile = outcarfile_name.replace('outcar', 'umd')
     with open(UMDfile+'.temp', 'w+') as temp:
         # We open the OUTCAR input file to read all the UMDSimulation and
         # UMDSnapshot information.
-        with open(outcarfile, 'r') as outcar:
+        with open(outcarfile_name, 'r') as outcar:
             # The OUTCAR file is read line by line untill its end.
-            # At each simulation run is read by the load_SimulationRun function
+            # Each simulation run is read by the Load_OUTCAR.load function
             # and added to the total simulation in the UMDSimulation object.
             try:
                 line = outcar.readline()
                 while line:
-                    # The load_SimulationRun function returns the updated
-                    # UMDSimulation object. If the UMDSimulationRun object is
-                    # not updated, then it has reached the end of the OUTCAR
-                    # file.
-                    simulation = Load_OUTCAR.load_UMDSimulationRun(outcar,temp,
-                                                                   simulation)
+                    # The Load_OUTCAR.load function returns the updated
+                    # UMDSimulation object. If the end of the OUTCAR file is
+                    # reached, then a EOFError is raised.
+                    simulation = Load_OUTCAR.load(outcar, temp, simulation)
                     if Load_OUTCAR.loadedSteps >= initialStep+nSteps:
                         break
                     line = outcar.readline()
