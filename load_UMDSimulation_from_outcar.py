@@ -82,7 +82,7 @@ def load_UMDSimulation_from_outcar(outcar, simulation):
     Parameters
     ----------
     outcar : input file
-        The Vasp OUTCAR file.
+        The Vasp OUTCAR file stream.
     simulation : UMDSimulation
         UMDSimulation object collecting the all simulation runs information.
 
@@ -182,7 +182,5 @@ def load_UMDSimulation_from_outcar(outcar, simulation):
                 run = UMDSimulationRun(simulation.cycle(), steps, steptime)
                 simulation.add(run)
                 return simulation
-
         line = outcar.readline()
-
     raise(EOFError('OUTCAR file loading completed.'))

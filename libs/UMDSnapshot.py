@@ -21,7 +21,7 @@ import numpy as np
 from .UMDLattice import UMDLattice
 from .UMDSnapDynamics import UMDSnapDynamics
 from .UMDSnapThermodynamics import UMDSnapThermodynamics
-from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot
+from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot_from_outcar
 
     
 class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
@@ -266,10 +266,10 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         while line:
             if ("aborting loop because EDIFF is reached" in line or
                 "aborting loop EDIFF was not reached (unconverged)" in line):
-                snapshot = load_UMDSnapshot(outcar, self)
+                snapshot = load_UMDSnapshot_from_outcar(outcar, self)
                 return snapshot
             line = outcar.readline()
-        return
+        raise(EOFError('OUTCAR file ended but the simulation is uncomplete.'))
 
     @staticmethod
     def UMDSnapshot_from_outcar_null(outcar):
@@ -296,3 +296,4 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
                 "aborting loop EDIFF was not reached (unconverged)" in line):
                 return
             line = outcar.readline()
+        raise(EOFError('OUTCAR file ended but the simulation is uncomplete.'))
