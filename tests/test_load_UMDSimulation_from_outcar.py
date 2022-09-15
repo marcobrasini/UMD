@@ -24,7 +24,7 @@ Both simulations are performed on the same lattice structure:
 """
 
 
-from ..UMDSimulation_from_outcar import UMDSimulation_from_outcar
+from ..load_UMDSimulation_from_outcar import load_UMDSimulation_from_outcar
 
 import numpy as np
 
@@ -60,7 +60,7 @@ class TestUMDSimulation_from_outcar:
         """
         simulation = UMDSimulation()
         with open('examples/OUTCAR_single.outcar', 'r') as outcar:
-            simulation = UMDSimulation_from_outcar(outcar, simulation)
+            simulation = load_UMDSimulation_from_outcar(outcar, simulation)
             outcar.close()
         assert simulation.lattice == self.lattice
         assert simulation.runs[0] == self.run0
@@ -78,12 +78,12 @@ class TestUMDSimulation_from_outcar:
         total_simulation = UMDSimulation(lattice=self.lattice, runs=self.runs)
         simulation = UMDSimulation()
         with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
-            while True:
-                cycle = simulation.cycle()
-                simulation = UMDSimulation_from_outcar(outcar, simulation)
-                if simulation.cycle() == cycle:
-                    break
-            outcar.close()
+            try:
+                while True:
+                    simulation = load_UMDSimulation_from_outcar(outcar,
+                                                                simulation)
+            except(EOFError):
+                    outcar.close()
         assert simulation == total_simulation
         assert simulation.lattice == self.lattice
         assert simulation.runs == self.runs

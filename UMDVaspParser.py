@@ -17,7 +17,7 @@ Functions
 See Also
 --------
     UMDSimulation
-    load_UMDSimulationRun
+    Load_OUTCAR
 
 """
 
@@ -58,6 +58,7 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
     if nSteps < 0:
         raise(ValueError('invalid nStep value: it must be positive.'))
 
+    Load_OUTCAR.reset()
     Load_OUTCAR.loadedSteps = 0
     Load_OUTCAR.finalStep = 0
     Load_OUTCAR.initialStep = initialStep
@@ -75,19 +76,20 @@ def UMDVaspParser(outcarfile, initialStep=0, nSteps=np.infty):
             # The OUTCAR file is read line by line untill its end.
             # At each simulation run is read by the load_SimulationRun function
             # and added to the total simulation in the UMDSimulation object.
-            line = outcar.readline()
-            while line:
-                # The load_SimulationRun function returns the updated
-                # UMDSimulation object. If the UMDSimulationRun object is not
-                # updated, then it has reached the end of the OUTCAR file.
-                cycle = simulation.cycle()
-                simulation = Load_OUTCAR.load_UMDSimulationRun(outcar, temp,
-                                                               simulation)
-                if simulation.cycle() == cycle:
-                    break
-                if Load_OUTCAR.loadedSteps >= initialStep + nSteps:
-                    break
+            try:
                 line = outcar.readline()
+                while line:
+                    # The load_SimulationRun function returns the updated
+                    # UMDSimulation object. If the UMDSimulationRun object is
+                    # not updated, then it has reached the end of the OUTCAR
+                    # file.
+                    simulation = Load_OUTCAR.load_UMDSimulationRun(outcar,temp,
+                                                                   simulation)
+                    if Load_OUTCAR.loadedSteps >= initialStep+nSteps:
+                        break
+                    line = outcar.readline()
+            except(EOFError) as eof:
+                print(eof)
             outcar.close()
 
         with open(UMDfile, 'w') as umd:

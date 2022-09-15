@@ -75,7 +75,7 @@ from .libs.UMDLattice import UMDLattice
 from .libs.UMDSimulationRun import UMDSimulationRun
 
 
-def UMDSimulation_from_outcar(outcar, simulation):
+def load_UMDSimulation_from_outcar(outcar, simulation):
     """
     Initialize a UMDSimulation object from a Vasp OUTCAR file.
 
@@ -184,4 +184,5 @@ def UMDSimulation_from_outcar(outcar, simulation):
                 return simulation
 
         line = outcar.readline()
-    return simulation
+
+    raise(EOFError('OUTCAR file loading completed.'))
