@@ -6,8 +6,10 @@
 
 from ..libs.UMDSnapshot import UMDSnapshot
 
+import sys
 import numpy as np
 import pytest
+import unittest.mock as mock
 import hypothesis as hp
 import hypothesis.strategies as st
 
@@ -163,7 +165,7 @@ class Test_UMDSnapshot_unit:
     # %% __eq__ function tests
     def test_UMDSnapshot_eq_true(self):
         """
-        Test the __eq__ function to compare two UMDSnapshot objects 
+        Test the __eq__ function to compare two UMDSnapshot objects
         representing two identical snapshots.
         The value returned must be True.
 
@@ -173,10 +175,10 @@ class Test_UMDSnapshot_unit:
         snapshot.setThermodynamics(self.temperature, self.pressure,
                                    self.energy)
         assert snapshot == self.snapshot
-    
+
     def test_UMDSnapshot_eq_false_snap(self):
         """
-        Test the __eq__ function to compare two UMDSnapshot objects 
+        Test the __eq__ function to compare two UMDSnapshot objects
         representing two different snapshots, with different snapshot index.
         The value returned must be False.
 
@@ -186,10 +188,10 @@ class Test_UMDSnapshot_unit:
         snapshot.setThermodynamics(self.temperature, self.pressure,
                                    self.energy)
         assert not snapshot == self.snapshot
-    
+
     def test_UMDSnapshot_eq_false_time(self):
         """
-        Test the __eq__ function to compare two UMDSnapshot objects 
+        Test the __eq__ function to compare two UMDSnapshot objects
         representing two different snapshots, with different time duration.
         The value returned must be False.
 
@@ -199,10 +201,10 @@ class Test_UMDSnapshot_unit:
         snapshot.setThermodynamics(self.temperature, self.pressure,
                                    self.energy)
         assert not snapshot == self.snapshot
-    
+
     def test_UMDSnapshot_eq_false_lattice(self):
         """
-        Test the __eq__ function to compare two UMDSnapshot objects 
+        Test the __eq__ function to compare two UMDSnapshot objects
         representing two different snapshots, with different lattice.
         The value returned must be False.
 
@@ -215,6 +217,19 @@ class Test_UMDSnapshot_unit:
         assert not snapshot == self.snapshot
 
     # %% __str__ function tests
+    @mock.patch.object(UMDSnapThermodynamics, '__str__')
+    @mock.patch.object(UMDSnapDynamics, '__str__')
+    def test_UMDSnapshot_str(self, mock_strThermodynamics, mock_strDynamics):
+        """
+        Test UMDSnapshot __str__ function convertin the snapshot data into a
+        readable string. The function must call both the UMDSnapThermodynamics
+        __str__ function and the UMDSnapDynamics __str__ function.
+
+        """
+        self.snapshot.__str__()
+        mock_strThermodynamics.assert_called_once()
+        mock_strDynamics.assert_called_once()
+
     def test_UMDSnapshot_str_length(self):
         """
         Test UMDSnapshot __str__ function length:
@@ -223,9 +238,21 @@ class Test_UMDSnapshot_unit:
             - 460, the the snapshot dynamics string length for 2 atoms.
 
         """
-        snapshot = UMDSnapshot(self.snap, self.time, self.lattice)
-        snapshot.setDynamics(self.position, self.velocity, self.force)
-        assert len(str(snapshot)) == (20+1) + (117+1) + 460
+        assert len(str(self.snapshot)) == (20+1) + (117+1) + 460
+
+    # %% save function tests
+    @mock.patch.object(sys.stdout, 'write')
+    @mock.patch.object(UMDSnapshot, '__str__')
+    def test_UMDSnapshot_save(self, mock_str, mock_write):
+        """
+        Test UMDSnapshot save function printing the snapshot data on an output
+        stream. The function must call the UMDSnapshot __str__ function and the
+        stream write function.
+
+        """
+        self.snapshot.save(sys.stdout)
+        mock_str.assert_called_once()
+        mock_write.assert_called_once()
 
 
 # %% ===================================================================== %% #
