@@ -25,6 +25,7 @@ Both simulations are performed on the same lattice structure:
 
 
 import numpy as np
+import pytest
 
 from ..libs.UMDAtom import UMDAtom
 from ..libs.UMDLattice import UMDLattice
@@ -150,3 +151,14 @@ class TestUMDSnapshot_from_outcar:
                 pass
             outcar.close()
         assert nsnapshots == 1900
+
+    def test_load_UMDSnapshot_from_outcar_eof(self):
+        """
+        Test the UMDSnapshot_from_outcar when it reads an empty OUTCAR file.
+        An EOFError is raised.
+
+        """
+        with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
+            snapshot = UMDSnapshot(0, 0.0, self.lattice)
+            with pytest.raises(EOFError):
+                snapshot = snapshot.UMDSnapshot_from_outcar(outcar, snapshot)

@@ -36,6 +36,7 @@ time duration of 0.4 fs. The reference values to compare the snapshot are:
 from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot_from_outcar
 
 import numpy as np
+import pytest
 
 from ..libs.UMDAtom import UMDAtom
 from ..libs.UMDLattice import UMDLattice
@@ -152,8 +153,9 @@ class Test_load_UMDSnapshot:
 
     def test_load_UMDSnapshot_from_snapshot(self):
         """
-        Test the load_UMDSnapshot function initializing a single UMDSnapshot,
-        when it reads the information from a single shapshot an OUTCAR file.
+        Test the load_UMDSnapshot_from_outcar function initializing a single
+        UMDSnapshot, when it reads the information from a single shapshot an
+        OUTCAR file.
         The snapshot is read by the load_UMDSnapshot function, an then the
         snapshot informations are compared with the reference values.
 
@@ -170,9 +172,9 @@ class Test_load_UMDSnapshot:
 
     def test_load_UMDSnapshot_from_outcar(self):
         """
-        Test the load_UMDSnapshot function initializing a single UMDSnapshot,
-        when it reads the information from a whole OUTCAR file containing many
-        snapshot data.
+        Test the load_UMDSnapshot_from_outcar function initializing a single
+        UMDSnapshot, when it reads the information from a whole OUTCAR file
+        containing many snapshot data.
         All the snapshots are read by the UMDSnapshot_from_outcar function, and
         when it finds the reference step, the snapshot informations are
         compared with the reference values.
@@ -192,3 +194,14 @@ class Test_load_UMDSnapshot:
             assert np.array_equal(snapshot.position, self.position)
             assert np.array_equal(snapshot.force, self.force)
             outcar.close()
+
+    def test_load_UMDSnapshot_from_outcar_eof(self):
+        """
+        Test the UMDSnapshot_from_outcar when it reads an empty OUTCAR file.
+        An EOFError is raised.
+
+        """
+        with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
+            snapshot = UMDSnapshot(0, 0.0, self.lattice)
+            with pytest.raises(EOFError):
+                snapshot = snapshot.UMDSnapshot_from_outcar(outcar, snapshot)

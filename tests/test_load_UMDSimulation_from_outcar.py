@@ -27,6 +27,7 @@ Both simulations are performed on the same lattice structure:
 from ..load_UMDSimulation_from_outcar import load_UMDSimulation_from_outcar
 
 import numpy as np
+import pytest
 
 from ..libs.UMDAtom import UMDAtom
 from ..libs.UMDLattice import UMDLattice
@@ -90,3 +91,14 @@ class TestUMDSimulation_from_outcar:
         assert simulation.cycle() == 3
         assert simulation.steps() == 1900
         assert simulation.time() == 850
+
+    def test_UMDSimulation_from_outcar_eof(self):
+        """
+        Test the UMDSimualtion_from_outcar when it reads an empty OUTCAR file.
+        An EOFError is raised.
+        
+        """
+        simulation = UMDSimulation()
+        with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
+            with pytest.raises(EOFError):
+                simulation = load_UMDSimulation_from_outcar(outcar, simulation)
