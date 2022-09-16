@@ -73,8 +73,8 @@ class TestUMDSnapshot_from_outcar:
         """
         Test UMDSnapshot_from_outcar function looking for a snapshot and then
         loading the snapshot from an OUTCAR file containing a single simulation
-        run. The total number of snapshot call over all the OUTCAR file must be
-        equal to the total simulation number of steps.
+        run. The total number of method loadedloaded over all the OUTCAR file
+        must be equal to the total simulation number of steps.
 
         """
         nsnapshots = 0
@@ -94,7 +94,7 @@ class TestUMDSnapshot_from_outcar:
         """
         Test UMDSnapshot_from_outcar_null function looking for a snapshot and
         then loading the snapshot from an OUTCAR file containing a single
-        simulation run. The total number of snapshot call over all the OUTCAR
+        simulation run. The total number of snapshot loaded over all the OUTCAR
         file must be equal to the total simulation number of steps.
 
         """
@@ -162,3 +162,4 @@ class TestUMDSnapshot_from_outcar:
             snapshot = UMDSnapshot(0, 0.0, self.lattice)
             with pytest.raises(EOFError):
                 snapshot = snapshot.UMDSnapshot_from_outcar(outcar, snapshot)
+            outcar.close()

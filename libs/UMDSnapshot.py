@@ -23,8 +23,6 @@ from .UMDSnapDynamics import UMDSnapDynamics
 from .UMDSnapThermodynamics import UMDSnapThermodynamics
 from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot_from_outcar
 from ..load_UMDSnapshot_from_umd import load_UMDSnapshot_from_umd
-# from ..load_UMDSnapshot_from_umd import load_UMDSnapDynamics_from_umd
-# from ..load_UMDSnapshot_from_umd import load_UMDSnapThermodynamics_from_umd
 
     
 class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
@@ -301,13 +299,32 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
             line = outcar.readline()
         raise(EOFError('OUTCAR file ended but the simulation is uncomplete.'))
 
-    def UMDSnapshot_from_umd(self, umd):
+    def UMDSnapshot_from_umd(self, umd, index=-1):
+        """
+        Initialize a UMDSnapshot object from a UMD file.
+
+        Parameters
+        ----------
+        umd : input file
+            The UMD input file stream.
+        index : int, optional
+            The index of the snapshot to load. If index is negative, then the
+            first available snapshot of the stream is loaded.
+            The default is -1.
+
+        Returns
+        -------
+        snapshot : UMDSnapshot
+            A UMDSnapshot object.
+
+        """
         line = umd.readline()
         while line:
             if 'Snapshot:' in line:
-                self.snap = int(line.replace('Snapshot:', '').strip())
-                snapshot = load_UMDSnapshot_from_umd(umd, self)
-                return snapshot
+                snap = int(line.replace('Snapshot:', '').strip())
+                if index < 0 or snap == index:
+                    self.snap = snap
+                    snapshot = load_UMDSnapshot_from_umd(umd, self)
+                    return snapshot
             line = umd.readline()
-        raise(EOFError('UMD file ended but the simulation is uncomplete.'))
-        
+        raise(EOFError('UMD file ended but no snapshot is loaded.'))
