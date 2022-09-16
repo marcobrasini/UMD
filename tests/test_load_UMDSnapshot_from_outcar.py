@@ -22,7 +22,7 @@ The simulation is performed on the following lattice structure:
      - H: 28 atoms,
      - Fe: 1 atom.
 
-The reference snapshot is the 1044-th snapshot of the total simulation with 
+The reference snapshot is the 1044-th snapshot of the total simulation with
 time duration of 0.4 fs. The reference values to compare the snapshot are:
  - the energy
  - the pressure
@@ -146,7 +146,7 @@ class Test_load_UMDSnapshot:
                       [-0.280773,      0.605878,     -0.507692],
                       [ 1.387906,     -0.202300,      0.976311]])
     
-    snapshot = UMDSnapshot(1044, 0.4, lattice)
+    snapshot = UMDSnapshot(1043, 0.4, lattice)
     snapshot.setDynamics(position=position, velocity=velocity, force=force)
     snapshot.setThermodynamics(temperature=temperature, pressure=pressure,
                                energy=energy)
@@ -161,20 +161,15 @@ class Test_load_UMDSnapshot:
 
         """
         with open('examples/OUTCAR_snapshot.outcar', 'r') as outcar:
-            snapshot = UMDSnapshot(1044, 0.4, self.lattice)
+            snapshot = UMDSnapshot(1043, 0.4, self.lattice)
             snapshot = load_UMDSnapshot_from_outcar(outcar, snapshot)
-            assert snapshot.energy == self.energy
-            assert snapshot.temperature == self.temperature
-            assert np.isclose(snapshot.pressure, self.pressure)
-            assert np.array_equal(snapshot.position, self.position)
-            assert np.array_equal(snapshot.force, self.force)
+            assert snapshot == self.snapshot
             outcar.close()
 
-    def test_load_UMDSnapshot_from_outcar(self):
+    def test_load_UMDSnapshot_from_outcar_multiple(self):
         """
         Test the load_UMDSnapshot_from_outcar function initializing a single
-        UMDSnapshot, when it reads the information from a whole OUTCAR file
-        containing many snapshot data.
+        UMDSnapshot, from a whole OUTCAR file containing many snapshots data.
         All the snapshots are read by the UMDSnapshot_from_outcar function, and
         when it finds the reference step, the snapshot informations are
         compared with the reference values.
@@ -182,17 +177,13 @@ class Test_load_UMDSnapshot:
         """
         snap = 0
         with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
-            snapshot = UMDSnapshot(snap, 0.4, self.lattice)
             while True:
+                snapshot = UMDSnapshot(snap, 0.4, self.lattice)
                 snapshot.UMDSnapshot_from_outcar(outcar)
                 if snap == self.reference_snap-1:
                     break
                 snap += 1
-            assert snapshot.energy == self.energy
-            assert snapshot.temperature == self.temperature
-            assert np.isclose(snapshot.pressure, self.pressure)
-            assert np.array_equal(snapshot.position, self.position)
-            assert np.array_equal(snapshot.force, self.force)
+            assert snapshot == self.snapshot
             outcar.close()
 
     def test_load_UMDSnapshot_from_outcar_eof(self):

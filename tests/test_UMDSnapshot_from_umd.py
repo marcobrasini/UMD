@@ -3,17 +3,20 @@
                     UMDSnapshot.UMDSnapshot_from_umd tests
 ==============================================================================
 
-To test UMDSnapshot_from_umd methods we use two examples of UMD files:
+To test UMDSnapshot_from_umd methods we use four examples of UMD files:
  - the example/UMD_single.umd:
-   It contains the result of a single simulation run with 300 snapshots of 0.5
-   fs duration.
+   It contains a single simulation run with 300 snapshots of 0.4 fs duration.
  - the example/UMD_multiple.umd:
-   It containes the result of three concatenated runs:
+   It containes the results of three concatenated runs:
        - run0 with 300 snapshots of 0.5 fs duration.
        - run1 with 600 snapshots of 0.5 fs duration.
        - run2 with 1000 snapshots of 0.4 fs duration.
+ - the examples/UMD_snapshot.umd:
+   It contains a single snapshot (the 1044-th of the example/UMD_multiple.umd)
+ - the examples/UMD_empty.umd:
+   It contains no snapshot.
 
-Both simulations are performed on the same lattice structure:
+All simulations are performed on the same lattice structure:
  - the matrix of basis vectors is:
        5.70     0.00     0.00
        0.00     5.70     0.00
@@ -22,6 +25,7 @@ Both simulations are performed on the same lattice structure:
      - O: 15 atoms,
      - H: 28 atoms,
      - Fe: 1 atom.
+
 """
 
 import numpy as np
@@ -34,6 +38,7 @@ from ..libs.UMDSnapshot import UMDSnapshot
 
 
 class Test_UMDSnapshot_from_umd:
+
     lattice_name = '2bccH2O+1Fe'
     H = UMDAtom(name='H', mass=1.00, valence=1.0)
     O = UMDAtom(name='O', mass=16.00, valence=6.0)
@@ -141,7 +146,8 @@ class Test_UMDSnapshot_from_umd:
     snapshot.setThermodynamics(temperature=temperature, pressure=pressure,
                                energy=energy)
 
-    def test_UMDSnapshot_from_outcar_snapshot(self):
+    # %% UMDSnapshot_from_umd tests with default index
+    def test_UMDSnapshot_from_umd_snapshot(self):
         """
         Test UMDSnapshot_from_umd method loading a snapshot from a UMD file
         containing a single snapshot. The load_UMDSnapshot_from_umd must return
@@ -203,8 +209,8 @@ class Test_UMDSnapshot_from_umd:
 
     def test_load_UMDSnapshot_from_umd_eof(self):
         """
-        Test UMDSnapshot_from_umd method when it reads an empty OUTCAR file.
-        An EOFError is raised.
+        Test UMDSnapshot_from_umd method loading all snapshots an empty UMD
+        file. An EOFError is raised.
 
         """
         with open('examples/UMD_empty.umd', 'r') as umd:
@@ -213,6 +219,27 @@ class Test_UMDSnapshot_from_umd:
                 snapshot = snapshot.UMDSnapshot_from_umd(umd)
             umd.close()
 
+    @mock.patch('UMD.libs.UMDSnapshot.load_UMDSnapshot_from_umd')
+    def test_UMDSnapshot_from_umd_single_mock(self, mock_load):
+        """
+        Test UMDSnapshot_from_umd method loading all snapshots from a UMD file.
+        The total number of snapshot loaded over all the UMD file must be equal
+        to the total number of simulation steps. For a UMD file obtained from
+        an OUTCAR file containing a single simulation run with 300 steps, the
+        number of snapshots loaded is 300.
+
+        """
+        with open('examples/UMD_single.umd', 'r') as umd:
+            try:
+                while True:
+                    snapshot = UMDSnapshot(lattice=self.lattice)
+                    snapshot.UMDSnapshot_from_umd(umd)
+            except(EOFError):
+                pass
+            umd.close()
+        assert mock_load.call_count == 300
+
+    # %% UMDSnapshot_from_umd tests with index
     def test_UMDSnapshot_from_umd_index(self):
         """
         Test UMDSnapshot_from_umd method loading a single snapshot from a UMD
@@ -227,16 +254,19 @@ class Test_UMDSnapshot_from_umd:
             assert snapshot == self.snapshot
             umd.close()
 
-    def test_UMDSnapshot_from_umd_index_too_large(self):
+    @mock.patch('UMD.libs.UMDSnapshot.load_UMDSnapshot_from_umd')
+    def test_UMDSnapshot_from_umd_index_too_large(self, mock_load):
         """
         Test UMDSnapshot_from_umd method loading a single snapshot from a UMD
         file by specifying it index. For an index larger than the number of
-        available snapshot in the UMD file, a EOFError is raised.
+        available snapshot in the UMD file, no snapshot is loaded and
+        a EOFError is raised.
 
         """
         snap = 1043
         with open('examples/UMD_single.umd', 'r') as umd:
             snapshot = UMDSnapshot(lattice=self.lattice)
             with pytest.raises(EOFError):
-                snapshot = snapshot.UMDSnapshot_from_umd(umd, snap)
+                snapshot.UMDSnapshot_from_umd(umd, snap)
             umd.close()
+        assert mock_load.call_count == 0

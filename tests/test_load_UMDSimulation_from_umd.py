@@ -24,8 +24,8 @@ Both simulations are performed on the same lattice structure:
 """
 
 
-from ..UMDSimulation_from_umd import UMDSimulation_from_umd
-from ..UMDSimulation_from_umd import UMDLattice_from_umd
+from ..load_UMDSimulation_from_umd import load_UMDSimulation_from_umd
+from ..load_UMDSimulation_from_umd import load_UMDLattice_from_umd
 
 import pytest
 import numpy as np
@@ -36,7 +36,7 @@ from ..libs.UMDSimulation import UMDSimulation
 from ..libs.UMDSimulationRun import UMDSimulationRun
 
 
-class TestUMDSimulation_from_umd:
+class Test_load_UMDSimulation_from_umd:
 
     lattice_name = '2bccH2O+1Fe'
     H = UMDAtom(name='H', mass=1.00, valence=1.0)
@@ -53,14 +53,14 @@ class TestUMDSimulation_from_umd:
     simulation_single = UMDSimulation('', lattice, [run0])
     simulation_multiple = UMDSimulation('', lattice, [run0, run1, run2])
 
-    def test_UMDLattice_from_umd(self):
+    def test_load_UMDLattice_from_umd(self):
         """
         Test the UMDLattice_from_umd function reading the lattice informations
         from a UMD file.
 
         """
         with open('./examples/UMD_single.umd', 'r') as umd:
-            lattice = UMDLattice_from_umd(umd)
+            lattice = load_UMDLattice_from_umd(umd)
             assert lattice == self.lattice
 
     def test_UMDSimulation_from_umd_single(self):
@@ -70,7 +70,7 @@ class TestUMDSimulation_from_umd:
 
         """
         with open('./examples/UMD_single.umd', 'r') as umd:
-            simulation = UMDSimulation_from_umd(umd)
+            simulation = load_UMDSimulation_from_umd(umd)
             assert simulation == self.simulation_single
 
     def test_UMDSimulation_from_umd_multiple(self):
@@ -80,5 +80,5 @@ class TestUMDSimulation_from_umd:
 
         """
         with open('./examples/UMD_multiple.umd', 'r') as umd:
-            simulation = UMDSimulation_from_umd(umd)
+            simulation = load_UMDSimulation_from_umd(umd)
             assert simulation == self.simulation_multiple

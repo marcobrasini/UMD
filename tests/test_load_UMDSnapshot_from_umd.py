@@ -1,20 +1,22 @@
 """
 ==============================================================================
-                         UMDSnapshot_from_umd tests
+                        load_UMDSnapshot_from_umd tests
 ==============================================================================
 
-To test UMDSnapshot_from_umd we use three examples of UMD files
+To test load_UMDSnapshot_from_umd we use four examples of UMD files
  - the example/UMD_single.umd:
-   It contains a single simulation run with 300 snapshots of 0.5 fs duration.
+   It contains a single simulation run with 300 snapshots of 0.4 fs duration.
  - the example/UMD_multiple.umd:
-   It containes three concatenated runs:
+   It containes the results of three concatenated runs:
        - run0 with 300 snapshots of 0.5 fs duration.
        - run1 with 600 snapshots of 0.5 fs duration.
        - run2 with 1000 snapshots of 0.4 fs duration.
  - the examples/UMD_snapshot.umd:
    It contains a single snapshot (the 1044-th of the example/UMD_multiple.umd)
+ - the examples/UMD_empty.umd:
+   It contains no snapshot.
 
-Both simulations are performed on the same lattice structure:
+All simulations are performed on the same lattice structure:
  - the matrix of basis vectors is:
        5.70     0.00     0.00
        0.00     5.70     0.00
@@ -23,22 +25,28 @@ Both simulations are performed on the same lattice structure:
      - O: 15 atoms,
      - H: 28 atoms,
      - Fe: 1 atom.
+
 """
 
-from ..UMDSnapshot_from_umd import UMDSnapshot_from_umd
+from ..load_UMDSnapshot_from_umd import load_UMDSnapshot_from_umd
+from ..load_UMDSnapshot_from_umd import load_UMDSnapThermodynamics_from_umd
+from ..load_UMDSnapshot_from_umd import load_UMDSnapDynamics_from_umd
 
 import pytest
 import numpy as np
+import unittest.mock as mock
 
 from ..libs.UMDAtom import UMDAtom
 from ..libs.UMDLattice import UMDLattice
 from ..libs.UMDSnapshot import UMDSnapshot
-from ..libs.UMDSimulation import UMDSimulation
-from ..libs.UMDSimulationRun import UMDSimulationRun
+from ..libs.UMDSnapDynamics import UMDSnapDynamics
+from ..libs.UMDSnapThermodynamics import UMDSnapThermodynamics
 
 
-class TestUMDSnapshot_from_umd:
-    
+class Test_load_UMDSnapshot_from_umd:
+
+    module = 'UMD.load_UMDSnapshot_from_umd.'
+
     lattice_name = '2bccH2O+1Fe'
     H = UMDAtom(name='H', mass=1.00, valence=1.0)
     O = UMDAtom(name='O', mass=16.00, valence=6.0)
@@ -46,19 +54,13 @@ class TestUMDSnapshot_from_umd:
     atoms = {O: 15, H: 28, Fe: 1}
     basis = 5.7*np.identity(3)
     lattice = UMDLattice(lattice_name, basis, atoms)
-
-    run0 = UMDSimulationRun(0, 300, 0.5)
-    run1 = UMDSimulationRun(1, 600, 0.5)
-    run2 = UMDSimulationRun(2, 1000, 0.4)
-
-    simulation_single = UMDSimulation('', lattice, [run0])
-    simulation_multiple = UMDSimulation('', lattice, [run0, run1, run2])
+    natoms = lattice.natoms()
 
     step = 1043
     time = 0.4
     temperature = 1769.01
     energy = -178.209742
-    pressure = np.mean(np.array([604.475, 627.147, 688.912])) / 10
+    pressure = np.mean(np.array([604.475, 627.147, 688.912]))/10
     position = np.array([[5.30395,      5.36673,      5.42726],
                          [0.25290,      5.49507,      3.03868],
                          [0.01625,      2.54823,      0.19909],
@@ -148,49 +150,91 @@ class TestUMDSnapshot_from_umd:
                       [ 1.453374,     -1.296291,     -1.659476],
                       [-0.280773,      0.605878,     -0.507692],
                       [ 1.387906,     -0.202300,      0.976311]])
+    
     snapshot = UMDSnapshot(step, time, lattice)
-    snapshot.setDynamics(position=position, force=force)
-    snapshot.setThermodynamics(temperature=temperature, pressure=pressure,
-                               energy=energy)
+    dynamics = UMDSnapDynamics(time, position, velocity, force)
+    thermodynamics = UMDSnapThermodynamics(temperature, pressure, energy)
+    snapshot.setDynamics(dynamics)
+    snapshot.setThermodynamics(thermodynamics)
 
-    def test_UMDSnapshot_from_umd(self):
+    #%% load_UMDSnapThermodynamics_from_umd tests
+    def test_load_UMDSnapThermodynamics_from_umd_snapshot(self):
         """
-        Test the UMDSnapsshot_from_umd function reading an isolated UMD 
-        snapshots and comparing it with the reference snapshot.
+        Test the load_UMDSnapThermodynamics_from_umd function reading an
+        isolated from a UMD file and comparing it with the reference
+        UMDSnapThermodynamics object.
 
         """
         with open('examples/UMD_snapshot.umd', 'r') as umd:
-            snapshot = UMDSnapshot_from_umd(umd, self.simulation_single)
+            thermodynamics = load_UMDSnapThermodynamics_from_umd(umd)
+            assert thermodynamics == self.thermodynamics
+            umd.close()
+
+    def test_load_UMDSnapThermodynamics_from_umd_eof(self):
+        """
+        Test load_UMDSnapThermodynamics_from_umd function reading from an empty
+        UMD file. An EOFError is raised.
+
+        """
+        with open('examples/UMD_empty.umd', 'r') as umd:
+            with pytest.raises(EOFError):
+                load_UMDSnapThermodynamics_from_umd(umd)
+            umd.close()
+
+    # %% load_UMDSnapDynamcis_from_umd tests
+    def test_load_UMDSnapDynamics_from_umd_snapshot(self):
+        """
+        Test the load_UMDSnapDynamics_from_umd function reading an isolated
+        snapshot from a UMD file and comparing it with the reference
+        UMDSnapDynamics object.
+
+        """
+        with open('examples/UMD_snapshot.umd', 'r') as umd:
+            dynamics = load_UMDSnapDynamics_from_umd(umd, self.natoms)
+            assert dynamics == self.dynamics
+            umd.close()
+
+    def test_load_UMDSnapDynamics_from_umd_eof(self):
+        """
+        Test load_UMDSnapDynamics_from_umd function when it reads an empty UMD
+        file. An EOFError is raised.
+
+        """
+        with open('examples/UMD_empty.umd', 'r') as umd:
+            with pytest.raises(EOFError):
+                load_UMDSnapDynamics_from_umd(umd, self.natoms)
+            umd.close()
+
+    # %% load_UMDSnapshot_from_umd tests
+    def test_load_UMDSnapshot_from_umd_snapshot(self):
+        """
+        Test the load_UMDSnapshot_from_umd function reading an isolated
+        snapshot from a UMD file and comparing it with the reference
+        UMDSnapshot object.
+
+        """
+        with open('examples/UMD_snapshot.umd', 'r') as umd:
+            snapshot = UMDSnapshot(snap=1043, lattice=self.lattice)
+            snapshot = load_UMDSnapshot_from_umd(umd, snapshot)
             assert snapshot == self.snapshot
+            umd.close()
 
-    def test_UMDSnapshot_from_umd_all_from_single(self):
+    @mock.patch(module+'load_UMDSnapDynamics_from_umd')
+    @mock.patch(module+'load_UMDSnapThermodynamics_from_umd')
+    @mock.patch.object(UMDSnapshot, 'setDynamics')
+    @mock.patch.object(UMDSnapshot, 'setThermodynamics')
+    def test_load_UMDSnapshot_from_umd(self, mock_thermo, mock_dynamics,
+                                       mock_load_thermo, mock_load_dynamics):
         """
-        Test the UMDSnapsshot_from_umd function reading snapshots from an
-        OUTCAR file containing a single simulation run.
-        The total number of snapshot read must be 300.
-
-        """
-        nsnapshot = 0
-        with open('examples/UMD_single.umd', 'r') as umd:
-            while True:
-                snapshot = UMDSnapshot_from_umd(umd, self.simulation_single)
-                if snapshot is None:
-                    break
-                nsnapshot += 1
-            assert nsnapshot == self.simulation_single.steps()
-
-    def test_UMDSnapshot_from_umd_all_from_multiple(self):
-        """
-        Test the UMDSnapsshot_from_umd function reading snapshots from an
-        OUTCAR file containing multiple simulation runs concatenated.
-        The total number of snapshot read must be 1900.
+        Test the load_UMDSnapshot_from_umd function reading an isolated
+        snapshot from a UMD file.
 
         """
-        nsnapshot = 0
-        with open('examples/UMD_multiple.umd', 'r') as umd:
-            while True:
-                snapshot = UMDSnapshot_from_umd(umd, self.simulation_multiple)
-                if snapshot is None:
-                    break
-                nsnapshot += 1
-            assert nsnapshot == self.simulation_multiple.steps()
+        with open('examples/UMD_snapshot.umd', 'r') as umd:
+            snapshot = UMDSnapshot(snap=1043, lattice=self.lattice)
+            snapshot = load_UMDSnapshot_from_umd(umd, snapshot)
+            mock_load_dynamics.assert_called_once()
+            mock_load_thermo.assert_called_once()
+            mock_dynamics.assert_called_once()
+            mock_thermo.assert_called_once()
+            umd.close()
