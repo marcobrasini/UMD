@@ -22,6 +22,9 @@ from .UMDLattice import UMDLattice
 from .UMDSnapDynamics import UMDSnapDynamics
 from .UMDSnapThermodynamics import UMDSnapThermodynamics
 from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot_from_outcar
+from ..load_UMDSnapshot_from_umd import load_UMDSnapshot_from_umd
+# from ..load_UMDSnapshot_from_umd import load_UMDSnapDynamics_from_umd
+# from ..load_UMDSnapshot_from_umd import load_UMDSnapThermodynamics_from_umd
 
     
 class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
@@ -70,7 +73,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
 
     """
 
-    def __init__(self, snap, time, lattice):
+    def __init__(self, snap=-1, time=0.0, lattice=UMDLattice()):
         """
         Construct a UMDSnapshot object.
 
@@ -297,3 +300,14 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
                 return
             line = outcar.readline()
         raise(EOFError('OUTCAR file ended but the simulation is uncomplete.'))
+
+    def UMDSnapshot_from_umd(self, umd):
+        line = umd.readline()
+        while line:
+            if 'Snapshot:' in line:
+                self.snap = int(line.replace('Snapshot:', '').strip())
+                snapshot = load_UMDSnapshot_from_umd(umd, self)
+                return snapshot
+            line = umd.readline()
+        raise(EOFError('UMD file ended but the simulation is uncomplete.'))
+        

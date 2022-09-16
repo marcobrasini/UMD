@@ -48,6 +48,17 @@ class Test_UMDSnapshot_unit:
     snapshot.setDynamics(position=position, velocity=velocity, force=force)
 
     # %% __init__ function tests
+    def test_UMDSnapshot_init_default(self):
+        """
+        Test UMDSnapshot __init__ function defualt constructor.
+
+        """
+        snapshot = UMDSnapshot()
+        assert snapshot.snap == -1
+        assert snapshot.time == 0.0
+        assert snapshot.natoms == 0
+        assert snapshot.lattice == UMDLattice()
+
     def test_UMDSnapshot_init(self):
         """
         Test UMDSnapshot __init__ function assignement operation.
