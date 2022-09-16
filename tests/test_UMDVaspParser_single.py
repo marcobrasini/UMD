@@ -33,11 +33,12 @@ See Also
 
 
 from ..UMDVaspParser import UMDVaspParser
-from ..UMDSimulation_from_umd import UMDSimulation_from_umd
 
 import os
-import pytest
+import filecmp
 import numpy as np
+
+import pytest
 import hypothesis as hp
 import hypothesis.strategies as st
 
@@ -67,6 +68,17 @@ class TestUMDVaspParser_single:
     run0 = UMDSimulationRun(0, 300, 0.5)
     simulation = UMDSimulation('', lattice, [run0])
 
+    def test_UMDVaspParser(self):
+        """
+        The UMDVaspParser must generate, from the OUTCARfile, a UMD file
+        identical to './examples/UMD_single.umd'.
+
+        """
+        UMDVaspParser(self.file_single+'.outcar')
+        assert filecmp.cmp('./examples/OUTCAR_single.umd',
+                           './examples/UMD_single.umd')
+        os.remove(self.file_single+'.umd')
+
     def test_UMDVaspParser_nsteps(self):
         """
         The UMDVaspParser must return a UMDSimulation object identical to the
@@ -75,20 +87,6 @@ class TestUMDVaspParser_single:
         """
         simulation = UMDVaspParser(self.file_single+'.outcar')
         assert simulation == self.simulation
-        os.remove(self.file_single+'.umd')
-
-    def test_UMDVaspParser_single_simulation_from_umd(self):
-        """
-        The UMDVaspParser must return a UMDSimulation object identical to the
-        one read back by the UMDSimulation_from_outcar function from the UMD
-        file generated.
-
-        """
-        simulation = UMDVaspParser(self.file_single+'.outcar')
-        with open(self.file_single+'.umd', 'r') as umd:
-            simulation_umd = UMDSimulation_from_umd(umd)
-            assert simulation == simulation_umd
-            umd.close()
         os.remove(self.file_single+'.umd')
 
     # %% UMDVaspParser initialStep argument tests

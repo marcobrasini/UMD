@@ -34,9 +34,10 @@ See Also
 
 
 from ..UMDVaspParser import UMDVaspParser
-from ..UMDSimulation_from_umd import UMDSimulation_from_umd
+from ..load_UMDSimulation_from_umd import load_UMDSimulation_from_umd
 
 import os
+import filecmp
 import numpy as np
 import hypothesis as hp
 import hypothesis.strategies as st
@@ -65,6 +66,17 @@ class TestUMDVaspParser_multiple:
 
     simulation = UMDSimulation('', lattice, [run0, run1, run2])
 
+    def test_UMDVaspParser(self):
+        """
+        The UMDVaspParser must generate, from the OUTCARfile, a UMD file
+        identical to './examples/UMD_multiple.umd'.
+
+        """
+        UMDVaspParser(self.file_multiple+'.outcar')
+        assert filecmp.cmp('./examples/OUTCAR_multiple.umd',
+                           './examples/UMD_multiple.umd')
+        os.remove(self.file_multiple+'.umd')
+
     def test_UMDVaspParser_multiple_nsteps(self):
         """
         Test UMDSimulation_from_outcar function when it reads all the snapshots
@@ -75,21 +87,6 @@ class TestUMDVaspParser_multiple:
         """
         simulation = UMDVaspParser(self.file_multiple+'.outcar')
         assert simulation == self.simulation
-        os.remove(self.file_multiple+'.umd')
-
-    def test_UMDVaspParser_multiple_simulation_from_umd(self):
-        """
-        Test UMDSimulation_from_outcar function when it reads all the snapshots
-        from the OUTCAR file of multiple simulation runs concatenated.
-        The UMDVaspParser must return a UMDSimulation object identical to the
-        one read back from the UMD file.
-
-        """
-        simulation = UMDVaspParser(self.file_multiple+'.outcar')
-        with open(self.file_multiple+'.umd', 'r') as umd:
-            simulation_umd = UMDSimulation_from_umd(umd)
-            assert simulation == simulation_umd
-            umd.close()
         os.remove(self.file_multiple+'.umd')
 
     # %% UMDVaspParser initialStep argument tests
