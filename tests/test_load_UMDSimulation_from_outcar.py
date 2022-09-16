@@ -1,9 +1,9 @@
 """
-==============================================================================
-                      UMDSimulation_from_outcar tests
-==============================================================================
+===============================================================================
+                      load_UMDSimulation_from_outcar tests
+===============================================================================
 
-To test UMDSimulation_from_outcar we use two examples of OUTCAR files:
+To test load_UMDSimulation_from_outcar we use three examples of OUTCAR files:
  - the example/OUTCAR_single.outcar:
    It contains a single simulation run with 300 snapshots of 0.5 fs duration.
  - the example/OUTCAR_multiple.outcar:
@@ -11,8 +11,10 @@ To test UMDSimulation_from_outcar we use two examples of OUTCAR files:
        - run0 with 300 snapshots of 0.5 fs duration.
        - run1 with 600 snapshots of 0.5 fs duration.
        - run2 with 1000 snapshots of 0.4 fs duration.
+ - the examples/OUTCAR_empty.outcar:
+   It contains no simulation.
 
-Both simulations are performed on the same lattice structure:
+All simulations are performed on the same lattice structure:
  - the matrix of basis vectors is:
        5.70     0.00     0.00
        0.00     5.70     0.00
@@ -21,6 +23,7 @@ Both simulations are performed on the same lattice structure:
      - O: 15 atoms,
      - H: 28 atoms,
      - Fe: 1 atom.
+
 """
 
 
@@ -54,9 +57,8 @@ class TestUMDSimulation_from_outcar:
 
     def test_UMDSimulation_from_outcar_single(self):
         """
-        Test the UMDSimualtion_from_outcar when it reads the OUTCAR file of a
-        single VASP simulation run (saved in the example/OUTCAR_single.outcar 
-        file).
+        Test the load_UMDSimualtion_from_outcar updating the simualtion from
+        an OUTCAR file containing a single simulation run.
 
         """
         simulation = UMDSimulation()
@@ -71,9 +73,8 @@ class TestUMDSimulation_from_outcar:
 
     def test_UMDSimulation_from_outcar_multiple(self):
         """
-        Test the UMDSimualtion_from_outcar when it reads the OUTCAR file of
-        multiple VASP simulation runs concatenated (saved in the 
-        example/OUTCAR_multiple.outcar file).
+        Test the load_UMDSimualtion_from_outcar updating the simualtion from
+        an OUTCAR file containing multiple simulation runs concatenated.
 
         """
         total_simulation = UMDSimulation(lattice=self.lattice, runs=self.runs)
@@ -84,7 +85,8 @@ class TestUMDSimulation_from_outcar:
                     simulation = load_UMDSimulation_from_outcar(outcar,
                                                                 simulation)
             except(EOFError):
-                    outcar.close()
+                pass
+            outcar.close()
         assert simulation == total_simulation
         assert simulation.lattice == self.lattice
         assert simulation.runs == self.runs
@@ -94,9 +96,9 @@ class TestUMDSimulation_from_outcar:
 
     def test_UMDSimulation_from_outcar_eof(self):
         """
-        Test the UMDSimualtion_from_outcar when it reads an empty OUTCAR file.
-        An EOFError is raised.
-        
+        Test the load_UMDSimualtion_from_outcar when it reads an empty OUTCAR
+        file. An EOFError is raised.
+
         """
         simulation = UMDSimulation()
         with open('examples/OUTCAR_empty.outcar', 'r') as outcar:

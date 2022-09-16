@@ -30,12 +30,11 @@ the snapshot index. Then it is subdevided into two subsections:
 """
 
 import numpy as np
-from .libs.UMDSnapshot import UMDSnapshot
 from .libs.UMDSnapDynamics import UMDSnapDynamics
 from .libs.UMDSnapThermodynamics import UMDSnapThermodynamics
 
 
-def UMDSnapThermodynamics_from_umd(umd):
+def load_UMDSnapThermodynamics_from_umd(umd):
     """
     Initialize a UMDSnapThermodynamics object from a UMD file.
 
@@ -61,9 +60,10 @@ def UMDSnapThermodynamics_from_umd(umd):
                                                    energy=energy)
             return thermodynamics
         line = umd.readline()
+    raise(EOFError('UMD file ended with UMDSnapTermodynamics uninitialized.'))
 
 
-def UMDSnapDynamics_from_umd(umd, natoms):
+def load_UMDSnapDynamics_from_umd(umd, natoms):
     """
     Initialize a UMDSnapDynamics object from a UMD file.
 
@@ -96,9 +96,10 @@ def UMDSnapDynamics_from_umd(umd, natoms):
                                        velocity=velocity, force=force)
             return dynamics
         line = umd.readline()
+    raise(EOFError('UMD file ended with UMDSnapDynamics uninitialized.'))
 
 
-def UMDSnapshot_from_umd(umd, simulation):
+def load_UMDSnapshot_from_umd(umd, snapshot):
     """
     Initialize a UMDSnapshot object from a UMD file.
 
@@ -106,8 +107,8 @@ def UMDSnapshot_from_umd(umd, simulation):
     ----------
     umd : input file
         The UMD input file.
-    simualtion : UMDSimulation
-        The UMDSimulation object with the simulation information.
+    snapshot : UMDSnapshot
+        The UMDSnapshot object with the snapshot data.
 
     Returns
     -------
@@ -115,16 +116,8 @@ def UMDSnapshot_from_umd(umd, simulation):
         A UMDSnapshot object.
 
     """
-    lattice = simulation.lattice
-    natoms = lattice.natoms()
-    line = umd.readline()
-    while line:
-        if 'Snapshot:' in line:
-            step = int(line.replace('Snapshot:', '').strip())
-            thermodynamics = UMDSnapThermodynamics_from_umd(umd)
-            dynamics = UMDSnapDynamics_from_umd(umd, natoms)
-            snapshot = UMDSnapshot(step, time=0.0, lattice=lattice)
-            snapshot.setDynamics(dynamics)
-            snapshot.setThermodynamics(thermodynamics)
-            return snapshot
-        line = umd.readline()
+    thermodynamics = load_UMDSnapThermodynamics_from_umd(umd)
+    dynamics = load_UMDSnapDynamics_from_umd(umd, snapshot.natoms)
+    snapshot.setDynamics(dynamics)
+    snapshot.setThermodynamics(thermodynamics)
+    return snapshot

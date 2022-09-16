@@ -29,6 +29,7 @@ All simulations are performed on the same lattice structure:
 """
 
 import numpy as np
+
 import pytest
 import unittest.mock as mock
 
@@ -38,7 +39,8 @@ from ..libs.UMDSnapshot import UMDSnapshot
 
 
 class Test_UMDSnapshot_from_umd:
-
+    # According to the lattice structure, we initialize the UMDLattice object
+    # that we will use as reference for the test ...
     lattice_name = '2bccH2O+1Fe'
     H = UMDAtom(name='H', mass=1.00, valence=1.0)
     O = UMDAtom(name='O', mass=16.00, valence=6.0)
@@ -46,7 +48,7 @@ class Test_UMDSnapshot_from_umd:
     atoms = {O: 15, H: 28, Fe: 1}
     basis = 5.7*np.identity(3)
     lattice = UMDLattice(lattice_name, basis, atoms)
-    
+    # ... and the data relative to the 1044-th reference snapshot.
     step = 1043
     time = 0.4
     temperature = 1769.01
@@ -141,6 +143,8 @@ class Test_UMDSnapshot_from_umd:
                       [ 1.453374,     -1.296291,     -1.659476],
                       [-0.280773,      0.605878,     -0.507692],
                       [ 1.387906,     -0.202300,      0.976311]])
+
+    # The reference object are generated.
     snapshot = UMDSnapshot(step, time, lattice)
     snapshot.setDynamics(position=position, force=force)
     snapshot.setThermodynamics(temperature=temperature, pressure=pressure,
@@ -243,11 +247,11 @@ class Test_UMDSnapshot_from_umd:
     def test_UMDSnapshot_from_umd_index(self):
         """
         Test UMDSnapshot_from_umd method loading a single snapshot from a UMD
-        file by specifying it index. For reference snapshot with index 1043,
-        the loaded UMDSnapshot must be equal to this reference one.
+        file by specifying its index. The loaded UMDSnapshot must be equal to
+        the reference object.
 
         """
-        snap = 1043
+        snap = self.step
         with open('examples/UMD_multiple.umd', 'r') as umd:
             snapshot = UMDSnapshot(lattice=self.lattice)
             snapshot = snapshot.UMDSnapshot_from_umd(umd, snap)
@@ -258,7 +262,7 @@ class Test_UMDSnapshot_from_umd:
     def test_UMDSnapshot_from_umd_index_too_large(self, mock_load):
         """
         Test UMDSnapshot_from_umd method loading a single snapshot from a UMD
-        file by specifying it index. For an index larger than the number of
+        file by specifying its index. For an index larger than the number of
         available snapshot in the UMD file, no snapshot is loaded and
         a EOFError is raised.
 

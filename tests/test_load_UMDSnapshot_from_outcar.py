@@ -2,17 +2,20 @@
 ==============================================================================
                            load_UMDSnapshot tests
 ==============================================================================
-To test load_UMDSimulation function in the UMDSnapshot_from_outcar we use two
-examples of OUTCAR file:
- - the example/OUTCAR_snapshot.outcar:
-   It contains only a single snapshot.
+
+To test load_UMDSimulation function we use three examples of OUTCAR file:
  - the example/OUTCAR_multiple.outcar:
    It containes three concatenated runs:
        - run0 with 300 snapshots of 0.5 fs duration.
        - run1 with 600 snapshots of 0.5 fs duration.
        - run2 with 1000 snapshots of 0.4 fs duration.
+ - the example/OUTCAR_snapshot.outcar:
+   It contains only a single snapshot (the 1044-th of the
+                                       example/OUTCAR_multiple.outcar)
+ - the examples/OUTCAR_empty.outcar:
+   It contains no snapshot.
 
-The simulation is performed on the following lattice structure:
+All simulations are performed on the same lattice structure:
  - the matrix of basis vectors is:
        5.70     0.00     0.00
        0.00     5.70     0.00
@@ -22,20 +25,13 @@ The simulation is performed on the following lattice structure:
      - H: 28 atoms,
      - Fe: 1 atom.
 
-The reference snapshot is the 1044-th snapshot of the total simulation with
-time duration of 0.4 fs. The reference values to compare the snapshot are:
- - the energy
- - the pressure
- - the temperature
- - the atom positions
- - the atom forces
-
 """
 
 
 from ..load_UMDSnapshot_from_outcar import load_UMDSnapshot_from_outcar
 
 import numpy as np
+
 import pytest
 
 from ..libs.UMDAtom import UMDAtom
@@ -43,7 +39,9 @@ from ..libs.UMDLattice import UMDLattice
 from ..libs.UMDSnapshot import UMDSnapshot
 
 
-class Test_load_UMDSnapshot:
+class Test_load_UMDSnapshot_from_outcar:
+    # According to the lattice structure, the UMDLattice object is initialized
+    # to be used as reference for the test ...
     lattice_name = '2bccH2O+1Fe'
     H = UMDAtom(name='H', mass=1.00, valence=1.0)
     O = UMDAtom(name='O', mass=16.00, valence=6.0)
@@ -51,11 +49,12 @@ class Test_load_UMDSnapshot:
     atoms = {O: 15, H: 28, Fe: 1}
     basis = 5.7*np.identity(3)
     lattice = UMDLattice(lattice_name, basis, atoms)
-
-    reference_snap = 1044
+    # ... and the data relative to the 1044-th reference snapshot.
+    step = 1043
+    time = 0.4
     temperature = 1769.01
     energy = -178.209742
-    pressure = np.mean(np.array([604.475, 627.147, 688.912])) / 10
+    pressure = np.mean(np.array([604.475, 627.147, 688.912]))/10
     position = np.array([[5.30395,      5.36673,      5.42726],
                          [0.25290,      5.49507,      3.03868],
                          [0.01625,      2.54823,      0.19909],
@@ -145,7 +144,8 @@ class Test_load_UMDSnapshot:
                       [ 1.453374,     -1.296291,     -1.659476],
                       [-0.280773,      0.605878,     -0.507692],
                       [ 1.387906,     -0.202300,      0.976311]])
-    
+
+    # The reference object are generated.
     snapshot = UMDSnapshot(1043, 0.4, lattice)
     snapshot.setDynamics(position=position, velocity=velocity, force=force)
     snapshot.setThermodynamics(temperature=temperature, pressure=pressure,
@@ -178,9 +178,9 @@ class Test_load_UMDSnapshot:
         snap = 0
         with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
             while True:
-                snapshot = UMDSnapshot(snap, 0.4, self.lattice)
+                snapshot = UMDSnapshot(snap, self.time, self.lattice)
                 snapshot.UMDSnapshot_from_outcar(outcar)
-                if snap == self.reference_snap-1:
+                if snap == self.step:
                     break
                 snap += 1
             assert snapshot == self.snapshot

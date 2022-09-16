@@ -5,7 +5,7 @@
 
 To test load_UMDSnapshot_from_umd we use four examples of UMD files
  - the example/UMD_single.umd:
-   It contains a single simulation run with 300 snapshots of 0.4 fs duration.
+   It contains a single simulation run with 300 snapshots of 0.5 fs duration.
  - the example/UMD_multiple.umd:
    It containes the results of three concatenated runs:
        - run0 with 300 snapshots of 0.5 fs duration.
@@ -32,8 +32,9 @@ from ..load_UMDSnapshot_from_umd import load_UMDSnapshot_from_umd
 from ..load_UMDSnapshot_from_umd import load_UMDSnapThermodynamics_from_umd
 from ..load_UMDSnapshot_from_umd import load_UMDSnapDynamics_from_umd
 
-import pytest
 import numpy as np
+
+import pytest
 import unittest.mock as mock
 
 from ..libs.UMDAtom import UMDAtom
@@ -44,9 +45,8 @@ from ..libs.UMDSnapThermodynamics import UMDSnapThermodynamics
 
 
 class Test_load_UMDSnapshot_from_umd:
-
-    module = 'UMD.load_UMDSnapshot_from_umd.'
-
+    # According to the lattice structure, the UMDLattice object is initialized
+    # to be used as reference for the test ...
     lattice_name = '2bccH2O+1Fe'
     H = UMDAtom(name='H', mass=1.00, valence=1.0)
     O = UMDAtom(name='O', mass=16.00, valence=6.0)
@@ -55,7 +55,7 @@ class Test_load_UMDSnapshot_from_umd:
     basis = 5.7*np.identity(3)
     lattice = UMDLattice(lattice_name, basis, atoms)
     natoms = lattice.natoms()
-
+    # ... and the data relative to the 1044-th reference snapshot.
     step = 1043
     time = 0.4
     temperature = 1769.01
@@ -150,7 +150,8 @@ class Test_load_UMDSnapshot_from_umd:
                       [ 1.453374,     -1.296291,     -1.659476],
                       [-0.280773,      0.605878,     -0.507692],
                       [ 1.387906,     -0.202300,      0.976311]])
-    
+
+    # The reference object are generated.
     snapshot = UMDSnapshot(step, time, lattice)
     dynamics = UMDSnapDynamics(time, position, velocity, force)
     thermodynamics = UMDSnapThermodynamics(temperature, pressure, energy)
@@ -219,6 +220,7 @@ class Test_load_UMDSnapshot_from_umd:
             assert snapshot == self.snapshot
             umd.close()
 
+    module = 'UMD.load_UMDSnapshot_from_umd.'
     @mock.patch(module+'load_UMDSnapDynamics_from_umd')
     @mock.patch(module+'load_UMDSnapThermodynamics_from_umd')
     @mock.patch.object(UMDSnapshot, 'setDynamics')

@@ -3,7 +3,7 @@
                     UMDSnapshot.UMDSnapshot_from_outcar tests
 ==============================================================================
 
-To test UMDSnapshot_from_outcar methods we use two examples of OUTCAR files:
+To test UMDSnapshot_from_outcar methods we use three examples of OUTCAR files:
  - the example/OUTCAR_single.outcar:
    It contains a single simulation run with 300 snapshots of 0.5 fs duration.
  - the example/OUTCAR_multiple.outcar:
@@ -11,8 +11,13 @@ To test UMDSnapshot_from_outcar methods we use two examples of OUTCAR files:
        - run0 with 300 snapshots of 0.5 fs duration.
        - run1 with 600 snapshots of 0.5 fs duration.
        - run2 with 1000 snapshots of 0.4 fs duration.
+ - the example/OUTCAR_snapshot.outcar:
+   It contains only a single snapshot (the 1044-th of the
+                                       example/OUTCAR_multiple.outcar)
+ - the examples/OUTCAR_empty.outcar:
+   It contains no snapshot.
 
-Both simulations are performed on the same lattice structure:
+All simulations are performed on the same lattice structure:
  - the matrix of basis vectors is:
        5.70     0.00     0.00
        0.00     5.70     0.00
@@ -21,10 +26,12 @@ Both simulations are performed on the same lattice structure:
      - O: 15 atoms,
      - H: 28 atoms,
      - Fe: 1 atom.
+
 """
 
 
 import numpy as np
+
 import pytest
 
 from ..libs.UMDAtom import UMDAtom
@@ -32,7 +39,7 @@ from ..libs.UMDLattice import UMDLattice
 from ..libs.UMDSnapshot import UMDSnapshot
 
 
-class TestUMDSnapshot_from_outcar:
+class Test_UMDSnapshot_from_outcar:
     # According to the lattice structure, we initialize the UMDLattice object
     # that we will use as reference for the test ...
     lattice_name = '2bccH2O+1Fe'
@@ -45,7 +52,7 @@ class TestUMDSnapshot_from_outcar:
 
     def test_UMDSnapshot_from_outcar_snapshot(self):
         """
-        Test UMDSnapshot_from_outcar function loading a snapshot from an OUTCAR
+        Test UMDSnapshot_from_outcar method loading a snapshot from an OUTCAR
         file containing a single snapshot. The load_UMDSnapshot_from_outcar
         must return the same UMDSnapshot updated.
 
@@ -58,7 +65,7 @@ class TestUMDSnapshot_from_outcar:
 
     def test_UMDSnapshot_from_outcar_null_snapshot(self):
         """
-        Test UMDSnapshot_from_outcar_null function loading a snapshot from an
+        Test UMDSnapshot_from_outcar_null method loading a snapshot from an
         OUTCAR file containing a single snapshot. The
         load_UMDSnapshot_from_outcar_null must return None.
 
@@ -71,10 +78,10 @@ class TestUMDSnapshot_from_outcar:
 
     def test_UMDSnapshot_from_outcar_single(self):
         """
-        Test UMDSnapshot_from_outcar function looking for a snapshot and then
-        loading the snapshot from an OUTCAR file containing a single simulation
-        run. The total number of method loadedloaded over all the OUTCAR file
-        must be equal to the total simulation number of steps.
+        Test UMDSnapshot_from_outcar method looking for a snapshot and
+        loading it from an OUTCAR file containing a single simulation run. The
+        total number of loaded snapshots over all the OUTCAR file must be equal
+        to the total number of steps in the simulation.
 
         """
         nsnapshots = 0
@@ -92,10 +99,10 @@ class TestUMDSnapshot_from_outcar:
 
     def test_UMDSnapshot_from_outcar_null_single(self):
         """
-        Test UMDSnapshot_from_outcar_null function looking for a snapshot and
-        then loading the snapshot from an OUTCAR file containing a single
-        simulation run. The total number of snapshot loaded over all the OUTCAR
-        file must be equal to the total simulation number of steps.
+        Test UMDSnapshot_from_outcar_null method looking for a snapshot and
+        loading it from an OUTCAR file containing a single simulation run. The
+        total number of unloaded snapshot over all the OUTCAR file must be
+        equal to the total number of steps simulation in the simulation.
 
         """
         nsnapshot = 0
@@ -112,10 +119,10 @@ class TestUMDSnapshot_from_outcar:
 
     def test_UMDSnapshot_from_outcar_multiple(self):
         """
-        Test UMDSnapshot_from_outcar function looking for a snapshot and then
-        loading the snapshot from an OUTCAR file containing multiple simulation
-        runs concatenated. The total number of snapshot loaded over all the
-        OUTCAR file must be equal to the total simulation number of steps.
+        Test UMDSnapshot_from_outcar method looking for a snapshot and
+        loading it from an OUTCAR file containing multiple simulation runs
+        concatenated. The total number of loaded snapshot over all the OUTCAR
+        file must be equal to the total number of steps in the simulation .
 
         """
         nsnapshots = 0
@@ -133,11 +140,10 @@ class TestUMDSnapshot_from_outcar:
 
     def test_UMDSnapshot_from_outcar_null_multiple(self):
         """
-        Test UMDSnapshot_from_outcar_null function looking for a snapshot and
-        then loading the snapshot from an OUTCAR file containing multiple
-        simulation runs concatenated. The total number of snapshot loaded over
-        all the OUTCAR file must be equal to the total simulation number of
-        steps.
+        Test UMDSnapshot_from_outcar_null method looking for a snapshot and
+        loading it from an OUTCAR file containing multiple simulation runs
+        concatenated. The total number of unloaded snapshot over all the OUTCAR
+        file must be equal to the total number of steps in the simulation.
 
         """
         nsnapshots = 0
@@ -152,9 +158,9 @@ class TestUMDSnapshot_from_outcar:
             outcar.close()
         assert nsnapshots == 1900
 
-    def test_load_UMDSnapshot_from_outcar_eof(self):
+    def test_UMDSnapshot_from_outcar_eof(self):
         """
-        Test the UMDSnapshot_from_outcar when it reads an empty OUTCAR file.
+        Test UMDSnapshot_from_outcar method when it reads an empty OUTCAR file.
         An EOFError is raised.
 
         """

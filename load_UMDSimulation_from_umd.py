@@ -1,10 +1,9 @@
 """
 ===============================================================================
-                            UMDSimulation_from_umd
+                           load_UMDSimulation_from_umd
 ===============================================================================
 
-This module provides the UMDSimulation_from_umd function implementation. The
-UMDSimulation_from_umd function is necessary to extract the simulation
+This module provides the load_UMDSimulation_from_umd function implementation. The load_UMDSimulation_from_umd function is necessary to extract the simulation
 parameters from a UMD file.
 Simulation informations are reported at the beginning of the UMD file. From the
 initial part of the UMD file, we get the informations to initialize both
@@ -46,7 +45,7 @@ from .libs.UMDSimulation import UMDSimulation
 from .libs.UMDSimulationRun import UMDSimulationRun
 
 
-def UMDSimulation_from_umd(umd):
+def load_UMDSimulation_from_umd(umd):
     """
     Load a simulation from UMD file and initialize a UMDSimulation object.
 
@@ -78,7 +77,7 @@ def UMDSimulation_from_umd(umd):
             runs.append(UMDSimulationRun(cycle, steps, steptime))
         elif '--------------------------------------------' in line:
             # In the UMD file the Lattice section follows the Simulation.
-            lattice = UMDLattice_from_umd(umd)
+            lattice = load_UMDLattice_from_umd(umd)
             print(lattice)
             simulation = UMDSimulation(name=name, lattice=lattice, runs=runs)
             assert totcycle == len(runs)
@@ -86,9 +85,10 @@ def UMDSimulation_from_umd(umd):
             assert tottime == simulation.time()
             return simulation
         line = umd.readline()
+    raise(EOFError('UMD file end with UMDSimulation uninitialized.'))
 
 
-def UMDLattice_from_umd(umd):
+def load_UMDLattice_from_umd(umd):
     """
     Load a lattice from a UMD file and initialize a UMDLattice object.
 
@@ -123,3 +123,4 @@ def UMDLattice_from_umd(umd):
                                  atoms=atoms)
             return lattice
         line = umd.readline()
+    raise(EOFError('UMD file end with UMDLattice uninitialized.'))
