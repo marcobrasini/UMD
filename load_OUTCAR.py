@@ -22,7 +22,7 @@ import numpy as np
 from .libs.UMDSnapshot import UMDSnapshot
 from .load_UMDSimulation_from_outcar import load_UMDSimulation_from_outcar
 
-from .decorator_ProgressBar import ProgressBar
+from .utils.decorator_ProgressBar import ProgressBar
 
 
 class Load_OUTCAR:

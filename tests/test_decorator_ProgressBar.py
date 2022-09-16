@@ -5,7 +5,7 @@
 """
 
 
-from ..decorator_ProgressBar import ProgressBar
+from ..utils.decorator_ProgressBar import ProgressBar
 
 import sys
 import unittest.mock as mock
