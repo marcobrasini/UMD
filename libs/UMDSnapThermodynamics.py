@@ -18,6 +18,9 @@ See Also
 """
 
 
+import numpy as np
+
+
 class UMDSnapThermodynamics:
     """
     UMDSnapThermodynamics class to collect the thermodynamic quantities of a
@@ -82,10 +85,10 @@ class UMDSnapThermodynamics:
 
         """
         equal  = isinstance(other, UMDSnapThermodynamics)
-        equal *= (self.temperature == other.temperature)
-        equal *= (self.pressure == other.pressure)
-        equal *= (self.energy == other.energy)
-        return equal
+        equal *= np.isclose(self.temperature, other.temperature)
+        equal *= np.isclose(self.pressure, other.pressure)
+        equal *= np.isclose(self.energy, other.energy)
+        return bool(equal)
 
     def __str__(self):
         """

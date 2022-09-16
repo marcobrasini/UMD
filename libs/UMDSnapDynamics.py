@@ -90,11 +90,14 @@ class UMDSnapDynamics:
 
         """
         equal  = isinstance(other, UMDSnapDynamics)
-        equal *= (self.time == other.time)
-        equal *= np.array_equal(self.position, other.position)
-        equal *= np.array_equal(self.velocity, other.velocity)
-        equal *= np.array_equal(self.force, other.force)
-        return equal
+        equal *= np.isclose(self.time, other.time)
+        try:
+            equal *= np.allclose(self.position, other.position)
+            equal *= np.allclose(self.velocity, other.velocity)
+            equal *= np.allclose(self.force, other.force)
+            return bool(equal)
+        except:
+            return False
 
     def __str__(self):
         """
