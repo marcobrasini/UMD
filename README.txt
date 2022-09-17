@@ -19,3 +19,4 @@ the UMDSimulation_from_umd and the UMDSnapshot_from_umd functions are defined.
 These functions give access to the simulation parameters and snapshot data
 respectively.
 
+The UMD package is written in Python 3.9.7 and tested with Pytest.
