@@ -38,7 +38,7 @@ from ..libs.UMDSimulation import UMDSimulation
 from ..libs.UMDSimulationRun import UMDSimulationRun
 
 
-class TestUMDSimulation_from_outcar:
+class Test_load_UMDSimulation_from_outcar:
     # According to the lattice structure, we initialize the UMDLattice object
     # that we will use as reference for the test ...
     lattice_name = '2bccH2O+1Fe'
@@ -55,7 +55,7 @@ class TestUMDSimulation_from_outcar:
     run2 = UMDSimulationRun(2, 1000, 0.4)
     runs = [run0, run1, run2]
 
-    def test_UMDSimulation_from_outcar_single(self):
+    def test_load_UMDSimulation_from_outcar_single(self):
         """
         Test the load_UMDSimualtion_from_outcar updating the simualtion from
         an OUTCAR file containing a single simulation run.
@@ -71,7 +71,7 @@ class TestUMDSimulation_from_outcar:
         assert simulation.steps() == 300
         assert simulation.time() == 150
 
-    def test_UMDSimulation_from_outcar_multiple(self):
+    def test_load_UMDSimulation_from_outcar_multiple(self):
         """
         Test the load_UMDSimualtion_from_outcar updating the simualtion from
         an OUTCAR file containing multiple simulation runs concatenated.
@@ -94,7 +94,7 @@ class TestUMDSimulation_from_outcar:
         assert simulation.steps() == 1900
         assert simulation.time() == 850
 
-    def test_UMDSimulation_from_outcar_eof(self):
+    def test_load_UMDSimulation_from_outcar_eof(self):
         """
         Test the load_UMDSimualtion_from_outcar when it reads an empty OUTCAR
         file. An EOFError is raised.

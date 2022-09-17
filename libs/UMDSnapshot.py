@@ -235,7 +235,7 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         string = UMDSnapshot.__str__(self)
         outfile.write(string+'\n\n')
 
-    def UMDSnapshot_from_outcar(self, outcar, load=True):
+    def UMDSnapshot_from_outcar(self, outcar):
         """
         Initialize a UMDSnapshot object from an OUTCAR file.
 
