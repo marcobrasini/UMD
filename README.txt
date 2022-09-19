@@ -17,6 +17,14 @@ save them into the UMD file.
 More functions can be built starting from the UMD data and, for this purpose,
 the UMDSimulation_from_umd and the UMDSnapshot_from_umd functions are defined.
 These functions give access to the simulation parameters and snapshot data
-respectively.
+respectively. 
+The implementation of new functions based on the UMD would allow to have a
+generic and universal package for the analysis of molecular dynamics 
+simulations.  
+ 
+To start with the package, try to first convert a Vasp OUTCAR file into a UMD
+file. Into a new python module import the UMDVaspParser function from the UMD
+package and pass the name of an OUTCAR file to the function as argument
+(examples of OUTCAR file are reported into the UMD/tests/examples directory).
 
 The UMD package is written in Python 3.9.7 and tested with Pytest.
