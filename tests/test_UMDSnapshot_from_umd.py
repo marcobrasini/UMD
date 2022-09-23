@@ -163,7 +163,6 @@ class Test_UMDSnapshot_from_umd:
             snapshot = snapshot.UMDSnapshot_from_umd(umd)
             assert isinstance(snapshot, UMDSnapshot)
             assert snapshot.snap == 1043
-            umd.close()
 
     def test_UMDSnapshot_from_umd_single(self):
         """
@@ -185,7 +184,6 @@ class Test_UMDSnapshot_from_umd:
                     nsnapshots += 1
             except(EOFError):
                 pass
-            umd.close()
         assert nsnapshots == 300
 
     def test_UMDSnapshot_from_umd_multiple(self):
@@ -208,7 +206,6 @@ class Test_UMDSnapshot_from_umd:
                     nsnapshots += 1
             except(EOFError):
                 pass
-            umd.close()
         assert nsnapshots == 1900
 
     def test_load_UMDSnapshot_from_umd_eof(self):
@@ -221,7 +218,6 @@ class Test_UMDSnapshot_from_umd:
             snapshot = UMDSnapshot(lattice=self.lattice)
             with pytest.raises(EOFError):
                 snapshot = snapshot.UMDSnapshot_from_umd(umd)
-            umd.close()
 
     @mock.patch('UMD.libs.UMDSnapshot.load_UMDSnapshot_from_umd')
     def test_UMDSnapshot_from_umd_single_mock(self, mock_load):
@@ -240,7 +236,6 @@ class Test_UMDSnapshot_from_umd:
                     snapshot.UMDSnapshot_from_umd(umd)
             except(EOFError):
                 pass
-            umd.close()
         assert mock_load.call_count == 300
 
     # %% UMDSnapshot_from_umd tests with index
@@ -256,7 +251,6 @@ class Test_UMDSnapshot_from_umd:
             snapshot = UMDSnapshot(lattice=self.lattice)
             snapshot = snapshot.UMDSnapshot_from_umd(umd, snap)
             assert snapshot == self.snapshot
-            umd.close()
 
     @mock.patch('UMD.libs.UMDSnapshot.load_UMDSnapshot_from_umd')
     def test_UMDSnapshot_from_umd_index_too_large(self, mock_load):
@@ -272,5 +266,4 @@ class Test_UMDSnapshot_from_umd:
             snapshot = UMDSnapshot(lattice=self.lattice)
             with pytest.raises(EOFError):
                 snapshot.UMDSnapshot_from_umd(umd, snap)
-            umd.close()
         assert mock_load.call_count == 0

@@ -3,7 +3,8 @@
                            load_UMDSimulation_from_umd
 ===============================================================================
 
-This module provides the load_UMDSimulation_from_umd function implementation. The load_UMDSimulation_from_umd function is necessary to extract the simulation
+This module provides the load_UMDSimulation_from_umd function implementation.
+The load_UMDSimulation_from_umd function is necessary to extract the simulation
 parameters from a UMD file.
 Simulation informations are reported at the beginning of the UMD file. From the
 initial part of the UMD file, we get the informations to initialize both

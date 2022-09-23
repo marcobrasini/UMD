@@ -50,7 +50,6 @@ class TestLoad_OUTCAR_run_before_initialStep:
             Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 300
             assert mock_load.call_count == 0
-            outcar.close()
         # After the _simulation_before_initialStep call the number of steps
         # in the last UMDSimulationRun must be 0.
         assert simulation.steps() == 0
@@ -96,7 +95,6 @@ class TestLoad_OUTCAR_run_before_initialStep:
             assert mock_null.call_count == 1900
             assert mock_load.call_count == 0
             assert simulation.runs[2].steps == 0
-            outcar.close()
         # After the multiple _simulation_before_initialStep calls the total
         # number of steps in the total UMDSimulation must be 0.
         assert simulation.steps() == 0

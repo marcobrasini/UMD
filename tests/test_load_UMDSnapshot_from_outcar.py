@@ -164,7 +164,6 @@ class Test_load_UMDSnapshot_from_outcar:
             snapshot = UMDSnapshot(1043, 0.4, self.lattice)
             snapshot = load_UMDSnapshot_from_outcar(outcar, snapshot)
             assert snapshot == self.snapshot
-            outcar.close()
 
     def test_load_UMDSnapshot_from_outcar_multiple(self):
         """
@@ -184,7 +183,6 @@ class Test_load_UMDSnapshot_from_outcar:
                     break
                 snap += 1
             assert snapshot == self.snapshot
-            outcar.close()
 
     def test_load_UMDSnapshot_from_outcar_eof(self):
         """
@@ -195,4 +193,4 @@ class Test_load_UMDSnapshot_from_outcar:
         with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.0, self.lattice)
             with pytest.raises(EOFError):
-                snapshot = snapshot.UMDSnapshot_from_outcar(outcar, snapshot)
+                snapshot = snapshot.UMDSnapshot_from_outcar(outcar)

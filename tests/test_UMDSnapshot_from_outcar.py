@@ -61,7 +61,6 @@ class Test_UMDSnapshot_from_outcar:
             snapshot = UMDSnapshot(0, 0.5, self.lattice)
             snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
             assert isinstance(snapshot, UMDSnapshot)
-            outcar.close()
 
     def test_UMDSnapshot_from_outcar_null_snapshot(self):
         """
@@ -74,7 +73,6 @@ class Test_UMDSnapshot_from_outcar:
             snapshot = UMDSnapshot(0, 0.5, self.lattice)
             snapshot = snapshot.UMDSnapshot_from_outcar_null(outcar)
             assert snapshot is None
-            outcar.close()
 
     def test_UMDSnapshot_from_outcar_single(self):
         """
@@ -94,7 +92,6 @@ class Test_UMDSnapshot_from_outcar:
                     nsnapshots += 1
             except(EOFError):
                 pass
-            outcar.close()
         assert nsnapshots == 300
 
     def test_UMDSnapshot_from_outcar_null_single(self):
@@ -114,7 +111,6 @@ class Test_UMDSnapshot_from_outcar:
                     nsnapshot += 1
             except(EOFError):
                 pass
-            outcar.close()
         assert nsnapshot == 300
 
     def test_UMDSnapshot_from_outcar_multiple(self):
@@ -135,7 +131,6 @@ class Test_UMDSnapshot_from_outcar:
                     nsnapshots += 1
             except(EOFError):
                 pass
-            outcar.close()
         assert nsnapshots == 1900
 
     def test_UMDSnapshot_from_outcar_null_multiple(self):
@@ -155,7 +150,6 @@ class Test_UMDSnapshot_from_outcar:
                     nsnapshots += 1
             except(EOFError):
                 pass
-            outcar.close()
         assert nsnapshots == 1900
 
     def test_UMDSnapshot_from_outcar_eof(self):
@@ -167,5 +161,4 @@ class Test_UMDSnapshot_from_outcar:
         with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.0, self.lattice)
             with pytest.raises(EOFError):
-                snapshot = snapshot.UMDSnapshot_from_outcar(outcar, snapshot)
-            outcar.close()
+                snapshot = snapshot.UMDSnapshot_from_outcar(outcar)

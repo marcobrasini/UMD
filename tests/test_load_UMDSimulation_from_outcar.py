@@ -64,7 +64,6 @@ class Test_load_UMDSimulation_from_outcar:
         simulation = UMDSimulation()
         with open('examples/OUTCAR_single.outcar', 'r') as outcar:
             simulation = load_UMDSimulation_from_outcar(outcar, simulation)
-            outcar.close()
         assert simulation.lattice == self.lattice
         assert simulation.runs[0] == self.run0
         assert simulation.cycle() == 1
@@ -86,7 +85,6 @@ class Test_load_UMDSimulation_from_outcar:
                                                                 simulation)
             except(EOFError):
                 pass
-            outcar.close()
         assert simulation == total_simulation
         assert simulation.lattice == self.lattice
         assert simulation.runs == self.runs

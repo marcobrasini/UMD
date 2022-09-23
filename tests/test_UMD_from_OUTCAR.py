@@ -6,6 +6,7 @@ Created on Sat Sep 17 01:06:36 2022
 """
 
 from ..UMDVaspParser import UMDVaspParser
+from ..load_UMDSimulation_from_outcar import load_UMDSimulation_from_outcar
 from ..load_UMDSimulation_from_umd import load_UMDSimulation_from_umd
 
 import os
@@ -35,7 +36,7 @@ class Test_UMD_from_OUTCAR:
     lattice = UMDLattice(lattice_name, basis, atoms)
 
     # %% UMD-OUTCAR simualtion conversion tests by UMDVaspParser
-    def test_UMD_from_OUTCAR_UMDSimulation_single(self):
+    def test_UMD_from_OUTCAR_UMDSimulation_single_with_UMDVaspParser(self):
         """
         Test UMDVaspParser function loading all snapshots from an OUTCAR file
         containing a single simulation run. The UMDVaspParser must return a
@@ -50,7 +51,7 @@ class Test_UMD_from_OUTCAR:
             umd.close()
         os.remove('./examples/OUTCAR_single.umd')
 
-    def test_UMD_from_OUTCAR_UMDSimulation_multiple(self):
+    def test_UMD_from_OUTCAR_UMDSimulation_multiple_with_UMDVaspParser(self):
         """
         Test UMDVaspParser function loading all snapshots from an OUTCAR file
         containing multiple simulation runs concatenated. The UMDVaspParser
@@ -65,6 +66,46 @@ class Test_UMD_from_OUTCAR:
             umd.close()
         os.remove('./examples/OUTCAR_multiple.umd')
 
+    def test_UMD_from_OUTCAR_UMDSimulation_single(self):
+        """
+        Test UMDSimulation_from_outcar and UMDSimulation_from_umd functions
+        when they extract the simulation parameter from an OUTCAR file 
+        containing a single simulation run and its corrspondent UMD file.
+        The simulation returned by the two functions must be equal.
+
+        """
+        with open('./examples/OUTCAR_single.outcar', 'r') as outcar:
+            simulation = UMDSimulation('OUTCAR_single', self.lattice)
+            try:
+                while True:
+                    simualtion = load_UMDSimulation_from_outcar(outcar,
+                                                                simulation)
+            except(EOFError):
+                pass
+            with open('./examples/UMD_single.umd', 'r') as umd:
+                simulationUMD = load_UMDSimulation_from_umd(umd)
+                assert simulation == simulationUMD
+
+    def test_UMD_from_OUTCAR_UMDSimulation_multiple(self):
+        """
+        Test UMDSimulation_from_outcar and UMDSimulation_from_umd functions
+        when they extract the simulation parameter from an OUTCAR file 
+        containing a single simulation run and its corrspondent UMD file.
+        The simulation returned by the two functions must be equal.
+
+        """
+        with open('./examples/OUTCAR_multiple.outcar', 'r') as outcar:
+            simulation = UMDSimulation('OUTCAR_multiple', self.lattice)
+            try:
+                while True:
+                    simualtion = load_UMDSimulation_from_outcar(outcar,
+                                                                simulation)
+            except(EOFError):
+                pass
+            with open('./examples/UMD_multiple.umd', 'r') as umd:
+                simulationUMD = load_UMDSimulation_from_umd(umd)
+                assert simulation == simulationUMD
+        
     # %% UMD-OUTCAR snapshot conversion tests
     def test_UMD_from_OUTCAR_UMDSnapshot_single(self):
         """

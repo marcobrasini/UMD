@@ -70,7 +70,6 @@ class TestLoad_OUTCAR:
             Load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 300
             assert mock_load.call_count == 0
-            outcar.close()
         # After the _run_before_initialStep call, the number of steps in the
         # last UMDSimulationRun must be 0.
         assert simulation.steps() == 0
@@ -101,8 +100,6 @@ class TestLoad_OUTCAR:
                 assert mock_null.call_count == initialStep
                 assert mock_load.call_count == 300 - initialStep
                 assert mock_save.call_count == 300 - initialStep
-                umd.close()
-            outcar.close()
         # After the _run_around_initialStep call, the number of steps in the
         # last UMDSimulationRun must be ((UMDSimulationRun.steps)-initialStep).
         assert simulation.steps() == 300 - initialStep
@@ -135,8 +132,6 @@ class TestLoad_OUTCAR:
                 assert mock_null.call_count == 0
                 assert mock_load.call_count == 300
                 assert mock_save.call_count == 300
-                umd.close()
-            outcar.close()
         # After the _run_after_initialStep call, the number of steps in the
         # last UMDSimulationRun must be UMDSimulationRun.steps.
         assert simulation.steps() == 300
@@ -178,8 +173,6 @@ class TestLoad_OUTCAR:
                     mock_after.assert_not_called()
                 assert Load_OUTCAR.finalStep == 300
                 assert Load_OUTCAR.loadedSteps == 300
-                umd.close()
-            outcar.close()
         os.remove('./examples/OUTCAR_single.umd')
         mock_before.reset_mock()
         mock_around.reset_mock()
@@ -252,8 +245,6 @@ class TestLoad_OUTCAR:
                     assert mock_before.call_count == 3
                     assert mock_around.call_count == 0
                     assert mock_after.call_count == 0
-                umd.close()
-            outcar.close()
         os.remove('./examples/OUTCAR_multiple.umd')
         mock_before.reset_mock()
         mock_around.reset_mock()

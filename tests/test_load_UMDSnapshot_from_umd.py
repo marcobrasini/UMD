@@ -169,7 +169,6 @@ class Test_load_UMDSnapshot_from_umd:
         with open('examples/UMD_snapshot.umd', 'r') as umd:
             thermodynamics = load_UMDSnapThermodynamics_from_umd(umd)
             assert thermodynamics == self.thermodynamics
-            umd.close()
 
     def test_load_UMDSnapThermodynamics_from_umd_eof(self):
         """
@@ -180,7 +179,6 @@ class Test_load_UMDSnapshot_from_umd:
         with open('examples/UMD_empty.umd', 'r') as umd:
             with pytest.raises(EOFError):
                 load_UMDSnapThermodynamics_from_umd(umd)
-            umd.close()
 
     # %% load_UMDSnapDynamcis_from_umd tests
     def test_load_UMDSnapDynamics_from_umd_snapshot(self):
@@ -193,7 +191,6 @@ class Test_load_UMDSnapshot_from_umd:
         with open('examples/UMD_snapshot.umd', 'r') as umd:
             dynamics = load_UMDSnapDynamics_from_umd(umd, self.natoms)
             assert dynamics == self.dynamics
-            umd.close()
 
     def test_load_UMDSnapDynamics_from_umd_eof(self):
         """
@@ -204,7 +201,6 @@ class Test_load_UMDSnapshot_from_umd:
         with open('examples/UMD_empty.umd', 'r') as umd:
             with pytest.raises(EOFError):
                 load_UMDSnapDynamics_from_umd(umd, self.natoms)
-            umd.close()
 
     # %% load_UMDSnapshot_from_umd tests
     def test_load_UMDSnapshot_from_umd_snapshot(self):
@@ -218,7 +214,6 @@ class Test_load_UMDSnapshot_from_umd:
             snapshot = UMDSnapshot(snap=1043, lattice=self.lattice)
             snapshot = load_UMDSnapshot_from_umd(umd, snapshot)
             assert snapshot == self.snapshot
-            umd.close()
 
     module = 'UMD.load_UMDSnapshot_from_umd.'
     @mock.patch(module+'load_UMDSnapDynamics_from_umd')
@@ -239,4 +234,3 @@ class Test_load_UMDSnapshot_from_umd:
             mock_load_thermo.assert_called_once()
             mock_dynamics.assert_called_once()
             mock_thermo.assert_called_once()
-            umd.close()

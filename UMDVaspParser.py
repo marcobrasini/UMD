@@ -88,7 +88,6 @@ def UMDVaspParser(outcarfile_name, initialStep=0, nSteps=np.infty):
                     line = outcar.readline()
             except(EOFError) as eof:
                 print(eof)
-            outcar.close()
 
         with open(UMDfile, 'w') as umd:
             # We now create the real UMD file, with the UMDSimulation
@@ -100,9 +99,7 @@ def UMDVaspParser(outcarfile_name, initialStep=0, nSteps=np.infty):
             umd.write(145*'-'+'\n\n')
             temp.seek(0)
             umd.write(temp.read())
-            umd.close()
         # The temporary UMD file is removed.
-        temp.close()
         os.remove(UMDfile+'.temp')
 
     print(simulation)
