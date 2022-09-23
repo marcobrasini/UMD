@@ -318,13 +318,10 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
             A UMDSnapshot object.
 
         """
-        line = umd.readline()
-        while line:
+        for line in umd:
             if 'Snapshot:' in line:
                 snap = int(line.replace('Snapshot:', '').strip())
                 if index < 0 or snap == index:
                     self.snap = snap
                     snapshot = load_UMDSnapshot_from_umd(umd, self)
                     return snapshot
-            line = umd.readline()
-        raise(EOFError('UMD file ended but no snapshot is loaded.'))

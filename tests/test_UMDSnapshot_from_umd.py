@@ -175,15 +175,11 @@ class Test_UMDSnapshot_from_umd:
         """
         nsnapshots = 0
         with open('examples/UMD_single.umd', 'r') as umd:
-            try:
-                snapshot = UMDSnapshot(lattice=self.lattice)
-                while True:
-                    snapshot = snapshot.UMDSnapshot_from_umd(umd)
-                    assert isinstance(snapshot, UMDSnapshot)
-                    assert snapshot.snap == nsnapshots
-                    nsnapshots += 1
-            except(EOFError):
-                pass
+            snapshot = UMDSnapshot(lattice=self.lattice)
+            while snapshot.UMDSnapshot_from_umd(umd):
+                assert isinstance(snapshot, UMDSnapshot)
+                assert snapshot.snap == nsnapshots
+                nsnapshots += 1
         assert nsnapshots == 300
 
     def test_UMDSnapshot_from_umd_multiple(self):
@@ -197,15 +193,11 @@ class Test_UMDSnapshot_from_umd:
         """
         nsnapshots = 0
         with open('examples/UMD_multiple.umd', 'r') as umd:
-            try:
-                snapshot = UMDSnapshot(lattice=self.lattice)
-                while True:
-                    snapshot = snapshot.UMDSnapshot_from_umd(umd)
-                    assert isinstance(snapshot, UMDSnapshot)
-                    assert snapshot.snap == nsnapshots
-                    nsnapshots += 1
-            except(EOFError):
-                pass
+            snapshot = UMDSnapshot(lattice=self.lattice)
+            while snapshot.UMDSnapshot_from_umd(umd):
+                assert isinstance(snapshot, UMDSnapshot)
+                assert snapshot.snap == nsnapshots
+                nsnapshots += 1
         assert nsnapshots == 1900
 
     def test_load_UMDSnapshot_from_umd_eof(self):
@@ -216,8 +208,8 @@ class Test_UMDSnapshot_from_umd:
         """
         with open('examples/UMD_empty.umd', 'r') as umd:
             snapshot = UMDSnapshot(lattice=self.lattice)
-            with pytest.raises(EOFError):
-                snapshot = snapshot.UMDSnapshot_from_umd(umd)
+            snapshot = snapshot.UMDSnapshot_from_umd(umd)
+            assert snapshot is None
 
     @mock.patch('UMD.libs.UMDSnapshot.load_UMDSnapshot_from_umd')
     def test_UMDSnapshot_from_umd_single_mock(self, mock_load):
@@ -230,12 +222,9 @@ class Test_UMDSnapshot_from_umd:
 
         """
         with open('examples/UMD_single.umd', 'r') as umd:
-            try:
-                while True:
-                    snapshot = UMDSnapshot(lattice=self.lattice)
-                    snapshot.UMDSnapshot_from_umd(umd)
-            except(EOFError):
-                pass
+            snapshot = UMDSnapshot(lattice=self.lattice)
+            while snapshot.UMDSnapshot_from_umd(umd):
+                snapshot.UMDSnapshot_from_umd(umd)
         assert mock_load.call_count == 300
 
     # %% UMDSnapshot_from_umd tests with index
@@ -264,6 +253,5 @@ class Test_UMDSnapshot_from_umd:
         snap = 1043
         with open('examples/UMD_single.umd', 'r') as umd:
             snapshot = UMDSnapshot(lattice=self.lattice)
-            with pytest.raises(EOFError):
-                snapshot.UMDSnapshot_from_umd(umd, snap)
+            snapshot.UMDSnapshot_from_umd(umd, snap)
         assert mock_load.call_count == 0

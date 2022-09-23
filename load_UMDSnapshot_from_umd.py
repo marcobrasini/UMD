@@ -49,8 +49,7 @@ def load_UMDSnapThermodynamics_from_umd(umd):
         A UMDSnapThermodynamics object.
 
     """
-    line = umd.readline()
-    while line:
+    for line in umd:
         if 'Thermodynamics:' in line:
             temperature = float(umd.readline().split()[-2])
             pressure = float(umd.readline().split()[-2])
@@ -59,7 +58,6 @@ def load_UMDSnapThermodynamics_from_umd(umd):
                                                    pressure=pressure,
                                                    energy=energy)
             return thermodynamics
-        line = umd.readline()
     raise(EOFError('UMD file ended with UMDSnapTermodynamics uninitialized.'))
 
 
@@ -80,8 +78,7 @@ def load_UMDSnapDynamics_from_umd(umd, natoms):
         A UMDSnapDynamics object.
 
     """
-    line = umd.readline()
-    while line:
+    for line in umd:
         if 'Dynamics' in line:
             time = float(line.strip().split()[-2])
             line = umd.readline()  # We read the header line
@@ -95,7 +92,6 @@ def load_UMDSnapDynamics_from_umd(umd, natoms):
             dynamics = UMDSnapDynamics(time=time, position=position,
                                        velocity=velocity, force=force)
             return dynamics
-        line = umd.readline()
     raise(EOFError('UMD file ended with UMDSnapDynamics uninitialized.'))
 
 
