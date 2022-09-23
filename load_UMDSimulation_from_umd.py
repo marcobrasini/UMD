@@ -64,8 +64,7 @@ def load_UMDSimulation_from_umd(umd):
     # We read line by line the UMD file. When we encounter the Simulation
     # section strating with 'Simulation:', we read the simulation information.
     runs = []
-    line = umd.readline()
-    while line:
+    for line in umd:
         if 'Simulation:' in line:
             name = line.replace('Simulation:', '').strip()
             totcycle = int(umd.readline().strip().split()[-1])
@@ -85,7 +84,6 @@ def load_UMDSimulation_from_umd(umd):
             assert totsteps == simulation.steps()
             assert tottime == simulation.time()
             return simulation
-        line = umd.readline()
     raise(EOFError('UMD file end with UMDSimulation uninitialized.'))
 
 
@@ -106,8 +104,7 @@ def load_UMDLattice_from_umd(umd):
     """
     # We read line by line the UMD file. When we encounter the Lattice section
     # strating with 'Lattice:', we read the lattice structure data.
-    line = umd.readline()
-    while line:
+    for line in umd:
         if 'Lattice:' in line:
             lattice_name = line.replace('Lattice:', '').strip()
             lattice_basis = np.zeros((3, 3))
@@ -123,5 +120,4 @@ def load_UMDLattice_from_umd(umd):
             lattice = UMDLattice(name=lattice_name, basis=lattice_basis,
                                  atoms=atoms)
             return lattice
-        line = umd.readline()
     raise(EOFError('UMD file end with UMDLattice uninitialized.'))
