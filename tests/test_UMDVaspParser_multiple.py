@@ -165,7 +165,7 @@ class TestUMDVaspParser_multiple:
                                    initialStep=initialStep)
         totalSteps = 0
         totalTime = 0.
-        for i in range(3):
+        for i in range(self.simulation.cycle()):
             runSteps = self.simulation.runs[i].steps
             stepTime = self.simulation.runs[i].steptime
             totalSteps += runSteps
@@ -247,7 +247,7 @@ class TestUMDVaspParser_multiple:
         simulation = UMDVaspParser(self.file_multiple+'.outcar', nSteps=nSteps)
         totalSteps = 0
         totalTime = 0.
-        for i in range(3):
+        for i in range(self.simulation.cycle()):
             runSteps = self.simulation.runs[i].steps
             stepTime = self.simulation.runs[i].steptime
             if nSteps > totalSteps+runSteps:
