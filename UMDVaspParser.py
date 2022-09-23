@@ -58,11 +58,7 @@ def UMDVaspParser(outcarfile_name, initialStep=0, nSteps=np.infty):
     if nSteps < 0:
         raise(ValueError('invalid nStep value: it must be positive.'))
 
-    Load_OUTCAR.reset()
-    Load_OUTCAR.loadedSteps = 0
-    Load_OUTCAR.finalStep = 0
-    Load_OUTCAR.initialStep = initialStep
-    Load_OUTCAR.nSteps = nSteps
+    load_OUTCAR = Load_OUTCAR(initialStep=initialStep, nSteps=nSteps)
 
     simulation_name = outcarfile_name.replace('.outcar', '').split('/')[-1]
     simulation = UMDSimulation(name=simulation_name)
@@ -82,8 +78,8 @@ def UMDVaspParser(outcarfile_name, initialStep=0, nSteps=np.infty):
                     # The Load_OUTCAR.load function returns the updated
                     # UMDSimulation object. If the end of the OUTCAR file is
                     # reached, then a EOFError is raised.
-                    simulation = Load_OUTCAR.load(outcar, temp, simulation)
-                    if Load_OUTCAR.loadedSteps >= initialStep+nSteps:
+                    simulation = load_OUTCAR.load(outcar, temp, simulation)
+                    if load_OUTCAR.loadedSteps >= initialStep+nSteps:
                         break
                     line = outcar.readline()
             except(EOFError) as eof:
@@ -99,8 +95,9 @@ def UMDVaspParser(outcarfile_name, initialStep=0, nSteps=np.infty):
             umd.write(145*'-'+'\n\n')
             temp.seek(0)
             umd.write(temp.read())
-        # The temporary UMD file is removed.
-        os.remove(UMDfile+'.temp')
+
+    # The temporary UMD file is removed.
+    os.remove(UMDfile+'.temp')
 
     print(simulation)
     return simulation

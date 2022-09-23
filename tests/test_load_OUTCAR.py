@@ -32,23 +32,28 @@ class TestLoad_OUTCAR:
     outcar_single = './examples/OUTCAR_single'
     outcar_multiple = './exampler/OUTCAR_multiple'
 
-    @hp.given(loaded=st.integers(0), initial=st.integers(0),
-              final=st.integers(0), n=st.integers(0))
-    def test_Load_OUTCAR_reset(self, loaded, initial, final, n):
+    def test_Load_OUTCAR_init_default(self):
         """
-        Test reset function to reset all the Load_OUTCAR parameters to their
-        default value.
+        Test __init__ function defualt constructor.
 
         """
-        Load_OUTCAR.loadedSteps == loaded
-        Load_OUTCAR.initialStep == initial
-        Load_OUTCAR.finalStep == final
-        Load_OUTCAR.nSteps = n
-        Load_OUTCAR.reset()
-        assert Load_OUTCAR.loadedSteps == 0
-        assert Load_OUTCAR.initialStep == 0
-        assert Load_OUTCAR.finalStep == 0
-        assert Load_OUTCAR.nSteps == np.infty
+        load_OUTCAR = Load_OUTCAR()
+        assert load_OUTCAR.loadedSteps == 0
+        assert load_OUTCAR.initialStep == 0
+        assert load_OUTCAR.finalStep == 0
+        assert load_OUTCAR.nSteps == np.infty
+
+    @hp.given(initialStep=st.integers(0), nSteps=st.integers(0))
+    def test_Load_OUTCAR_init(self, initialStep, nSteps):
+        """
+        Test __init__ function assignement operations.
+
+        """
+        load_OUTCAR = Load_OUTCAR(initialStep=initialStep, nSteps=nSteps)
+        assert load_OUTCAR.initialStep == initialStep
+        assert load_OUTCAR.finalStep == 0
+        assert load_OUTCAR.loadedSteps == 0
+        assert load_OUTCAR.nSteps == nSteps
 
     # %% _run_before_initialStep tests
     @mock.patch.object(UMDSnapshot, 'UMDSnapshot_from_outcar')
@@ -62,12 +67,12 @@ class TestLoad_OUTCAR:
         UMDSimulationRun. The usual UMDSnapshot_from_outcar is never called.
 
         """
-        Load_OUTCAR.reset()
-        Load_OUTCAR.finalStep = 300
+        load_OUTCAR = Load_OUTCAR()
+        load_OUTCAR.finalStep = 300
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open(self.outcar_single+'.outcar', 'r') as outcar:
-            Load_OUTCAR._run_before_initialStep(outcar, simulation)
+            load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 300
             assert mock_load.call_count == 0
         # After the _run_before_initialStep call, the number of steps in the
@@ -89,14 +94,13 @@ class TestLoad_OUTCAR:
         ((UMDSimulationRun.steps)-initialStep) times.
 
         """
-        Load_OUTCAR.reset()
-        Load_OUTCAR.initialStep = initialStep
-        Load_OUTCAR.finalStep = 300
+        load_OUTCAR = Load_OUTCAR(initialStep=initialStep)
+        load_OUTCAR.finalStep = 300
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open(self.outcar_single+'.outcar', 'r') as outcar:
             with open(self.outcar_single+'.umd', 'w') as umd:
-                Load_OUTCAR._run_around_initialStep(outcar, umd, simulation)
+                load_OUTCAR._run_around_initialStep(outcar, umd, simulation)
                 assert mock_null.call_count == initialStep
                 assert mock_load.call_count == 300 - initialStep
                 assert mock_save.call_count == 300 - initialStep
@@ -122,13 +126,13 @@ class TestLoad_OUTCAR:
         The usual UMDSnapshot_from_outcar_null is never called.
 
         """
-        Load_OUTCAR.reset()
-        Load_OUTCAR.finalStep = 300
+        load_OUTCAR = Load_OUTCAR()
+        load_OUTCAR.finalStep = 300
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open(self.outcar_single+'.outcar', 'r') as outcar:
             with open(self.outcar_single+'.umd', 'w') as umd:
-                Load_OUTCAR._run_after_initialStep(outcar, umd, simulation)
+                load_OUTCAR._run_after_initialStep(outcar, umd, simulation)
                 assert mock_null.call_count == 0
                 assert mock_load.call_count == 300
                 assert mock_save.call_count == 300
@@ -152,13 +156,12 @@ class TestLoad_OUTCAR:
         the initialStep parameter.
 
         """
-        Load_OUTCAR.reset()
-        Load_OUTCAR.initialStep = initialStep
+        load_OUTCAR = Load_OUTCAR(initialStep=initialStep)
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open('./examples/OUTCAR_single.outcar', 'r') as outcar:
             with open('./examples/OUTCAR_single.umd', 'w') as umd:
-                Load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
+                load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
                 if initialStep == 0:
                     mock_before.assert_not_called()
                     mock_around.assert_not_called()
@@ -171,8 +174,8 @@ class TestLoad_OUTCAR:
                     mock_before.assert_called_once()
                     mock_around.assert_not_called()
                     mock_after.assert_not_called()
-                assert Load_OUTCAR.finalStep == 300
-                assert Load_OUTCAR.loadedSteps == 300
+                assert load_OUTCAR.finalStep == 300
+                assert load_OUTCAR.loadedSteps == 300
         os.remove('./examples/OUTCAR_single.umd')
         mock_before.reset_mock()
         mock_around.reset_mock()
@@ -192,8 +195,7 @@ class TestLoad_OUTCAR:
         with the initialStep parameter.
 
         """
-        Load_OUTCAR.reset()
-        Load_OUTCAR.initialStep = initialStep
+        load_OUTCAR = Load_OUTCAR(initialStep=initialStep)
         run0 = UMDSimulationRun(0, 300, 0.5)
         run1 = UMDSimulationRun(1, 600, 0.5)
         run2 = UMDSimulationRun(2, 1000, 0.4)
@@ -204,17 +206,17 @@ class TestLoad_OUTCAR:
                 # simulation run update. The loadedSteps and finalStep 
                 # parameters are updated at each function call.
                 simulation.runs.append(run0)
-                Load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
-                assert Load_OUTCAR.finalStep == 300
-                assert Load_OUTCAR.loadedSteps == 300
+                load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
+                assert load_OUTCAR.finalStep == 300
+                assert load_OUTCAR.loadedSteps == 300
                 simulation.runs.append(run1)
-                Load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
-                assert Load_OUTCAR.finalStep == 900
-                assert Load_OUTCAR.loadedSteps == 900
+                load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
+                assert load_OUTCAR.finalStep == 900
+                assert load_OUTCAR.loadedSteps == 900
                 simulation.runs.append(run2)
-                Load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
-                assert Load_OUTCAR.finalStep == 1900
-                assert Load_OUTCAR.loadedSteps == 1900
+                load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
+                assert load_OUTCAR.finalStep == 1900
+                assert load_OUTCAR.loadedSteps == 1900
                 # According to the initialStep value, it is tested, the number
                 # of times that each function is called.
                 if initialStep == 0:

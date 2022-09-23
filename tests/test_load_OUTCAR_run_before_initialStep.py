@@ -42,12 +42,12 @@ class TestLoad_OUTCAR_run_before_initialStep:
         call operates over all the simulation steps.
 
         """
-        Load_OUTCAR.reset()
-        Load_OUTCAR.finalStep = 300
+        load_OUTCAR = Load_OUTCAR()
+        load_OUTCAR.finalStep = 300
         run0 = UMDSimulationRun(0, 300, 0.5)
         simulation = UMDSimulation('', self.lattice, [run0])
         with open('./examples/OUTCAR_single.outcar', 'r') as outcar:
-            Load_OUTCAR._run_before_initialStep(outcar, simulation)
+            load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 300
             assert mock_load.call_count == 0
         # After the _simulation_before_initialStep call the number of steps
@@ -66,32 +66,32 @@ class TestLoad_OUTCAR_run_before_initialStep:
         the function call operates only over the last simulation run.
 
         """
-        Load_OUTCAR.reset()
+        load_OUTCAR = Load_OUTCAR()
         run0 = UMDSimulationRun(0, 300, 0.5)
         run1 = UMDSimulationRun(1, 600, 0.5)
         run2 = UMDSimulationRun(2, 1000, 0.4)
         simulation = UMDSimulation('', self.lattice)
         with open('./examples/OUTCAR_multiple.outcar', 'r') as outcar:
             # apply the _simulation_before_initialStep to load the run 0    
-            Load_OUTCAR.finalStep = 300
+            load_OUTCAR.finalStep = 300
             simulation.runs.append(run0)
-            Load_OUTCAR._run_before_initialStep(outcar, simulation)
+            load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 300
             assert mock_load.call_count == 0
             assert simulation.runs[0].steps == 0
             # apply the _simulation_before_initialStep to load the run 1
-            Load_OUTCAR.loadedSteps = 300
-            Load_OUTCAR.finalStep = 900
+            load_OUTCAR.loadedSteps = 300
+            load_OUTCAR.finalStep = 900
             simulation.runs.append(run1)
-            Load_OUTCAR._run_before_initialStep(outcar, simulation)
+            load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 900
             assert mock_load.call_count == 0
             assert simulation.runs[1].steps == 0
             # apply the _simulation_before_initialStep to load the run 2
-            Load_OUTCAR.loadedSteps = 900
-            Load_OUTCAR.finalStep = 1900
+            load_OUTCAR.loadedSteps = 900
+            load_OUTCAR.finalStep = 1900
             simulation.runs.append(run2)
-            Load_OUTCAR._run_before_initialStep(outcar, simulation)
+            load_OUTCAR._run_before_initialStep(outcar, simulation)
             assert mock_null.call_count == 1900
             assert mock_load.call_count == 0
             assert simulation.runs[2].steps == 0

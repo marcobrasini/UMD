@@ -61,26 +61,22 @@ class Load_OUTCAR:
         to the UMD file.
 
     """
-    initialStep = 0
-    finalStep = 0
-    loadedSteps = 0
-    nSteps = np.infty
 
-    def reset():
+    def __init__(self, initialStep=0, nSteps=np.infty):
         """
-        Reset all the Load_OUTCAR parameters to their default values.
+        Initialize a Load_OUTCAR instance with default parameters.
 
         Returns
         -------
-        None.
+        Load_OUTCAR object.
 
         """
-        Load_OUTCAR.initialStep = 0
-        Load_OUTCAR.finalStep = 0
-        Load_OUTCAR.loadedSteps = 0
-        Load_OUTCAR.nSteps = np.infty
+        self.nSteps = nSteps
+        self.initialStep = initialStep
+        self.finalStep = 0
+        self.loadedSteps = 0
 
-    def load(outcar, umd, simulation):
+    def load(self, outcar, umd, simulation):
         """
         Convert the data of a simulation run from the OUTCAR to the UMD file.
 
@@ -121,11 +117,11 @@ class Load_OUTCAR:
             It raises a EOFError if all the OUTCAR file is read.
 
         """
-        simulation = Load_OUTCAR.UMDSimulation_from_outcar(outcar, simulation)
-        Load_OUTCAR.UMDSnapshot_from_outcar(outcar, umd, simulation)
+        simulation = self.UMDSimulation_from_outcar(outcar, simulation)
+        self.UMDSnapshot_from_outcar(outcar, umd, simulation)
         return simulation
 
-    def UMDSimulation_from_outcar(outcar, simulation):
+    def UMDSimulation_from_outcar(self, outcar, simulation):
         """
         Extract the parameters of a Vasp simulation run from the OUTCAR.
 
@@ -149,9 +145,11 @@ class Load_OUTCAR:
 
         """
         simulation = load_UMDSimulation_from_outcar(outcar, simulation)
+        print('Loaded simulation run...')
+        print(simulation.runs[-1])
         return simulation
 
-    def UMDSnapshot_from_outcar(outcar, umd, simulation):
+    def UMDSnapshot_from_outcar(self, outcar, umd, simulation):
         """
         Convert all the snapshots of a Vasp simulation run from the OUTCAR
         to the UMD file.
@@ -179,25 +177,21 @@ class Load_OUTCAR:
         None.
 
         """
-        loadedSteps = Load_OUTCAR.loadedSteps
-        initialStep = Load_OUTCAR.initialStep
-        nSteps = Load_OUTCAR.nSteps
-        print('Loaded simulation run...')
-        print(simulation.runs[-1])
         print('Loading snapshots ...')
         runSteps = simulation.runs[-1].steps
-        Load_OUTCAR.finalStep = min(initialStep+nSteps, loadedSteps+runSteps)
-        if initialStep >= loadedSteps+runSteps:
-            Load_OUTCAR._run_before_initialStep(outcar, simulation)
-        elif initialStep > loadedSteps:
-            Load_OUTCAR._run_around_initialStep(outcar, umd, simulation)
+        self.finalStep = min(self.initialStep + self.nSteps,
+                             self.loadedSteps+runSteps)
+        if self.initialStep >= self.loadedSteps+runSteps:
+            self._run_before_initialStep(outcar, simulation)
+        elif self.initialStep > self.loadedSteps:
+            self._run_around_initialStep(outcar, umd, simulation)
         else:
-            Load_OUTCAR._run_after_initialStep(outcar, umd, simulation)
-        Load_OUTCAR.loadedSteps += runSteps
+            self._run_after_initialStep(outcar, umd, simulation)
+        self.loadedSteps += runSteps
         print(' ... {} snapshots saved.\n'.format(simulation.runs[-1].steps))
 
     @ProgressBar(length=20)
-    def _run_before_initialStep(outcar, simulation):
+    def _run_before_initialStep(self, outcar, simulation):
         """
         Read the snapshots before the initialStep.
 
@@ -216,16 +210,14 @@ class Load_OUTCAR:
             Ratio of the snapshot read.
 
         """
-        loadedSteps = Load_OUTCAR.loadedSteps
-        finalStep = Load_OUTCAR.finalStep
-        print(range(loadedSteps, finalStep))
-        for step in range(loadedSteps, finalStep):
+        print(range(self.loadedSteps, self.finalStep))
+        for step in range(self.loadedSteps, self.finalStep):
             UMDSnapshot.UMDSnapshot_from_outcar_null(outcar)
-            yield float(step-loadedSteps)/(finalStep-loadedSteps)
+            yield float(step-self.loadedSteps)/(self.finalStep-self.loadedSteps)
         simulation.runs[-1].steps = 0
 
     @ProgressBar(length=20)
-    def _run_around_initialStep(outcar, umd, simulation):
+    def _run_around_initialStep(self, outcar, umd, simulation):
         """
         Read and load the snapshots for initialStep in the current run.
 
@@ -249,21 +241,18 @@ class Load_OUTCAR:
 
         """
         run = simulation.runs[-1]
-        loadedSteps = Load_OUTCAR.loadedSteps
-        initialStep = Load_OUTCAR.initialStep
-        finalStep = Load_OUTCAR.finalStep
-        for step in range(loadedSteps, initialStep):
+        for step in range(self.loadedSteps, self.initialStep):
             UMDSnapshot.UMDSnapshot_from_outcar_null(outcar)
-            yield float(step-loadedSteps)/(finalStep-loadedSteps)
-        for step in range(initialStep, finalStep):
+            yield float(step-self.loadedSteps)/(self.finalStep-self.loadedSteps)
+        for step in range(self.initialStep, self.finalStep):
             snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
             snapshot.UMDSnapshot_from_outcar(outcar)
             snapshot.save(umd)
-            yield float(step-loadedSteps)/(finalStep-loadedSteps)
-        simulation.runs[-1].steps = finalStep - initialStep
+            yield float(step-self.loadedSteps)/(self.finalStep-self.loadedSteps)
+        simulation.runs[-1].steps = self.finalStep - self.initialStep
 
     @ProgressBar(length=20)
-    def _run_after_initialStep(outcar, umd, simulation):
+    def _run_after_initialStep(self, outcar, umd, simulation):
         """
         Read and load the snapshots after initialStep.
 
@@ -286,11 +275,9 @@ class Load_OUTCAR:
 
         """
         run = simulation.runs[-1]
-        loadedSteps = Load_OUTCAR.loadedSteps
-        finalStep = Load_OUTCAR.finalStep
-        for step in range(loadedSteps, finalStep):
+        for step in range(self.loadedSteps, self.finalStep):
             snapshot = UMDSnapshot(step, run.steptime, simulation.lattice)
             snapshot.UMDSnapshot_from_outcar(outcar)
             snapshot.save(umd)
-            yield float(step-loadedSteps)/(finalStep-loadedSteps)
-        simulation.runs[-1].steps = finalStep - loadedSteps
+            yield float(step-self.loadedSteps)/(self.finalStep-self.loadedSteps)
+        simulation.runs[-1].steps = self.finalStep - self.loadedSteps
