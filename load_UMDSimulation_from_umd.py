@@ -42,48 +42,36 @@ import numpy as np
 
 from .libs.UMDAtom import UMDAtom
 from .libs.UMDLattice import UMDLattice
-from .libs.UMDSimulation import UMDSimulation
 from .libs.UMDSimulationRun import UMDSimulationRun
 
 
-def load_UMDSimulation_from_umd(umd):
+def load_UMDSimulationRun_from_umd(umd):
     """
-    Load a simulation from UMD file and initialize a UMDSimulation object.
+    Load the simulation runs from UMD file.
 
     Parameters
     ----------
-    umd : input file
-        The UMD input file.
+    umd : input stream
+        The UMD input stream.
 
     Returns
     -------
-    simulation : UMDSimulation
-        A UMDSimulation object.
+    runs : list
+        A list of UMDSimulationRun objects.
 
     """
     # We read line by line the UMD file. When we encounter the Simulation
     # section strating with 'Simulation:', we read the simulation information.
     runs = []
     for line in umd:
-        if 'Simulation:' in line:
-            name = line.replace('Simulation:', '').strip()
-            totcycle = int(umd.readline().strip().split()[-1])
-            totsteps = int(umd.readline().strip().split()[-1])
-            tottime = float(umd.readline().strip().split()[-2])
-        elif 'Run' in line:
+        if 'Run' in line:
             cycle = int(line.replace(':', '').strip().split()[-1])
             steps = int(umd.readline().strip().split()[-1])
             steptime = float(umd.readline().strip().split()[-2])
             runs.append(UMDSimulationRun(cycle, steps, steptime))
         elif '--------------------------------------------' in line:
             # In the UMD file the Lattice section follows the Simulation.
-            lattice = load_UMDLattice_from_umd(umd)
-            print(lattice)
-            simulation = UMDSimulation(name=name, lattice=lattice, runs=runs)
-            assert totcycle == len(runs)
-            assert totsteps == simulation.steps()
-            assert tottime == simulation.time()
-            return simulation
+            return runs
     raise(EOFError('UMD file end with UMDSimulation uninitialized.'))
 
 

@@ -120,6 +120,8 @@ class Load_OUTCAR:
         cycle = simulation.cycle()
         simulation = self.UMDSimulation_from_outcar(outcar, simulation)
         if simulation.cycle() == cycle+1:
+            print('Loaded simulation run...')
+            print(simulation.runs[-1])
             self.UMDSnapshot_from_outcar(outcar, umd, simulation)
         return simulation
 
@@ -147,8 +149,6 @@ class Load_OUTCAR:
 
         """
         simulation = load_UMDSimulation_from_outcar(outcar, simulation)
-        print('Loaded simulation run...')
-        print(simulation.runs[-1])
         return simulation
 
     def UMDSnapshot_from_outcar(self, outcar, umd, simulation):

@@ -22,6 +22,8 @@ See Also
 
 
 from .UMDLattice import UMDLattice
+from ..load_UMDSimulation_from_umd import load_UMDLattice_from_umd
+from ..load_UMDSimulation_from_umd import load_UMDSimulationRun_from_umd
 
 
 class UMDSimulation:
@@ -98,12 +100,11 @@ class UMDSimulation:
         else:
             self.__time = time
             self.__snaps = snaps
-        
 
     def __eq__(self, other):
         """
         Compare two UMDSimulation objects.
-        
+
         Parameters
         ----------
         other : UMDSimulation
@@ -234,3 +235,39 @@ class UMDSimulation:
             self.runs.append(run)
         else:
             raise AttributeError(errmsg)
+
+    def UMDSimulation_from_umd(umd):
+        """
+        Initialize a UMDSnapshot object from a UMD file.
+
+        The function reset the stream at the beginning of the UMD file where
+        the simulation information is reported.
+
+        Parameters
+        ----------
+        umd : input stream
+            The UMD input stream.
+
+        Returns
+        -------
+        simulation : UMDSimulation
+            The UMDSimulation object summarizing the total simulation 
+            information.
+
+        """
+        umd.seek(0)
+        for line in umd:
+            if 'Simulation:' in line:
+                name = line.replace('Simulation:', '').strip()
+                cycle = int(umd.readline().strip().split()[-1])
+                steps = int(umd.readline().strip().split()[-1])
+                time = float(umd.readline().strip().split()[-2])
+
+                runs = load_UMDSimulationRun_from_umd(umd)
+                lattice = load_UMDLattice_from_umd(umd)
+                simulation = UMDSimulation(name, lattice, runs)
+
+                assert cycle == len(runs)
+                assert steps == simulation.steps()
+                assert time == simulation.time()
+                return simulation

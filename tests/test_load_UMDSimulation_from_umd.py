@@ -27,7 +27,7 @@ All simulations are performed on the same lattice structure:
 """
 
 
-from ..load_UMDSimulation_from_umd import load_UMDSimulation_from_umd
+from ..load_UMDSimulation_from_umd import load_UMDSimulationRun_from_umd
 from ..load_UMDSimulation_from_umd import load_UMDLattice_from_umd
 
 import pytest
@@ -79,32 +79,32 @@ class Test_load_UMDSimulation_from_umd:
                 load_UMDLattice_from_umd(umd)
 
     # %% load_UMDSimulation_from_umd tests
-    def test_load_UMDSimulation_from_umd_single(self):
+    def test_load_UMDSimulationRun_from_umd_single(self):
         """
-        Test load_UMDSimulation_from_umd function loading the simulation from
-        a UMD file containing a single simulation run.
+        Test load_UMDSimulationRun_from_umd function loading the simulation
+        runs from a UMD file containing a single simulation run.
 
         """
         with open('./examples/UMD_single.umd', 'r') as umd:
-            simulation = load_UMDSimulation_from_umd(umd)
-            assert simulation == self.simulation_single
+            runs = load_UMDSimulationRun_from_umd(umd)
+            assert runs == self.simulation_single.runs
 
-    def test_load_UMDSimulation_from_umd_multiple(self):
+    def test_load_UMDSimulationRun_from_umd_multiple(self):
         """
-        Test load_UMDSimulation_from_umd function loading the simulation from
-        a UMD file containing multiple simulation runs.
+        Test load_UMDSimulationRun_from_umd function loading the simulation
+        runs from a UMD file containing multiple simulation runs.
 
         """
         with open('./examples/UMD_multiple.umd', 'r') as umd:
-            simulation = load_UMDSimulation_from_umd(umd)
-            assert simulation == self.simulation_multiple
+            runs = load_UMDSimulationRun_from_umd(umd)
+            assert runs == self.simulation_multiple.runs
 
-    def test_load_UMDSimulation_from_umd_eof(self):
+    def test_load_UMDSimulationRun_from_umd_eof(self):
         """
-        Test load_UMDSimulation_from_umd function loading the simulation from
-        an empty UMD file. A EOFError is raised.
+        Test load_UMDSimulationRun_from_umd function loading the simulation
+        runs from an empty UMD file. A EOFError is raised.
 
         """
         with open('./examples/UMD_empty.umd', 'r') as umd:
             with pytest.raises(EOFError):
-                load_UMDSimulation_from_umd(umd)
+                load_UMDSimulationRun_from_umd(umd)
