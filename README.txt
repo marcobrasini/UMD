@@ -26,3 +26,8 @@ To start with the package, try to first convert a Vasp OUTCAR file into a UMD
 file. Into a new python module import the UMDVaspParser function from the UMD
 package and pass the name of an OUTCAR file to the function as argument
 (examples of OUTCAR file are reported into the UMD/tests/examples directory).
+<<<<<<< HEAD
+=======
+
+The UMD package is written in Python 3.9.7 and tested with Pytest.
+>>>>>>> 66e11dcc7e9d69b4f655ed6e91a9d9621ace0e89
