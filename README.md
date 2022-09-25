@@ -66,7 +66,7 @@ The UMD package wants to provides useful tools for the analysis of molecular dyn
 The Vasp results are reported in the OUTCAR file. For a molecular dynamics simulation, the OUTCAR file is very big and contains more data than what is necessary for studying ion motion. 
 The UMDVaspParser function in the UMD package allows converting and summarizing the OUTCAR data into a more readable UMD format. 
 
-The aim of the project is to implement other analysis functions starting from the UMD file. For example the radial pair distribution function or the time correlation function.
+The aim of the project is to implement other analysis functions starting from the UMD file. For example the *radial pair distribution function* or the *time correlation function*.
 
 In this way, the UMD package would become a universal package for studying the results of Vasp moleuclar dynamics simulations.
 
