@@ -249,28 +249,23 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
 
         Parameters
         ----------
-        outcar : input file
-            The OUTCAR file.
-        simulation : simulation object
-            A simulation object with information about the lattice.
-        step : int
-            The identificative step number.
+        outcar : input stream
+            The OUTCAR stream.
 
         Returns
         -------
         snapshot : UMDSnapshot object
-            A snapshot object with information about the TD qunatities and
-            the atoms dynamics.
+            A UMDSnapshot object with information about the thermodynamic
+            qunatities and the atoms dynamics of the next snapshot in the
+            stream.
+            If there is no next snapshot to load, then None is returned.
 
         """
-        line = outcar.readline()
-        while line:
+        for line in outcar:
             if ("aborting loop because EDIFF is reached" in line or
                 "aborting loop EDIFF was not reached (unconverged)" in line):
                 snapshot = load_UMDSnapshot_from_outcar(outcar, self)
                 return snapshot
-            line = outcar.readline()
-        raise(EOFError('OUTCAR file ended but the simulation is uncomplete.'))
 
     @staticmethod
     def UMDSnapshot_from_outcar_null(outcar):
@@ -283,25 +278,27 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
 
         Parameters
         ----------
-        outcar : input file
-            The OUTCAR file.
+        outcar : input stream
+            The OUTCAR stream.
 
         Returns
         -------
         None.
 
         """
-        line = outcar.readline()
-        while line:
+        for line in outcar:
             if ("aborting loop because EDIFF is reached" in line or
                 "aborting loop EDIFF was not reached (unconverged)" in line):
                 return
-            line = outcar.readline()
-        raise(EOFError('OUTCAR file ended but the simulation is uncomplete.'))
 
     def UMDSnapshot_from_umd(self, umd, index=-1):
         """
         Initialize a UMDSnapshot object from a UMD file.
+
+        The function looks for the first available snapshot in the UMD file.
+        However, if index is given and positive, the function looks for the
+        snapshot with the corresponding index. If the index is too large and
+        does not correspond with any snapshot, then it returns None.
 
         Parameters
         ----------
@@ -315,7 +312,9 @@ class UMDSnapshot(UMDSnapThermodynamics, UMDSnapDynamics):
         Returns
         -------
         snapshot : UMDSnapshot
-            A UMDSnapshot object.
+            A UMDSnapshot object with information about the thermodynamic
+            qunatities and the atoms dynamics of the next snapshot in the
+            stream.
 
         """
         for line in umd:

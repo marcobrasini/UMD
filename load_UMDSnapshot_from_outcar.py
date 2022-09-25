@@ -138,8 +138,14 @@ def load_UMDSnapshot_from_outcar(outcar, snapshot):
     Returns
     -------
     snapshot : UMDSnapshot object
-        A snapshot object with information about the TD qunatities and
-        the atoms dynamics.
+        A UMDSnapshot object with information about the thermodynamic
+        quantities and the atoms dynamics of the current snapshot in the
+        stream.
+
+    Raises
+    ------
+    EOFError :
+        If the OUTCAR file ends with uncomplete snapshot information.
 
     """
     natoms = snapshot.natoms
@@ -156,8 +162,7 @@ def load_UMDSnapshot_from_outcar(outcar, snapshot):
     charges = np.zeros(natoms, dtype=float)
     magnets = np.zeros(natoms, dtype=float)
 
-    line = outcar.readline()
-    while line:
+    for line in outcar:
         if "total charge" in line:
             charges = load_charges(outcar, natoms)
         if "magnetization (x)" in line:
@@ -176,7 +181,7 @@ def load_UMDSnapshot_from_outcar(outcar, snapshot):
             snapshot.setThermodynamics(temperature, pressure, energy)
             snapshot.setDynamics(position, velocity, force)
             return snapshot
-        line = outcar.readline()
+
     raise(EOFError('OUTCAR file ended but the last snapshot is uncomplete.'))
 
 
@@ -285,13 +290,11 @@ def load_stress(outcar):
         Array of the stress components (xx, yy, zz, xy, yz, zx).
     """
     stress = np.zeros(6, dtype=float)
-    line = outcar.readline()
-    while line:
+    for line in outcar:
         if "Total+kin." in line:
             stress = np.array(line.strip().split()[1:], dtype=float)
             stress = stress/10.   # to convert it from kBar to GPa
             return stress
-        line = outcar.readline()
 
 
 def load_dynamics(outcar, natoms):
@@ -333,8 +336,7 @@ def load_dynamics(outcar, natoms):
 
     """
     dynamics = np.zeros((natoms, 6), dtype=float)
-    line = outcar.readline()
-    while line:
+    for line in outcar:
         if "POSITION" in line and "TOTAL-FORCE (eV/Angst)" in line:
             line = outcar.readline()    # read the separator ---------
             for i in range(natoms):
@@ -342,7 +344,6 @@ def load_dynamics(outcar, natoms):
             position = dynamics[:, :3]
             force = dynamics[:, 3:]
             return position, force
-        line = outcar.readline()
 
 
 def load_energy(outcar):
@@ -386,11 +387,9 @@ def load_energy(outcar):
     """
     energy = 0.0
     temperature = 0.0
-    line = outcar.readline()
-    while line:
+    for line in outcar:
         if "lattice  EKIN_LAT=" in line:
             temperature = float(line.strip().split()[-2])
         elif "ETOTAL" in line:
             energy = float(line.strip().split()[-2])
             return energy, temperature
-        line = outcar.readline()

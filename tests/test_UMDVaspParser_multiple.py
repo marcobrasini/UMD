@@ -74,7 +74,7 @@ class TestUMDVaspParser_multiple:
         """
         UMDVaspParser(self.file_multiple+'.outcar')
         assert filecmp.cmp('./examples/OUTCAR_multiple.umd',
-                           './examples/UMD_multiple.umd')
+                            './examples/UMD_multiple.umd')
         os.remove(self.file_multiple+'.umd')
 
     def test_UMDVaspParser_multiple_nsteps(self):
@@ -94,7 +94,7 @@ class TestUMDVaspParser_multiple:
         """
         Test UMDVaspParser function when it reads data from the OUTCAR file
         containing multiple simulation runs, starting from an initial
-        snapshots, nStep, in run0.
+        snapshots, initialStep, in run0.
 
         """
         initialStep = 100
@@ -109,7 +109,7 @@ class TestUMDVaspParser_multiple:
         """
         Test UMDVaspParser function when it reads data from the OUTCAR file
         containing multiple simulation runs, starting from an initial
-        snapshots, nStep, in run1.
+        snapshots, initialStep, in run1.
 
         """
         initialStep = 450
@@ -125,7 +125,7 @@ class TestUMDVaspParser_multiple:
         """
         Test UMDVaspParser function when it reads data from the OUTCAR file
         containing multiple simulation runs, starting from an initial
-        snapshots, nStep, in run2.
+        snapshots, initialStep, in run2.
 
         """
         initialStep = 1450
@@ -141,7 +141,7 @@ class TestUMDVaspParser_multiple:
         """
         Test UMDVaspParser function when it reads data from the OUTCAR file
         containing multiple simulation runs, starting from an initial
-        snapshots, nStep, too large.
+        snapshots, initialStep, too large.
 
         """
         initialStep = 1950
@@ -158,7 +158,7 @@ class TestUMDVaspParser_multiple:
         """
         Test UMDVaspParser function when it reads data from the OUTCAR file
         containing multiple simulation runs, starting from a generic initial
-        snapshots, nStep.
+        snapshots, initialStep.
 
         """
         simulation = UMDVaspParser(self.file_multiple+'.outcar',

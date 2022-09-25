@@ -117,8 +117,10 @@ class Load_OUTCAR:
             It raises a EOFError if all the OUTCAR file is read.
 
         """
+        cycle = simulation.cycle()
         simulation = self.UMDSimulation_from_outcar(outcar, simulation)
-        self.UMDSnapshot_from_outcar(outcar, umd, simulation)
+        if simulation.cycle() == cycle+1:
+            self.UMDSnapshot_from_outcar(outcar, umd, simulation)
         return simulation
 
     def UMDSimulation_from_outcar(self, outcar, simulation):

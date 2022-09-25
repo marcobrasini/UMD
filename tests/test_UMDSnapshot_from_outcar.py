@@ -85,33 +85,10 @@ class Test_UMDSnapshot_from_outcar:
         nsnapshots = 0
         with open('examples/OUTCAR_single.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.5, self.lattice)
-            try:
-                while True:
-                    snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
-                    assert isinstance(snapshot, UMDSnapshot)
-                    nsnapshots += 1
-            except(EOFError):
-                pass
+            while snapshot.UMDSnapshot_from_outcar(outcar):
+                assert isinstance(snapshot, UMDSnapshot)
+                nsnapshots += 1
         assert nsnapshots == 300
-
-    def test_UMDSnapshot_from_outcar_null_single(self):
-        """
-        Test UMDSnapshot_from_outcar_null method looking for a snapshot and
-        loading it from an OUTCAR file containing a single simulation run. The
-        total number of unloaded snapshot over all the OUTCAR file must be
-        equal to the total number of steps simulation in the simulation.
-
-        """
-        nsnapshot = 0
-        with open('examples/OUTCAR_single.outcar', 'r') as outcar:
-            try:
-                while True:
-                    snapshot = UMDSnapshot.UMDSnapshot_from_outcar_null(outcar)
-                    assert snapshot is None
-                    nsnapshot += 1
-            except(EOFError):
-                pass
-        assert nsnapshot == 300
 
     def test_UMDSnapshot_from_outcar_multiple(self):
         """
@@ -124,41 +101,17 @@ class Test_UMDSnapshot_from_outcar:
         nsnapshots = 0
         with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.5, self.lattice)
-            try:
-                while True:
-                    snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
-                    assert isinstance(snapshot, UMDSnapshot)
-                    nsnapshots += 1
-            except(EOFError):
-                pass
-        assert nsnapshots == 1900
-
-    def test_UMDSnapshot_from_outcar_null_multiple(self):
-        """
-        Test UMDSnapshot_from_outcar_null method looking for a snapshot and
-        loading it from an OUTCAR file containing multiple simulation runs
-        concatenated. The total number of unloaded snapshot over all the OUTCAR
-        file must be equal to the total number of steps in the simulation.
-
-        """
-        nsnapshots = 0
-        with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
-            try:
-                while True:
-                    snapshot = UMDSnapshot.UMDSnapshot_from_outcar_null(outcar)
-                    assert snapshot is None
-                    nsnapshots += 1
-            except(EOFError):
-                pass
+            while snapshot.UMDSnapshot_from_outcar(outcar):
+                nsnapshots += 1
         assert nsnapshots == 1900
 
     def test_UMDSnapshot_from_outcar_eof(self):
         """
         Test UMDSnapshot_from_outcar method when it reads an empty OUTCAR file.
-        An EOFError is raised.
+        Since there is no next snapshot to load, then None is returned.
 
         """
         with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.0, self.lattice)
-            with pytest.raises(EOFError):
-                snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
+            snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
+            assert snapshot is None

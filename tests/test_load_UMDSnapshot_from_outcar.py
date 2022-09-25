@@ -165,32 +165,13 @@ class Test_load_UMDSnapshot_from_outcar:
             snapshot = load_UMDSnapshot_from_outcar(outcar, snapshot)
             assert snapshot == self.snapshot
 
-    def test_load_UMDSnapshot_from_outcar_multiple(self):
-        """
-        Test the load_UMDSnapshot_from_outcar function initializing a single
-        UMDSnapshot, from a whole OUTCAR file containing many snapshots data.
-        All the snapshots are read by the UMDSnapshot_from_outcar function, and
-        when it finds the reference step, the snapshot informations are
-        compared with the reference values.
-
-        """
-        snap = 0
-        with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
-            while True:
-                snapshot = UMDSnapshot(snap, self.time, self.lattice)
-                snapshot.UMDSnapshot_from_outcar(outcar)
-                if snap == self.step:
-                    break
-                snap += 1
-            assert snapshot == self.snapshot
-
     def test_load_UMDSnapshot_from_outcar_eof(self):
         """
-        Test the UMDSnapshot_from_outcar when it reads an empty OUTCAR file.
-        An EOFError is raised.
+        Test load_UMDSnapshot_from_outcar when it reads an empty OUTCAR file.
+        An EOFError must be raised.
 
         """
         with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
             snapshot = UMDSnapshot(0, 0.0, self.lattice)
             with pytest.raises(EOFError):
-                snapshot = snapshot.UMDSnapshot_from_outcar(outcar)
+                load_UMDSnapshot_from_outcar(outcar, snapshot)
