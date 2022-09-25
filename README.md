@@ -114,8 +114,7 @@ To read back the data from the UMD file, the first step is to load the simulatio
 	from UMD import UMDSimulation
 
 	with open('UMD.umd') as umd:
-		simulation = UMDSimulation()
-		simulation.UMDSimulation_from_umd(umd)
+		simulation = UMDSimulation.UMDSimulation_from_umd(umd)
 
 Once the simulation is loaded, an empty snapshot must be created with the lattice information stored in the UMDSimulation object obtained.
 Finally, a single snapshot is loaded from the UMD file with the *UMDSnapshot_from_umd* method. The snapshot to load is chosen by setting the index argument (for example the 20-th).
