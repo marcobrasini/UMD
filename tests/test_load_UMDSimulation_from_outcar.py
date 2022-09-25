@@ -79,12 +79,10 @@ class Test_load_UMDSimulation_from_outcar:
         total_simulation = UMDSimulation(lattice=self.lattice, runs=self.runs)
         simulation = UMDSimulation()
         with open('examples/OUTCAR_multiple.outcar', 'r') as outcar:
-            try:
-                while True:
-                    simulation = load_UMDSimulation_from_outcar(outcar,
-                                                                simulation)
-            except(EOFError):
-                pass
+            cycle = 0
+            while simulation.cycle() == cycle:
+                simulation = load_UMDSimulation_from_outcar(outcar, simulation)
+                cycle += 1
         assert simulation == total_simulation
         assert simulation.lattice == self.lattice
         assert simulation.runs == self.runs
@@ -100,5 +98,5 @@ class Test_load_UMDSimulation_from_outcar:
         """
         simulation = UMDSimulation()
         with open('examples/OUTCAR_empty.outcar', 'r') as outcar:
-            with pytest.raises(EOFError):
-                simulation = load_UMDSimulation_from_outcar(outcar, simulation)
+            simulation = load_UMDSimulation_from_outcar(outcar, simulation)
+            assert simulation == UMDSimulation()

@@ -73,15 +73,13 @@ def UMDVaspParser(outcarfile_name, initialStep=0, nSteps=np.infty):
             # Each simulation run is read by the Load_OUTCAR.load function
             # and added to the total simulation in the UMDSimulation object.
             try:
-                line = outcar.readline()
-                while line:
+                for line in outcar:
                     # The Load_OUTCAR.load function returns the updated
                     # UMDSimulation object. If the end of the OUTCAR file is
                     # reached, then a EOFError is raised.
                     simulation = load_OUTCAR.load(outcar, temp, simulation)
                     if load_OUTCAR.loadedSteps >= initialStep+nSteps:
                         break
-                    line = outcar.readline()
             except(EOFError) as eof:
                 print(eof)
 

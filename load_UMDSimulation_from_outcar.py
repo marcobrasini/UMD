@@ -108,27 +108,24 @@ def load_UMDSimulation_from_outcar(outcar, simulation):
     # Everytime we find a section of the header containing useful information,
     # an inner loops is started on the section in order to initialize the
     # previously defined variables.
-    line = outcar.readline()
-    while line:
+    for line in outcar:
         if "POTCAR:" in line:
             # Once in a POTCAR section we scroll the lines till we find the
             # atomic symbol reported in the 'TITLE' line.
-            while line:
+            for line in outcar:
                 if "TITEL  =" in line:
                     atoms_name.append(line.strip().split()[-2])
                     break
-                line = outcar.readline()
 
         elif "Dimension of arrays:" in line:
             # Once in the 'Dimension of arrays' group of parameters, we scroll
             # the lines till we find 'ion per type line' containing the number
             # of atoms per each type.
-            while line:
+            for line in outcar:
                 if "ions per type =" in line:
                     line = line.replace("ions per type", '').replace("=", '')
                     atoms_number = [int(at) for at in line.strip().split()]
                     break
-                line = outcar.readline()
         elif "SYSTEM =" in line:
             lattice_name = line.strip().split()[-1]
 
@@ -139,7 +136,7 @@ def load_UMDSimulation_from_outcar(outcar, simulation):
             # - 'POTIM' to set the time duration of each snapshot
             # - 'POMASS' to set the atomic mass per atom type
             # - 'ZVAL' to set the number of valence electrons per atom type
-            while line:
+            for line in outcar:
                 if 'NSW' in line:
                     steps = int(line.strip().split()[2])
                 if 'POTIM' in line:
@@ -153,7 +150,6 @@ def load_UMDSimulation_from_outcar(outcar, simulation):
                 if "DOS related values" in line:
                     # It marks the beginnig of the new section of parameters.
                     break
-                line = outcar.readline()
 
         elif ("direct lattice vectors" in line
               and "reciprocal lattice vectors" in line):
@@ -182,5 +178,5 @@ def load_UMDSimulation_from_outcar(outcar, simulation):
                 run = UMDSimulationRun(simulation.cycle(), steps, steptime)
                 simulation.add(run)
                 return simulation
-        line = outcar.readline()
-    raise(EOFError('OUTCAR file loading completed.'))
+
+    return simulation
