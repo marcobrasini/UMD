@@ -98,26 +98,25 @@ The package functions can be tested executing the command on the terminal.
 ### Usage
 
 #### Convert OUTCAR to UMD
-To use the UMDVaspParser function to convert a Vasp OUTCAR file, it is necessary to import the UMDVaspParser function from the UMD package and execute the function with the name of an OUTCAR file.
+To use the *UMDVaspParser* function to convert a Vasp OUTCAR file, it is necessary to import the UMDVaspParser function from the UMD package and execute it with the name of an OUTCAR file. Some examples of OUTCAR file, like the 'magpu5.70a1800T.outcar', can be found inside the UMD package in the directory 'UMD/tests/examples'.
 The UMD output file is generated in the same directory as the input file.
 
 	from UMD import UMDVaspParser
 
-	UMDVaspParser('OUTCAR.outcar')
+	UMDVaspParser('magpu5.70a1800T.outcar')
 
-Some examples of OUTCAR file, can be found inside the UMD package in the directory 'UMD/tests/examples'. 	
 
 #### Read from UMD
-To read back the data from the UMD file, the first step is to load the simulation information with the *UMDSimulation_from_umd* method.
+To read back the data from a UMD file, like the 'magpu5.70a1800T.umd' generated previously, the first step is to load the simulation information with the *UMDSimulation_from_umd* method.
 
 	from UMD import UMDSnapshot
 	from UMD import UMDSimulation
 
-	with open('UMD.umd') as umd:
+	with open('magpu5.70a1800T.umd') as umd:
 		simulation = UMDSimulation.UMDSimulation_from_umd(umd)
 
 Once the simulation is loaded, an empty snapshot must be created with the lattice information stored in the UMDSimulation object obtained.
-Finally, a single snapshot is loaded from the UMD file with the *UMDSnapshot_from_umd* method. The snapshot to load is chosen by setting the index argument (for example the 20-th).
+Finally, a single snapshot is loaded from the UMD file with the *UMDSnapshot_from_umd* method. It si possible to choose the proper snapshot by setting the index argument (in this case we are loading the 20-th snapshot).
 
 		snapshot = UMDSnapshot(lattice=simulation.lattice)
 		snapshot.UMDSnapshot_from_umd(umd, index=19)
